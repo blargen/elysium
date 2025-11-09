@@ -1,0 +1,30 @@
+# Claude Code personal settings
+.claude/settings.local.json
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build outputs
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Foundry data (if testing locally)
+Data/

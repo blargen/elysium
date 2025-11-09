@@ -1,0 +1,19 @@
+{
+  "model": "sonnet",
+  "allowedTools": [
+    "Read",
+    "Write",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Bash(npm:*)",
+    "Bash(git:*)",
+    "Bash(node:*)",
+    "Bash(npx:*)"
+  ],
+  "hooks": {
+    "preEdit": [
+      "npx prettier --write $FILE || true"
+    ]
+  }
+}
