@@ -69,30 +69,9 @@ Elysium features multiple aether qualities, each with different properties:
 
 ---
 
-## Featured Items
-
-### Hand Module (Spell Storage System)
-
-A cyberpunk-fantasy magical augmentation that allows storing spells on a character's hand.
-
-**Key Features:**
-- **5 Finger Slots**: Thumb, Index, Middle, Ring, Pinky
-- **Imprint from Scroll**: Store spells from scrolls onto finger slots
-- **Cast from Finger**: Cast stored spells directly from fingers
-- **Delete from Finger**: Remove stored spells to free up slots
-
-**Implementation Notes:**
-- Each finger can hold one spell
-- Spell data stored in item/actor flags
-- Visual feedback for which fingers have spells
-- Casting should consume appropriate resources (spell slots, aether, etc.)
-- May require aether to power casting or imprinting
-
----
-
 ## Technology Stack
 
-- **Platform**: FoundryVTT v11+
+- **Platform**: FoundryVTT v13+
 - **Game System**: D&D 5e (dnd5e system)
 - **Language**: JavaScript/TypeScript (prefer TypeScript for new code)
 - **Automation**: midi-qol for combat/item workflows
@@ -156,6 +135,19 @@ elysium/
 
 ### Modularity & Testing Philosophy
 
+**Test-Driven Development (TDD):**
+- **ALWAYS use TDD when possible** - write tests first, then implement
+- Red → Green → Refactor cycle
+- Tests document expected behavior and requirements
+- Makes refactoring safe and fearless
+- Catches bugs early in development
+
+**TDD Workflow:**
+1. **Red**: Write a failing test for the next small piece of functionality
+2. **Green**: Write the minimal code to make the test pass
+3. **Refactor**: Clean up the code while keeping tests green
+4. Repeat
+
 **Prefer small, focused modules:**
 - Break code into small, single-purpose functions
 - Each file should have one clear responsibility
@@ -174,7 +166,8 @@ elysium/
 - Test aether consumption logic
 - Test toxicity calculations
 - Test item flag parsing
-- Use Jest or similar testing framework
+- Test flag management utilities
+- Use Jest testing framework
 - Mock Foundry API (`game`, `actor`, `item`, etc.)
 
 **Change with confidence:**

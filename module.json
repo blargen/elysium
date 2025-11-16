@@ -1,0 +1,58 @@
+{
+  "id": "elysium",
+  "title": "Elysium",
+  "description": "A cyberpunk-fantasy world powered by aether fuel",
+  "version": "0.1.0",
+  "compatibility": {
+    "minimum": "13",
+    "verified": "13"
+  },
+  "authors": [
+    {
+      "name": "Eben"
+    }
+  ],
+  "esmodules": [
+    "scripts/elysium.js"
+  ],
+  "styles": [
+    "styles/elysium.css"
+  ],
+  "packs": [
+    {
+      "name": "aether-fuel",
+      "label": "Elysium: Aether Fuel",
+      "path": "packs/aether-fuel",
+      "type": "Item",
+      "system": "dnd5e",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "elysium-items",
+      "label": "Elysium: Items",
+      "path": "packs/elysium-items",
+      "type": "Item",
+      "system": "dnd5e",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    }
+  ],
+  "relationships": {
+    "systems": [
+      {
+        "id": "dnd5e",
+        "type": "system",
+        "compatibility": {
+          "minimum": "3.0.0"
+        }
+      }
+    ]
+  },
+  "manifest": "https://raw.githubusercontent.com/YOUR_USERNAME/elysium/main/module.json",
+  "download": "https://github.com/YOUR_USERNAME/elysium/archive/main.zip"
+}

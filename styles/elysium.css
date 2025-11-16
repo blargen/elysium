@@ -1,0 +1,33 @@
+/**
+ * Elysium Styles
+ * Cyberpunk-fantasy aesthetic
+ */
+
+/* Aether message styling */
+.aether-message {
+  border-radius: 8px;
+  padding: 12px;
+  margin: 8px 0;
+  text-align: center;
+  color: #f0f8ff;
+}
+
+.aether-message h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+}
+
+.aether-message-success {
+  border: 2px solid #1175D0;
+  background: linear-gradient(135deg, rgba(17,117,208,0.1), rgba(0,0,0,0.8));
+}
+
+.aether-message-toxicity {
+  border: 2px solid #D06C11;
+  background: linear-gradient(135deg, rgba(208,108,17,0.1), rgba(0,0,0,0.8));
+}
+
+.aether-message-warning {
+  border: 2px solid #D4AF37;
+  background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(0,0,0,0.8));
+}

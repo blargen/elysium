@@ -1,0 +1,26 @@
+{
+  "name": "elysium",
+  "version": "0.1.0",
+  "description": "A FoundryVTT module featuring a cyberpunk-fantasy world powered by aether",
+  "type": "module",
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
+    "lint": "eslint scripts/",
+    "format": "prettier --write \"scripts/**/*.js\" \"tests/**/*.js\""
+  },
+  "keywords": [
+    "foundry-vtt",
+    "dnd5e",
+    "module"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.2.4"
+  }
+}
