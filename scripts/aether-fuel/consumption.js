@@ -46,45 +46,26 @@ export async function showToxicityWarning(actor) {
     new Dialog({
       title: "⚠️ TOXICITY WARNING ⚠️",
       content: `
-        <div style="
-          border: 2px solid #D06C11;
-          border-radius: 8px;
-          padding: 15px;
-          background: linear-gradient(135deg, rgba(208,108,17,0.1), rgba(0,0,0,0.8));
-          color: #f0f8ff;
-          text-align: center;
-        ">
-          <h3 style="
-            color: #D06C11;
-            font-size: 1.2rem;
-            font-weight: bold;
-            text-shadow: 0 0 8px rgba(208,108,17,0.8);
-            margin-bottom: 10px;
-          ">
+        <div class="elysium-info-box-warning elysium-text-center">
+          <h3 class="elysium-header elysium-header-toxicity">
             ☠️ UNREFINED AETHER IS TOXIC ☠️
           </h3>
-          <p style="margin: 8px 0;">You remember the dangers of using raw aether!</p>
+          <p>You remember the dangers of using raw aether!</p>
 
-          <div style="
-            background: rgba(17,117,208,0.1);
-            border: 1px solid #1175D0;
-            border-radius: 4px;
-            padding: 10px;
-            margin: 12px 0;
-          ">
+          <div class="elysium-info-box">
             <strong>Current Status:</strong><br>
-            Daily Doses: <span style="color: #D06C11;">${dailyDoses}</span><br>
-            Aether Toxicity Level (ATL): <span style="color: #D06C11;">${atl}</span><br>
-            <span style="color: #D06C11; font-weight: bold; font-size: 1.1em;">
+            Daily Doses: <span class="elysium-text-orange">${dailyDoses}</span><br>
+            Aether Toxicity Level (ATL): <span class="elysium-text-orange">${atl}</span><br>
+            <span class="elysium-text-orange" style="font-weight: bold; font-size: 1.1em;">
               Next Save DC: ${nextDC}
             </span>
           </div>
 
-          <p style="color: #9bb8d3; font-size: 0.9em; margin-top: 8px;">
+          <p class="elysium-text-muted" style="font-size: 0.9em; margin-top: 8px;">
             Failed saves increase toxicity and apply debilitating conditions.
           </p>
 
-          <p style="color: #D06C11; font-weight: bold; margin-top: 12px;">
+          <p class="elysium-text-orange" style="font-weight: bold; margin-top: 12px;">
             Are you sure you want to proceed?
           </p>
         </div>

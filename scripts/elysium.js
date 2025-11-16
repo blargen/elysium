@@ -229,7 +229,7 @@ async function handleAethersGraspUse(actor, aethersGrasp) {
     new Dialog({
       title: "Aether's Grasp",
       content: `
-        <div style="text-align: center; color: #f0f8ff;">
+        <div class="elysium-dialog-content elysium-text-center">
           <p>What would you like to do with <strong>Aether's Grasp</strong>?</p>
         </div>
       `,
@@ -287,9 +287,9 @@ async function handleImprintFromScroll(actor, aethersGrasp) {
   slots.forEach(slot => {
     const statusText = slot.occupied ? 'Occupied' : 'Empty';
     const spellCell = slot.occupied
-      ? `<td style="padding: 8px;">${slot.spell.spellData.name}</td>`
-      : `<td style="padding: 8px;">
-          <select name="finger-${slot.index}" style="width: 100%;">
+      ? `<td>${slot.spell.spellData.name}</td>`
+      : `<td>
+          <select name="finger-${slot.index}" class="elysium-select" style="width: 100%;">
             <option value="">-- Select Spell --</option>
             ${scrolls.map(scroll => {
               // Extract spell name from scroll (remove "Scroll of " prefix)
@@ -301,9 +301,9 @@ async function handleImprintFromScroll(actor, aethersGrasp) {
 
     tableRows += `
       <tr>
-        <td style="padding: 8px;"><strong>${slot.name}</strong></td>
+        <td><strong>${slot.name}</strong></td>
         ${spellCell}
-        <td style="padding: 8px;">${statusText}</td>
+        <td>${statusText}</td>
       </tr>
     `;
   });
@@ -313,16 +313,16 @@ async function handleImprintFromScroll(actor, aethersGrasp) {
     new Dialog({
       title: "Imprint Spells from Scrolls",
       content: `
-        <div style="color: #f0f8ff;">
-          <p style="text-align: center; margin-bottom: 12px;">
+        <div class="elysium-dialog-content">
+          <p class="elysium-dialog-text">
             Select which scrolls to imprint on empty fingers
           </p>
-          <table style="width: 100%; border-collapse: collapse;">
+          <table class="elysium-table">
             <thead>
-              <tr style="border-bottom: 2px solid #1175D0;">
-                <th style="padding: 8px; text-align: left;">Finger</th>
-                <th style="padding: 8px; text-align: left;">Spell</th>
-                <th style="padding: 8px; text-align: left;">Status</th>
+              <tr>
+                <th>Finger</th>
+                <th>Spell</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
@@ -416,22 +416,15 @@ async function handleCastFromFinger(actor, aethersGrasp) {
       : '(Empty)';
 
     const castCell = slot.occupied
-      ? `<td style="padding: 8px; text-align: center;">
-          <button class="cast-button" data-finger-index="${slot.index}" style="
-            padding: 4px 12px;
-            background: linear-gradient(135deg, #1175D0, #0a4a8a);
-            border: 1px solid #1175D0;
-            border-radius: 4px;
-            color: #f0f8ff;
-            cursor: pointer;
-          ">Cast</button>
+      ? `<td class="center">
+          <button class="cast-button elysium-button-cast" data-finger-index="${slot.index}">Cast</button>
         </td>`
-      : `<td style="padding: 8px; text-align: center; color: #666;">-</td>`;
+      : `<td class="center elysium-text-muted">-</td>`;
 
     tableRows += `
       <tr>
-        <td style="padding: 8px;"><strong>${slot.name}</strong></td>
-        <td style="padding: 8px;">${spellName}</td>
+        <td><strong>${slot.name}</strong></td>
+        <td>${spellName}</td>
         ${castCell}
       </tr>
     `;
@@ -442,16 +435,16 @@ async function handleCastFromFinger(actor, aethersGrasp) {
     new Dialog({
       title: "Cast Spell from Aether's Grasp",
       content: `
-        <div style="color: #f0f8ff;">
-          <p style="text-align: center; margin-bottom: 12px;">
+        <div class="elysium-dialog-content">
+          <p class="elysium-dialog-text">
             Select which finger to cast from
           </p>
-          <table style="width: 100%; border-collapse: collapse;">
+          <table class="elysium-table">
             <thead>
-              <tr style="border-bottom: 2px solid #1175D0;">
-                <th style="padding: 8px; text-align: left;">Finger</th>
-                <th style="padding: 8px; text-align: left;">Spell</th>
-                <th style="padding: 8px; text-align: center;">Cast</th>
+              <tr>
+                <th>Finger</th>
+                <th>Spell</th>
+                <th class="center">Cast</th>
               </tr>
             </thead>
             <tbody>
@@ -516,7 +509,7 @@ async function handleCastFromFinger(actor, aethersGrasp) {
 
     new Dialog({
       title: "Select Aether Fuel",
-      content: `<div style="text-align: center; color: #f0f8ff;"><p>Choose which aether to consume:</p></div>`,
+      content: `<div class="elysium-dialog-content elysium-text-center"><p>Choose which aether to consume:</p></div>`,
       buttons,
       default: "cancel"
     }).render(true);
@@ -596,17 +589,17 @@ async function handleForgetFromFinger(actor, aethersGrasp) {
       : '(Empty)';
 
     const forgetCell = slot.occupied
-      ? `<td style="padding: 8px; text-align: center;">
-          <input type="checkbox" name="forget-${slot.index}" class="forget-checkbox" data-finger-index="${slot.index}">
+      ? `<td class="center">
+          <input type="checkbox" name="forget-${slot.index}" class="forget-checkbox elysium-checkbox" data-finger-index="${slot.index}">
         </td>`
-      : `<td style="padding: 8px; text-align: center;">
+      : `<td class="center">
           <input type="checkbox" disabled>
         </td>`;
 
     tableRows += `
       <tr>
-        <td style="padding: 8px;"><strong>${slot.name}</strong></td>
-        <td style="padding: 8px;">${spellName}</td>
+        <td><strong>${slot.name}</strong></td>
+        <td>${spellName}</td>
         ${forgetCell}
       </tr>
     `;
@@ -617,16 +610,16 @@ async function handleForgetFromFinger(actor, aethersGrasp) {
     new Dialog({
       title: "Forget Spells from Aether's Grasp",
       content: `
-        <div style="color: #f0f8ff;">
-          <p style="text-align: center; margin-bottom: 12px;">
+        <div class="elysium-dialog-content">
+          <p class="elysium-dialog-text">
             Select which spells to forget
           </p>
-          <table style="width: 100%; border-collapse: collapse;">
+          <table class="elysium-table">
             <thead>
-              <tr style="border-bottom: 2px solid #1175D0;">
-                <th style="padding: 8px; text-align: left;">Finger</th>
-                <th style="padding: 8px; text-align: left;">Spell</th>
-                <th style="padding: 8px; text-align: center;">Forget</th>
+              <tr>
+                <th>Finger</th>
+                <th>Spell</th>
+                <th class="center">Forget</th>
               </tr>
             </thead>
             <tbody>

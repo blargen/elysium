@@ -93,19 +93,12 @@ async function checkAetherMadness(actor, dc) {
     ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor }),
       content: `
-        <div style="
-          border: 2px solid #D06C11;
-          border-radius: 8px;
-          padding: 12px;
-          background: linear-gradient(135deg, rgba(208,108,17,0.2), rgba(0,0,0,0.8));
-          color: #f0f8ff;
-          text-align: center;
-        ">
-          <h3 style="color: #D06C11; text-shadow: 0 0 8px rgba(208,108,17,0.8); margin: 0 0 8px 0;">
+        <div class="aether-message aether-message-toxicity">
+          <h3>
             🌀 AETHER MADNESS 🌀
           </h3>
-          <p style="margin: 4px 0;"><strong>${actor.name}</strong> succumbs to aether-induced madness!</p>
-          <p style="color: #D06C11; font-size: 0.9em; margin: 4px 0;">Applied: Charmed condition</p>
+          <p><strong>${actor.name}</strong> succumbs to aether-induced madness!</p>
+          <p class="elysium-text-orange" style="font-size: 0.9em;">Applied: Charmed condition</p>
         </div>
       `
     });
@@ -141,19 +134,12 @@ async function checkStunned(actor, dc) {
     ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor }),
       content: `
-        <div style="
-          border: 2px solid #D06C11;
-          border-radius: 8px;
-          padding: 12px;
-          background: linear-gradient(135deg, rgba(208,108,17,0.2), rgba(0,0,0,0.8));
-          color: #f0f8ff;
-          text-align: center;
-        ">
-          <h3 style="color: #D06C11; text-shadow: 0 0 8px rgba(208,108,17,0.8); margin: 0 0 8px 0;">
+        <div class="aether-message aether-message-toxicity">
+          <h3>
             ⚡ AETHER OVERLOAD ⚡
           </h3>
-          <p style="margin: 4px 0;"><strong>${actor.name}</strong> is overwhelmed by toxic aether!</p>
-          <p style="color: #D06C11; font-size: 0.9em; margin: 4px 0;">Applied: Stunned condition</p>
+          <p><strong>${actor.name}</strong> is overwhelmed by toxic aether!</p>
+          <p class="elysium-text-orange" style="font-size: 0.9em;">Applied: Stunned condition</p>
         </div>
       `
     });
