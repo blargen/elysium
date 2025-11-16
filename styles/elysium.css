@@ -1,0 +1,427 @@
+/**
+ * Elysium Styles
+ * Aetherpunk – Orange & Blue Cyberpunk-Fantasy Theme
+ */
+
+/* ===============================
+   CSS Variables - Color Palette
+   =============================== */
+:root {
+  /* Background Colors */
+  --aether-bg-dark: #050810;
+  --aether-bg-panel: #0b1018;
+
+  /* Primary Colors */
+  --aether-blue: #1175D0;
+  --aether-blue-soft: rgba(17, 117, 208, 0.55);
+  --aether-orange: #D06C11;
+  --aether-orange-soft: rgba(208, 108, 17, 0.65);
+
+  /* Text Colors */
+  --aether-text-main: #f0f8ff;
+  --aether-text-muted: #9bb8d3;
+
+  /* Border & Effects */
+  --aether-border-soft: rgba(208, 108, 17, 0.65);
+
+  /* Additional Utility Colors */
+  --aether-warning: #D4AF37;
+}
+
+/* ===============================
+   Chat Log Background
+   =============================== */
+#chat-log {
+  background:
+    radial-gradient(circle at top left, rgba(17, 117, 208, 0.18) 0, transparent 55%),
+    radial-gradient(circle at bottom right, rgba(208, 108, 17, 0.15) 0, transparent 50%),
+    var(--aether-bg-dark);
+  border-left: 1px solid rgba(255,255,255,0.04);
+  box-shadow: -6px 0 20px rgba(0,0,0,0.7);
+}
+
+/* Scrollbar */
+#chat-log::-webkit-scrollbar {
+  width: 8px;
+}
+#chat-log::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--aether-blue-soft), var(--aether-orange));
+  border-radius: 4px;
+}
+
+/* ===============================
+   Chat Messages
+   =============================== */
+.chat-message {
+  position: relative;
+  margin: 4px 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: linear-gradient(
+      135deg,
+      rgba(255,255,255,0.04),
+      rgba(0,0,0,0.6)
+    ),
+    var(--aether-bg-panel);
+  border: 1px solid var(--aether-border-soft);
+  color: var(--aether-text-main);
+  box-shadow:
+    0 0 12px rgba(0,0,0,0.7),
+    0 0 6px rgba(17, 117, 208, 0.15);
+  overflow: hidden;
+}
+
+/* Hover glow */
+.chat-message:hover {
+  border-color: var(--aether-blue-soft);
+  box-shadow:
+    0 0 14px rgba(17, 117, 208, 0.35),
+    0 0 24px rgba(208, 108, 17, 0.25);
+}
+
+/* Speaker name */
+.chat-message .message-header .message-sender {
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--aether-blue);
+  text-shadow: 0 0 6px rgba(17,117,208,0.7);
+}
+
+/* Timestamp */
+.chat-message .message-header time,
+.chat-message .message-metadata {
+  color: var(--aether-text-muted);
+  font-size: 0.75rem;
+}
+
+/* Message body */
+.chat-message .message-content {
+  margin-top: 2px;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  color: var(--aether-text-main);
+}
+
+/* ===============================
+   Aether Message Utility Classes
+   (Custom chat messages from module)
+   =============================== */
+.aether-message {
+  border-radius: 8px;
+  padding: 12px;
+  margin: 8px 0;
+  text-align: center;
+  color: var(--aether-text-main);
+}
+
+.aether-message h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  text-shadow: 0 0 8px currentColor;
+}
+
+.aether-message p {
+  margin: 4px 0;
+}
+
+.aether-message-success {
+  border: 2px solid var(--aether-blue);
+  background: linear-gradient(135deg, rgba(17,117,208,0.2), rgba(0,0,0,0.8));
+}
+
+.aether-message-success h3 {
+  color: var(--aether-blue);
+}
+
+.aether-message-toxicity {
+  border: 2px solid var(--aether-orange);
+  background: linear-gradient(135deg, rgba(208,108,17,0.2), rgba(0,0,0,0.8));
+}
+
+.aether-message-toxicity h3 {
+  color: var(--aether-orange);
+}
+
+.aether-message-warning {
+  border: 2px solid var(--aether-warning);
+  background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(0,0,0,0.8));
+}
+
+.aether-message-warning h3 {
+  color: var(--aether-warning);
+}
+
+/* ===============================
+   Aether Pulse & Scan FX
+   =============================== */
+.chat-message::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(90deg,
+      transparent 0%,
+      rgba(17, 117, 208, 0.35) 40%,
+      rgba(208, 108, 17, 0.5) 60%,
+      transparent 100%);
+  background-size: 250% 100%;
+  mix-blend-mode: screen;
+  opacity: 0.2;
+  pointer-events: none;
+  animation: aether-scan 6s linear infinite;
+}
+
+.chat-message::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: inherit;
+  background: radial-gradient(circle at top left,
+    rgba(17, 117, 208, 0.16),
+    transparent 60%);
+  opacity: 0;
+  pointer-events: none;
+  animation: aether-pulse 5.5s ease-in-out infinite;
+}
+
+@keyframes aether-scan {
+  0% { background-position: 200% 0%; }
+  100% { background-position: -50% 0%; }
+}
+
+@keyframes aether-pulse {
+  0%, 100% { opacity: 0.0; }
+  50% { opacity: 0.28; }
+}
+
+/* ===============================
+   Dialog Windows
+   =============================== */
+.app.dialog,
+.window-app.dialog {
+  background:
+    radial-gradient(circle at top center, rgba(17,117,208,0.2) 0, transparent 55%),
+    linear-gradient(145deg, #05070c, #0d1018 50%, #05070c 100%);
+  border-radius: 10px;
+  border: 1px solid var(--aether-border-soft);
+  box-shadow:
+    0 0 25px rgba(0,0,0,0.85),
+    0 0 20px rgba(17,117,208,0.35);
+  color: var(--aether-text-main);
+}
+
+/* Header */
+.app.dialog .window-header {
+  background: linear-gradient(90deg,
+      rgba(0,0,0,0.8),
+      rgba(17,117,208,0.3),
+      rgba(0,0,0,0.8));
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.8rem;
+  color: var(--aether-orange);
+  text-shadow: 0 0 6px rgba(208,108,17,0.8);
+}
+
+/* Content */
+.app.dialog .window-content {
+  background: transparent;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  color: var(--aether-text-main);
+}
+
+/* Dialog Buttons */
+.app.dialog .dialog-buttons button {
+  background: radial-gradient(circle at 30% 0,
+      rgba(17,117,208,0.35),
+      rgba(0,0,0,0.9));
+  border: 1px solid var(--aether-orange);
+  color: var(--aether-text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  box-shadow:
+    0 0 8px rgba(0,0,0,0.9),
+    0 0 8px rgba(17,117,208,0.3);
+  transition: all 0.2s ease;
+}
+
+.app.dialog .dialog-buttons button:hover {
+  border-color: var(--aether-blue);
+  box-shadow:
+    0 0 10px rgba(17,117,208,0.6),
+    0 0 16px rgba(208,108,17,0.4);
+}
+
+/* ===============================
+   Elysium Component Classes
+   (Custom UI components)
+   =============================== */
+
+/* Dialog Content Containers */
+.elysium-dialog-content {
+  color: var(--aether-text-main);
+}
+
+.elysium-dialog-text {
+  text-align: center;
+  margin-bottom: 12px;
+  color: var(--aether-text-main);
+  font-size: 0.95rem;
+}
+
+/* Headers with Glow */
+.elysium-header {
+  color: var(--aether-blue);
+  text-shadow: 0 0 8px rgba(17,117,208,0.8);
+  margin: 0 0 8px 0;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.elysium-header-toxicity {
+  color: var(--aether-orange);
+  text-shadow: 0 0 8px rgba(208,108,17,0.8);
+}
+
+/* Tables */
+.elysium-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--aether-text-main);
+}
+
+.elysium-table thead tr {
+  border-bottom: 2px solid var(--aether-blue);
+}
+
+.elysium-table th {
+  padding: 8px;
+  text-align: left;
+  color: var(--aether-blue);
+  text-shadow: 0 0 6px rgba(17,117,208,0.6);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+}
+
+.elysium-table th.center {
+  text-align: center;
+}
+
+.elysium-table td {
+  padding: 8px;
+  color: var(--aether-text-main);
+}
+
+.elysium-table td.center {
+  text-align: center;
+}
+
+.elysium-table td strong {
+  color: var(--aether-blue);
+}
+
+/* Buttons */
+.elysium-button-cast {
+  padding: 4px 12px;
+  background: linear-gradient(135deg, var(--aether-blue), #0a4a8a);
+  border: 1px solid var(--aether-blue);
+  border-radius: 4px;
+  color: var(--aether-text-main);
+  cursor: pointer;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 8px rgba(17,117,208,0.4);
+}
+
+.elysium-button-cast:hover {
+  background: linear-gradient(135deg, #1a85e0, var(--aether-blue));
+  box-shadow: 0 0 12px rgba(17,117,208,0.7);
+}
+
+/* Info Boxes */
+.elysium-info-box {
+  border: 2px solid var(--aether-blue);
+  border-radius: 8px;
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(17,117,208,0.1), rgba(0,0,0,0.8));
+  color: var(--aether-text-main);
+  margin: 8px 0;
+}
+
+.elysium-info-box-warning {
+  border: 2px solid var(--aether-orange);
+  background: linear-gradient(135deg, rgba(208,108,17,0.2), rgba(0,0,0,0.8));
+}
+
+.elysium-info-box p {
+  margin: 4px 0;
+  font-size: 0.9em;
+}
+
+.elysium-info-box strong {
+  color: var(--aether-blue);
+}
+
+.elysium-info-box-warning strong {
+  color: var(--aether-orange);
+}
+
+/* Status Rows */
+.elysium-status-row {
+  color: var(--aether-text-muted);
+  font-size: 0.9em;
+  margin: 4px 0;
+}
+
+.elysium-status-row strong {
+  color: var(--aether-text-main);
+}
+
+/* Form Elements */
+.elysium-select {
+  background: rgba(0,0,0,0.6);
+  border: 1px solid var(--aether-blue-soft);
+  border-radius: 4px;
+  color: var(--aether-text-main);
+  padding: 4px 8px;
+  font-size: 0.9rem;
+}
+
+.elysium-select:focus {
+  outline: none;
+  border-color: var(--aether-blue);
+  box-shadow: 0 0 8px rgba(17,117,208,0.5);
+}
+
+.elysium-checkbox {
+  cursor: pointer;
+  accent-color: var(--aether-blue);
+}
+
+/* Utility Classes */
+.elysium-text-center {
+  text-align: center;
+}
+
+.elysium-text-muted {
+  color: var(--aether-text-muted);
+}
+
+.elysium-text-blue {
+  color: var(--aether-blue);
+}
+
+.elysium-text-orange {
+  color: var(--aether-orange);
+}

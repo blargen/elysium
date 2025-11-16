@@ -8,6 +8,8 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 
 You are an expert in developing FoundryVTT modules for the D&D 5e system.
 
+**Target Version:** FoundryVTT v13+
+
 ## FoundryVTT Module Architecture
 
 ### Module Structure
@@ -34,8 +36,8 @@ module-name/
   "description": "Module description",
   "version": "1.0.0",
   "compatibility": {
-    "minimum": "11",
-    "verified": "12"
+    "minimum": "13",
+    "verified": "13"
   },
   "authors": [
     {"name": "Author Name"}
@@ -93,30 +95,62 @@ Hooks.once('ready', function() {
 
 ### D&D 5e System Hooks
 
+**IMPORTANT:** As of dnd5e v4.0+ (system version 5.x), the hook system changed from item-based to activity-based hooks.
+
+#### Activity Hooks (v5.x - Current)
+
 ```javascript
-// When an item is used
-Hooks.on('dnd5e.useItem', async (item, config, options) => {
-  console.log(`${item.name} was used!`);
+// Before activity is used - fires before consumption is calculated
+// Return false to prevent activity execution
+Hooks.on('dnd5e.preUseActivity', async (activity, usageConfig, dialogConfig, messageConfig) => {
+  const item = activity.item;
   const actor = item.actor;
+  console.log(`${actor.name} is using ${item.name}`);
 
-  // Modify config or options before use
-  // Return false to prevent usage
+  // Modify configuration or prevent usage
+  // return false; // Prevents activity
 });
 
-// Before a roll
-Hooks.on('dnd5e.preRollAttack', (item, rollConfig) => {
-  // Modify attack roll before it happens
+// Before consumption is calculated
+// Return false to prevent usage
+Hooks.on('dnd5e.preActivityConsumption', async (activity, usageConfig, messageConfig) => {
+  const item = activity.item;
+  // Inspect/modify before consumption calculation
 });
 
-Hooks.on('dnd5e.preRollDamage', (item, rollConfig) => {
-  // Modify damage roll before it happens
+// After consumption calculated, before updates applied
+// Return false to prevent usage
+Hooks.on('dnd5e.activityConsumption', async (activity, usageConfig, messageConfig, updates) => {
+  const item = activity.item;
+  // The 'updates' parameter contains what will be applied to actor/items
+  console.log('Consumption updates:', updates);
 });
 
-// After a roll
-Hooks.on('dnd5e.rollAttack', (item, roll) => {
-  console.log(`Attack roll: ${roll.total}`);
+// After consumption is fully applied
+Hooks.on('dnd5e.postActivityConsumption', async (activity, usageConfig, messageConfig, updates) => {
+  const item = activity.item;
+  // Item has been consumed, apply custom effects here
 });
 
+// After activity completes
+Hooks.on('dnd5e.postUseActivity', async (activity, usageConfig, results) => {
+  const item = activity.item;
+  console.log('Activity completed!', results);
+});
+```
+
+#### Legacy Hooks (Deprecated in v4.0+)
+
+```javascript
+// ⚠️ DEPRECATED - Use activity hooks above instead
+Hooks.on('dnd5e.useItem', async (item, config, options) => {
+  // This hook no longer fires in v5.x!
+});
+```
+
+#### Other D&D 5e Hooks
+
+```javascript
 // Rest hooks
 Hooks.on('dnd5e.restCompleted', async (actor, restData) => {
   if (restData.longRest) {
@@ -129,7 +163,26 @@ Hooks.on('dnd5e.restCompleted', async (actor, restData) => {
 Hooks.on('dnd5e.advanceLevel', (actor, level) => {
   console.log(`${actor.name} reached level ${level}!`);
 });
+
+// Roll hooks (still available)
+Hooks.on('dnd5e.preRollAttack', (item, rollConfig) => {
+  // Modify attack roll before it happens
+});
+
+Hooks.on('dnd5e.preRollDamage', (item, rollConfig) => {
+  // Modify damage roll before it happens
+});
 ```
+
+#### Choosing the Right Hook
+
+- **`preUseActivity`**: Intercept before anything happens (good for showing dialogs, preventing use)
+- **`preActivityConsumption`**: Before consumption calculation (modify what gets consumed)
+- **`activityConsumption`**: After calculation, before applying (inspect/modify updates)
+- **`postActivityConsumption`**: After consumption applied (add custom effects, toxicity, etc.)
+- **`postUseActivity`**: After everything is done (logging, cleanup)
+
+For **aether fuel consumption**, use `postActivityConsumption` to let the system handle item consumption, then apply toxicity effects.
 
 ### Common Foundry Hooks
 
@@ -338,6 +391,98 @@ await item.rollAttack();
 await item.rollDamage();
 ```
 
+### Spell Scrolls in D&D 5e v5.x
+
+**IMPORTANT:** In D&D 5e v5.x, spell scrolls work differently than you might expect.
+
+#### Spell Data Storage
+
+In earlier versions, scrolls had a `system.spell.uuid` reference to a separate spell document. **This is no longer the case in v5.x.**
+
+```javascript
+// ❌ This does NOT exist in v5.x scrolls
+const spellUuid = scroll.system.spell?.uuid;  // undefined!
+
+// ✅ The scroll itself IS the spell
+const scrollData = scroll.toObject();
+// Contains: activities, effects, duration, range, etc.
+```
+
+#### Working with Scrolls
+
+```javascript
+// Get all 1st level scrolls from actor
+const scrolls = actor.items.filter(item =>
+  item.type === 'consumable' &&
+  item.system.type?.value === 'scroll' &&
+  item.system.identifier === 'spell-scroll-1st-level' &&
+  (item.system.uses?.value || 0) > 0
+);
+
+// The scroll contains all spell data in its activities
+const scroll = scrolls[0];
+console.log(scroll.system.activities);  // ActivityCollection with spell effects
+
+// Extract spell name from scroll
+// Method 1: DDB Importer flag (if using D&D Beyond import)
+const spellName = scroll.flags?.ddbimporter?.originalName;  // "Detect Magic"
+
+// Method 2: Parse from scroll name
+const spellName = scroll.name.replace(/^Spell Scroll:\s*/i, '').trim();
+// "Spell Scroll: Cure Wounds" → "Cure Wounds"
+
+// Use the scroll data directly as spell data
+const spellData = scroll.toObject();
+// This contains everything needed to cast the spell:
+// - Activities (casting mechanics)
+// - Effects (what happens when cast)
+// - Duration, range, targeting
+// - All spell properties
+```
+
+#### Why This Matters
+
+When storing spell data from scrolls (e.g., for imprinting on items):
+
+```javascript
+// ✅ Correct approach for v5.x
+async function imprintScrollSpell(scroll) {
+  // The scroll already has all spell data
+  const spellData = scroll.toObject();
+
+  // Get spell name for display
+  const spellName = scroll.flags?.ddbimporter?.originalName ||
+                    scroll.name.replace(/^Spell Scroll:\s*/i, '').trim();
+
+  // Store the scroll's data - it IS the spell
+  await storeSpell(spellData, spellName);
+}
+
+// ❌ Wrong approach - this won't work
+async function imprintScrollSpell(scroll) {
+  const spellUuid = scroll.system.spell?.uuid;  // undefined in v5.x!
+  const spell = await fromUuid(spellUuid);      // Will fail
+}
+```
+
+#### Scroll Item Identifiers
+
+```javascript
+// Scroll identifiers by spell level
+'spell-scroll-cantrip'
+'spell-scroll-1st-level'
+'spell-scroll-2nd-level'
+'spell-scroll-3rd-level'
+// etc...
+
+// Check if item is a scroll
+const isScroll = item.type === 'consumable' &&
+                 item.system.type?.value === 'scroll';
+
+// Check scroll spell level
+const is1stLevel = item.system.identifier === 'spell-scroll-1st-level';
+```
+
 ---
 
 ## D&D 5e Rolls
@@ -361,19 +506,29 @@ await roll.toMessage({
 });
 ```
 
-### Ability Checks
+### Ability Checks and Saves
+
+**IMPORTANT:** As of dnd5e v4.1+, the methods were renamed:
+- `rollAbilityTest` → `rollAbilityCheck`
+- `rollAbilitySave` → `rollSavingThrow`
 
 ```javascript
-// Roll ability check
-await actor.rollAbilityTest("str");     // Strength check
-await actor.rollAbilitySave("dex");     // Dexterity save
-await actor.rollSkill("acr");           // Acrobatics check
+// Roll ability check (v4.1+)
+await actor.rollAbilityCheck({ ability: "str" });  // Strength check
+await actor.rollSkill({ key: "acr" });             // Acrobatics check
 
-// With custom DC
-await actor.rollAbilitySave("con", {
-  targetValue: 15,
-  flavor: "Constitution Save vs Poison"
+// Roll saving throw (v4.1+)
+await actor.rollSavingThrow({ ability: "con" });   // Constitution save
+
+// With custom DC and flavor
+await actor.rollSavingThrow({
+  ability: "con",
+  targetValue: 15
 });
+
+// Legacy methods (deprecated in v4.1+)
+// await actor.rollAbilityTest("str");     // OLD - use rollAbilityCheck instead
+// await actor.rollAbilitySave("dex");     // OLD - use rollSavingThrow instead
 ```
 
 ---
