@@ -10,24 +10,39 @@ import { calculateToxicityDC } from '../utils/calculations.js';
 import { getDailyDoses } from '../utils/flags.js';
 
 /**
- * Consume one use of an aether fuel item (single-use, deletes item)
+ * Consume one use of an aether fuel item
  * @param {Item} item
  * @returns {Promise<boolean>} True if consumed, false if no uses remaining
  */
 export async function consumeAetherFuelItem(item) {
   const currentUses = item.system?.uses?.value || 0;
+  const currentQuantity = item.system?.quantity || 1;
 
-  console.log(`Elysium | Consuming ${item.name}: ${currentUses} uses`);
+  console.log(`Elysium | Consuming ${item.name}: ${currentUses} uses, ${currentQuantity} quantity`);
 
   if (currentUses <= 0) {
     console.log(`Elysium | Cannot consume - no uses remaining`);
     return false; // Cannot consume
   }
 
-  // Single-use item - just delete it
-  await item.delete();
-
-  console.log(`Elysium | ${item.name} consumed and deleted`);
+  if (currentUses > 1) {
+    // Decrement uses (multiple uses per item)
+    await item.update({
+      'system.uses.value': currentUses - 1
+    });
+    console.log(`Elysium | ${item.name} consumed (${currentUses - 1} uses remaining)`);
+  } else if (currentQuantity > 1) {
+    // Last use of this item, but more in the stack - decrement quantity and reset uses
+    await item.update({
+      'system.quantity': currentQuantity - 1,
+      'system.uses.value': item.system.uses?.max || 1
+    });
+    console.log(`Elysium | ${item.name} consumed (${currentQuantity - 1} remaining in stack)`);
+  } else {
+    // Last use of last item - delete
+    await item.delete();
+    console.log(`Elysium | ${item.name} consumed and deleted (last one)`);
+  }
 
   return true;
 }
