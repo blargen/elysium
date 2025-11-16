@@ -135,6 +135,17 @@ elysium/
 
 ### Modularity & Testing Philosophy
 
+**🚨 CRITICAL: Test-Driven Development (TDD) 🚨**
+
+**⚠️ ALWAYS WRITE TESTS FIRST - NO EXCEPTIONS ⚠️**
+
+This is a hard requirement for this project. Before writing any new feature or function:
+1. **STOP** - Do not write implementation code yet
+2. **WRITE THE TEST FIRST** - Create the test file and test cases
+3. **RUN THE TEST** - Verify it fails (Red)
+4. **IMPLEMENT** - Write the minimal code to pass the test (Green)
+5. **REFACTOR** - Clean up while keeping tests green
+
 **Test-Driven Development (TDD):**
 - **ALWAYS use TDD when possible** - write tests first, then implement
 - Red → Green → Refactor cycle

@@ -10,6 +10,7 @@ import { isAetherFuel, getModType, getAetherQuality, getDailyDoses } from './uti
 import { calculateToxicityDC } from './utils/calculations.js';
 import { findFirstLevelScrolls, canImprintMoreSpells, getAvailableFingerSlots, imprintSpellOnFinger, consumeScroll } from './aethers-grasp/imprint.js';
 import { getStoredSpellByFinger, castSpellFromFinger } from './aethers-grasp/cast.js';
+import { clearSpellFromFinger } from './aethers-grasp/forget.js';
 import { getAvailableAetherFuel, getQualityModifiers } from './aether-fuel/fuel-selection.js';
 import { handleAetherFuelUse as consumeAether } from './aether-fuel/consumption.js';
 
@@ -243,6 +244,11 @@ async function handleAethersGraspUse(actor, aethersGrasp) {
           label: "Cast From Finger",
           callback: () => resolve('cast')
         },
+        forget: {
+          icon: '<i class="fas fa-eraser"></i>',
+          label: "Forget From Finger",
+          callback: () => resolve('forget')
+        },
         cancel: {
           icon: '<i class="fas fa-times"></i>',
           label: "Cancel",
@@ -257,6 +263,8 @@ async function handleAethersGraspUse(actor, aethersGrasp) {
     await handleImprintFromScroll(actor, aethersGrasp);
   } else if (action === 'cast') {
     await handleCastFromFinger(actor, aethersGrasp);
+  } else if (action === 'forget') {
+    await handleForgetFromFinger(actor, aethersGrasp);
   }
 }
 
@@ -565,6 +573,111 @@ async function handleCastFromFinger(actor, aethersGrasp) {
   }
 
   ui.notifications.info(`Cast ${storedSpell.spellData.name} from ${storedSpell.fingerName} using ${result.quality} aether!`);
+}
+
+/**
+ * Handle Forget From Finger action
+ */
+async function handleForgetFromFinger(actor, aethersGrasp) {
+  const slots = getAvailableFingerSlots(aethersGrasp);
+  const occupiedSlots = slots.filter(s => s.occupied);
+
+  if (occupiedSlots.length === 0) {
+    ui.notifications.warn("No spells stored in Aether's Grasp to forget!");
+    return;
+  }
+
+  // Build table HTML
+  let tableRows = '';
+  slots.forEach(slot => {
+    const spellName = slot.occupied
+      ? (slot.spell.spellData.flags?.ddbimporter?.originalName ||
+         slot.spell.spellData.name.replace(/^Spell Scroll:\s*/i, '').trim())
+      : '(Empty)';
+
+    const forgetCell = slot.occupied
+      ? `<td style="padding: 8px; text-align: center;">
+          <input type="checkbox" name="forget-${slot.index}" class="forget-checkbox" data-finger-index="${slot.index}">
+        </td>`
+      : `<td style="padding: 8px; text-align: center;">
+          <input type="checkbox" disabled>
+        </td>`;
+
+    tableRows += `
+      <tr>
+        <td style="padding: 8px;"><strong>${slot.name}</strong></td>
+        <td style="padding: 8px;">${spellName}</td>
+        ${forgetCell}
+      </tr>
+    `;
+  });
+
+  // Show dialog
+  const selectedFingers = await new Promise((resolve) => {
+    new Dialog({
+      title: "Forget Spells from Aether's Grasp",
+      content: `
+        <div style="color: #f0f8ff;">
+          <p style="text-align: center; margin-bottom: 12px;">
+            Select which spells to forget
+          </p>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="border-bottom: 2px solid #1175D0;">
+                <th style="padding: 8px; text-align: left;">Finger</th>
+                <th style="padding: 8px; text-align: left;">Spell</th>
+                <th style="padding: 8px; text-align: center;">Forget</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRows}
+            </tbody>
+          </table>
+        </div>
+      `,
+      buttons: {
+        forget: {
+          icon: '<i class="fas fa-eraser"></i>',
+          label: "Forget Selected",
+          callback: (html) => {
+            const selected = [];
+            html.find('.forget-checkbox:checked').each((i, checkbox) => {
+              selected.push(parseInt(checkbox.dataset.fingerIndex));
+            });
+            resolve(selected);
+          }
+        },
+        cancel: {
+          icon: '<i class="fas fa-times"></i>',
+          label: "Cancel",
+          callback: () => resolve(null)
+        }
+      },
+      default: "forget",
+      close: () => resolve(null)
+    }).render(true);
+  });
+
+  if (!selectedFingers || selectedFingers.length === 0) {
+    ui.notifications.info("No spells selected to forget.");
+    return;
+  }
+
+  // Clear each selected spell
+  let forgottenCount = 0;
+  for (const fingerIndex of selectedFingers) {
+    const removedSpell = await clearSpellFromFinger(aethersGrasp, fingerIndex);
+    if (removedSpell) {
+      const spellName = removedSpell.spellData.flags?.ddbimporter?.originalName ||
+                        removedSpell.spellData.name.replace(/^Spell Scroll:\s*/i, '').trim();
+      ui.notifications.info(`Forgot ${spellName} from ${removedSpell.fingerName}!`);
+      forgottenCount++;
+    }
+  }
+
+  if (forgottenCount > 0) {
+    console.log(`Elysium | Forgot ${forgottenCount} spell(s) from Aether's Grasp`);
+  }
 }
 
 /**
