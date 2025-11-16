@@ -55,6 +55,10 @@ describe('Toxicity Application System', () => {
       toggleStatusEffect: jest.fn(async function(condition, options) {
         // Mock adding conditions
         return this;
+      }),
+      rollSavingThrow: jest.fn(async function(options) {
+        // Mock returning a successful roll (new v4.1+ API)
+        return [{ _total: 15, total: 15 }];
       })
     };
   });

@@ -36,8 +36,12 @@ describe('Aether Fuel Consumption', () => {
         return this;
       }),
       rollAbilitySave: jest.fn(async function(ability, options) {
-        // Mock returning a successful roll
+        // Mock returning a successful roll (old API)
         return { total: 15 };
+      }),
+      rollSavingThrow: jest.fn(async function(options) {
+        // Mock returning a successful roll (new v4.1+ API)
+        return [{ _total: 15, total: 15 }];
       }),
       toggleStatusEffect: jest.fn(async function(condition, options) {
         return this;
@@ -64,32 +68,33 @@ describe('Aether Fuel Consumption', () => {
           this.system.uses.value = data['system.uses.value'];
         }
         return this;
+      }),
+      delete: jest.fn(async function() {
+        return this;
       })
     };
   });
 
   describe('consumeAetherFuelItem', () => {
-    test('reduces item uses by 1', async () => {
-      mockItem.system.uses.value = 5;
+    test('deletes the item (single-use)', async () => {
+      mockItem.system.uses.value = 1;
 
       await consumeAetherFuelItem(mockItem);
 
-      expect(mockItem.update).toHaveBeenCalledWith({
-        'system.uses.value': 4
-      });
+      expect(mockItem.delete).toHaveBeenCalled();
     });
 
-    test('does not reduce below 0', async () => {
+    test('does not delete if no uses', async () => {
       mockItem.system.uses.value = 0;
 
       const result = await consumeAetherFuelItem(mockItem);
 
       expect(result).toBe(false); // Cannot consume
-      expect(mockItem.update).not.toHaveBeenCalled();
+      expect(mockItem.delete).not.toHaveBeenCalled();
     });
 
     test('returns true on successful consumption', async () => {
-      mockItem.system.uses.value = 3;
+      mockItem.system.uses.value = 1;
 
       const result = await consumeAetherFuelItem(mockItem);
 
@@ -106,23 +111,24 @@ describe('Aether Fuel Consumption', () => {
   });
 
   describe('rollConstitutionSave', () => {
-    test('calls actor.rollAbilitySave with correct DC', async () => {
+    test('calls actor.rollSavingThrow with correct DC (v4.1+ API)', async () => {
       const dc = 12;
 
       await rollConstitutionSave(mockActor, dc);
 
-      expect(mockActor.rollAbilitySave).toHaveBeenCalledWith('con', {
-        targetValue: 12,
-        flavor: expect.stringContaining('Aether Toxicity Save')
+      expect(mockActor.rollSavingThrow).toHaveBeenCalledWith({
+        ability: 'con',
+        targetValue: 12
       });
     });
 
     test('returns the roll result', async () => {
-      mockActor.rollAbilitySave.mockResolvedValue({ total: 18 });
+      mockActor.rollSavingThrow.mockResolvedValue([{ _total: 18, total: 18 }]);
 
       const roll = await rollConstitutionSave(mockActor, 15);
 
-      expect(roll.total).toBe(18);
+      // Roll is returned as-is (array format from v4.1+ API)
+      expect(roll).toEqual([{ _total: 18, total: 18 }]);
     });
   });
 
@@ -140,7 +146,7 @@ describe('Aether Fuel Consumption', () => {
         quality: 'basic-refined',
         toxicityApplied: false
       });
-      expect(mockItem.update).toHaveBeenCalled();
+      expect(mockItem.delete).toHaveBeenCalled();
     });
 
     test('applies toxicity for unrefined aether', async () => {

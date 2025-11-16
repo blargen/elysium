@@ -4,7 +4,7 @@
  * Handles unrefined aether toxicity tracking and effects
  */
 
-import { getDailyDoses, setDailyDoses, getATL, setATL } from '../utils/flags.js';
+import { getDailyDoses, setDailyDoses, getATL, setATL, getAetherQuality } from '../utils/flags.js';
 import { calculateToxicityDC, shouldAddExhaustion } from '../utils/calculations.js';
 
 /**
