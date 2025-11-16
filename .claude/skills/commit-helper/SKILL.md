@@ -429,6 +429,7 @@ From CLAUDE.md and conversation:
 4. **Testing** - Celebrate when adding tests
 5. **Module hooks** - Call out when removing macros
 6. **No AI credit** - Human wrote this!
+7. **GitHub username** - blargen (for URLs and distribution)
 
 ---
 

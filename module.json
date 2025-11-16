@@ -53,6 +53,6 @@
       }
     ]
   },
-  "manifest": "https://raw.githubusercontent.com/YOUR_USERNAME/elysium/main/module.json",
+  "manifest": "https://raw.githubusercontent.com/blargen/elysium/main/module.json",
   "download": "https://github.com/blargen/elysium/archive/main.zip"
 }
