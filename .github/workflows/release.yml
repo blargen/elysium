@@ -1,0 +1,74 @@
+name: Create Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'module.json'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Read version from module.json
+        id: get_version
+        run: |
+          VERSION=$(jq -r '.version' module.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Check if release exists
+        id: check_release
+        run: |
+          if gh release view "v${{ steps.get_version.outputs.version }}" > /dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Create release package
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          # Create a clean directory for the package
+          mkdir -p elysium
+
+          # Copy module files (exclude dev files)
+          rsync -av --exclude='.git' \
+                    --exclude='.github' \
+                    --exclude='.claude' \
+                    --exclude='node_modules' \
+                    --exclude='tests' \
+                    --exclude='jest.config.js' \
+                    --exclude='package.json' \
+                    --exclude='package-lock.json' \
+                    --exclude='TESTING.md' \
+                    --exclude='.gitignore' \
+                    --exclude='*.test.js' \
+                    . elysium/
+
+          # Create zip file
+          zip -r elysium-v${{ steps.get_version.outputs.version }}.zip elysium
+
+      - name: Create GitHub Release
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          gh release create "v${{ steps.get_version.outputs.version }}" \
+            elysium-v${{ steps.get_version.outputs.version }}.zip \
+            --title "Elysium v${{ steps.get_version.outputs.version }}" \
+            --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Release already exists
+        if: steps.check_release.outputs.exists == 'true'
+        run: |
+          echo "Release v${{ steps.get_version.outputs.version }} already exists. Skipping creation."
