@@ -14,6 +14,7 @@ import { clearSpellFromFinger } from './aethers-grasp/forget.js';
 import { getAvailableAetherFuel, getQualityModifiers } from './aether-fuel/fuel-selection.js';
 import { handleAetherFuelUse as consumeAether } from './aether-fuel/consumption.js';
 import { useAethersLeap } from './aethers-leap/leap.js';
+import './utils/create-items.js';  // Loads item creator utilities for macros
 
 console.log('Elysium | Loading...');
 
@@ -713,11 +714,15 @@ Hooks.on('dnd5e.restCompleted', async (actor, restData) => {
 });
 
 /**
- * Hook: Item Used
+ * Hook: Activity Used (D&D 5e v5.x compatible)
  * Handle aether-powered items like Aether's Leap
+ *
+ * Uses postActivityConsumption to trigger after the activity is used
+ * This hook fires AFTER the item's normal consumption (if any)
  */
-Hooks.on('dnd5e.useItem', async (item, config, options) => {
-  const actor = item.actor;
+Hooks.on('dnd5e.postActivityConsumption', async (activity, usageConfig, messageConfig, updates) => {
+  const item = activity.item;
+  const actor = item?.actor;
   if (!actor) return;
 
   // Check if this is an Aether's Leap item
