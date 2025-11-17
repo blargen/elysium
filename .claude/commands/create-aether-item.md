@@ -11,8 +11,10 @@ Create a complete aether-powered item by asking questions, then generate a conso
    - Description (what it does)
    - Item type (equipment, consumable, etc.)
    - Rarity (common, uncommon, rare, etc.)
-   - Body slot (if equipment: head, chest, hands, etc.)
-   - Icon/image path
+   - Body slot (if equipment: head, chest, hands, feet, etc.)
+   - **Image/Icon:** Ask if image exists in assets/ folder
+     - If yes: What's the filename? (e.g., "AethersLeap.png")
+     - If no: Note that placeholder will be used, remind to add image later
    - Which spell/effect it mimics (if applicable)
    - Duration (if applicable)
    - Concentration required? (if applicable)
@@ -35,11 +37,14 @@ Create a complete aether-powered item by asking questions, then generate a conso
 - `name`: Item name (e.g., "Aether's Leap")
 - `type`: Item type ("equipment", "consumable", "weapon", "feat")
 - `system.description.value`: HTML description
-- `system.rarity`: Rarity tier
-- `system.armor.type.value`: Body slot (if equipment)
-- `img`: Icon path (e.g., "modules/elysium/assets/ItemName.png")
-- `flags.elysium.isAethers{Name}`: Detection flag (camelCase)
+- `system.rarity`: Rarity tier ("common", "uncommon", "rare", "very rare", "legendary")
+- `system.armor.type.value`: Body slot if equipment ("head", "chest", "hands", "feet", "arms", "legs", "neck", "back", "waist", "wrist", "finger")
+- `img`: Icon path
+  - If image exists: "modules/elysium/assets/{filename}.png"
+  - If not: "icons/svg/item-bag.svg" (placeholder, remind user to add later)
+- `flags.elysium.isAethers{Name}`: Detection flag (camelCase, e.g., "isAethersLeap")
 - `flags.elysium.requiresAether`: true
+- `flags.elysium.category`: "aether-items"
 
 **Example output:**
 ```javascript
@@ -77,5 +82,8 @@ console.log("Item created successfully. Remember to commit!");
 **After generating script:**
 - Explain what the script does
 - Tell user to paste it into Foundry console
+- If placeholder image was used, remind them to:
+  - Add the actual image to `assets/` folder
+  - Re-run the script with updated image path
 - Remind them to test it in-game
-- Remind them to commit with: `git add packs/elysium-items/ && git commit -m "feat: add [Item Name] to compendium"`
+- Remind them to commit with: `git add packs/elysium-items/ assets/ && git commit -m "feat: add [Item Name] to compendium"`
