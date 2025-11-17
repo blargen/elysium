@@ -425,3 +425,129 @@
 .elysium-text-orange {
   color: var(--aether-orange);
 }
+
+/* ===============================
+   Fuel Selection Option Cards
+   =============================== */
+.elysium-fuel-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  margin: 8px 0;
+  background: radial-gradient(circle at 30% 0,
+      rgba(17,117,208,0.25),
+      rgba(0,0,0,0.85));
+  border: 1px solid var(--aether-orange);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow:
+    0 0 8px rgba(0,0,0,0.9),
+    0 0 6px rgba(17,117,208,0.25);
+}
+
+.elysium-fuel-option:hover {
+  border-color: var(--aether-blue);
+  background: radial-gradient(circle at 30% 0,
+      rgba(17,117,208,0.35),
+      rgba(0,0,0,0.9));
+  box-shadow:
+    0 0 10px rgba(17,117,208,0.6),
+    0 0 16px rgba(208,108,17,0.4);
+  transform: translateY(-1px);
+}
+
+.elysium-fuel-icon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 4px rgba(17,117,208,0.5));
+}
+
+.elysium-fuel-info {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.elysium-fuel-name {
+  color: var(--aether-text-main);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
+}
+
+.elysium-fuel-uses {
+  color: var(--aether-text-muted);
+  font-size: 0.8rem;
+}
+
+.elysium-fuel-quality {
+  color: var(--aether-text-muted);
+  font-size: 0.75rem;
+  margin-top: 2px;
+}
+
+/* ===============================
+   Action Selection Option Cards
+   (For Aether's Grasp main menu)
+   =============================== */
+.elysium-action-option {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 14px;
+  margin: 8px 0;
+  background: radial-gradient(circle at 30% 0,
+      rgba(17,117,208,0.25),
+      rgba(0,0,0,0.85));
+  border: 1px solid var(--aether-orange);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow:
+    0 0 8px rgba(0,0,0,0.9),
+    0 0 6px rgba(17,117,208,0.25);
+}
+
+.elysium-action-option:hover {
+  border-color: var(--aether-blue);
+  background: radial-gradient(circle at 30% 0,
+      rgba(17,117,208,0.35),
+      rgba(0,0,0,0.9));
+  box-shadow:
+    0 0 10px rgba(17,117,208,0.6),
+    0 0 16px rgba(208,108,17,0.4);
+  transform: translateY(-1px);
+}
+
+.elysium-action-icon {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 6px rgba(17,117,208,0.5));
+}
+
+.elysium-action-info {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.elysium-action-name {
+  color: var(--aether-text-main);
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.03em;
+}
+
+.elysium-action-desc {
+  color: var(--aether-text-muted);
+  font-size: 0.8rem;
+  line-height: 1.3;
+}

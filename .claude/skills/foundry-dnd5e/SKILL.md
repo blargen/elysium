@@ -792,6 +792,277 @@ const item = await pack.getDocument("item-id");
 const importedItem = await game.items.importFromCompendium(pack, "item-id");
 ```
 
+### Adding Items to Compendiums Programmatically
+
+**IMPORTANT:** For distribution modules (modules you'll share/sell), you want items in compendiums, not just in the world. This section shows how to automate that.
+
+#### Basic Pattern: Add Item to Compendium
+
+```javascript
+/**
+ * Add an item from the world to a compendium
+ * @param {Item} item - The world item to add
+ * @param {string} packName - Full pack ID (e.g., 'elysium.elysium-items')
+ */
+async function addItemToCompendium(item, packName) {
+  const pack = game.packs.get(packName);
+
+  if (!pack) {
+    ui.notifications.error(`Compendium ${packName} not found!`);
+    return null;
+  }
+
+  // Import item into compendium
+  const compendiumItem = await pack.importDocument(item);
+
+  console.log(`Added ${item.name} to ${packName}`);
+  ui.notifications.info(`${item.name} added to compendium`);
+
+  return compendiumItem;
+}
+
+// Usage
+const item = game.items.getName("Aether's Leap");
+await addItemToCompendium(item, 'elysium.elysium-items');
+```
+
+#### Update Pattern: Delete Old + Add New
+
+```javascript
+/**
+ * Update an item in a compendium (delete old, add new)
+ * @param {Item} item - The world item to add/update
+ * @param {string} packName - Full pack ID
+ */
+async function updateItemInCompendium(item, packName) {
+  const pack = game.packs.get(packName);
+
+  if (!pack) {
+    ui.notifications.error(`Compendium ${packName} not found!`);
+    return null;
+  }
+
+  // Check if item already exists in compendium
+  const index = await pack.getIndex();
+  const existingEntry = index.find(i => i.name === item.name);
+
+  if (existingEntry) {
+    console.log(`Deleting old version of ${item.name}...`);
+    const existingItem = await pack.getDocument(existingEntry._id);
+    await existingItem.delete();
+    console.log(`Old version deleted`);
+  }
+
+  // Add new version
+  const compendiumItem = await pack.importDocument(item);
+
+  console.log(`Updated ${item.name} in ${packName}`);
+  ui.notifications.info(`${item.name} updated in compendium`);
+
+  return compendiumItem;
+}
+
+// Usage
+const item = game.items.getName("Aether's Leap");
+await updateItemInCompendium(item, 'elysium.elysium-items');
+```
+
+#### Batch Operations: Add/Update Multiple Items
+
+```javascript
+/**
+ * Add/update multiple items in a compendium
+ * @param {Item[]} items - Array of world items
+ * @param {string} packName - Full pack ID
+ */
+async function batchUpdateCompendium(items, packName) {
+  const pack = game.packs.get(packName);
+
+  if (!pack) {
+    ui.notifications.error(`Compendium ${packName} not found!`);
+    return;
+  }
+
+  const index = await pack.getIndex();
+
+  for (const item of items) {
+    const existingEntry = index.find(i => i.name === item.name);
+
+    if (existingEntry) {
+      const existingItem = await pack.getDocument(existingEntry._id);
+      await existingItem.delete();
+      console.log(`Deleted old ${item.name}`);
+    }
+
+    await pack.importDocument(item);
+    console.log(`Added ${item.name}`);
+  }
+
+  ui.notifications.info(`Updated ${items.length} items in compendium`);
+}
+
+// Usage - add all Elysium items
+const elysiumItems = game.items.filter(i =>
+  i.getFlag('elysium', 'isAethersLeap') ||
+  i.getFlag('elysium', 'isAethersGrasp')
+);
+await batchUpdateCompendium(elysiumItems, 'elysium.elysium-items');
+```
+
+#### Finding Items by Flag
+
+```javascript
+/**
+ * Find all items with a specific flag and add to compendium
+ * @param {string} flagKey - Flag key to search for (e.g., 'requiresAether')
+ * @param {string} packName - Full pack ID
+ */
+async function addItemsByFlag(flagKey, packName) {
+  const items = game.items.filter(item =>
+    item.getFlag('elysium', flagKey) === true
+  );
+
+  if (items.length === 0) {
+    ui.notifications.warn(`No items found with flag elysium.${flagKey}`);
+    return;
+  }
+
+  await batchUpdateCompendium(items, packName);
+
+  console.log(`Added ${items.length} items with flag ${flagKey}`);
+}
+
+// Usage - add all aether-powered items
+await addItemsByFlag('requiresAether', 'elysium.elysium-items');
+```
+
+#### Macro for Easy Compendium Updates
+
+Create a macro in Foundry for quick item updates:
+
+```javascript
+// Macro: Update Item in Compendium
+
+// Get selected item from sidebar
+const selectedItem = ui.items?.object;
+
+if (!selectedItem) {
+  ui.notifications.error("Please select an item from the Items sidebar first!");
+  return;
+}
+
+// Determine which compendium to use based on flags
+let packName;
+if (selectedItem.getFlag('elysium', 'isAetherFuel')) {
+  packName = 'elysium.aether-fuel';
+} else {
+  packName = 'elysium.elysium-items';
+}
+
+// Update in compendium
+const pack = game.packs.get(packName);
+if (!pack) {
+  ui.notifications.error(`Compendium ${packName} not found!`);
+  return;
+}
+
+// Delete old version if exists
+const index = await pack.getIndex();
+const existingEntry = index.find(i => i.name === selectedItem.name);
+
+if (existingEntry) {
+  const existingItem = await pack.getDocument(existingEntry._id);
+  await existingItem.delete();
+  console.log(`Deleted old version of ${selectedItem.name}`);
+}
+
+// Add new version
+await pack.importDocument(selectedItem);
+
+ui.notifications.info(`✅ ${selectedItem.name} updated in ${packName}`);
+console.log(`${selectedItem.name} updated in compendium`);
+```
+
+#### Subdirectories in Compendiums
+
+**NOTE:** FoundryVTT compendiums don't natively support subdirectories in the file structure. However, you can organize items using:
+
+1. **Folder Structure in UI**: Create folders in the compendium UI
+2. **Naming Conventions**: Prefix item names (e.g., "Aether Items: Leap", "Aether Fuel: Unrefined")
+3. **Flags for Categories**: Use flags to categorize items
+
+```javascript
+// Set category flag
+await item.setFlag('elysium', 'category', 'aether-items');
+
+// Filter by category in compendium browser
+const pack = game.packs.get('elysium.elysium-items');
+const items = await pack.getDocuments();
+const aetherItems = items.filter(i =>
+  i.getFlag('elysium', 'category') === 'aether-items'
+);
+```
+
+### Elysium Workflow: Creating Items
+
+**Standard workflow for creating Elysium items:**
+
+1. **Create item in world** (via UI)
+2. **Set required flags** (via console or macro)
+   ```javascript
+   const item = game.items.getName("Aether's Leap");
+   await item.setFlag('elysium', 'isAethersLeap', true);
+   await item.setFlag('elysium', 'requiresAether', true);
+   ```
+3. **Test in-game** (use the item, verify hooks work)
+4. **Add to compendium** (via macro or console)
+   ```javascript
+   await updateItemInCompendium(item, 'elysium.elysium-items');
+   ```
+5. **Commit compendium changes** (git add + commit)
+   ```bash
+   git add packs/elysium-items/
+   git commit -m "feat: add Aether's Leap to compendium"
+   ```
+
+**Create a macro for this workflow:**
+
+```javascript
+// Macro: Elysium Item to Compendium
+
+const item = ui.items?.object;
+
+if (!item) {
+  ui.notifications.error("Select an item first!");
+  return;
+}
+
+// Determine pack
+const isAetherFuel = item.getFlag('elysium', 'isAetherFuel');
+const packName = isAetherFuel ? 'elysium.aether-fuel' : 'elysium.elysium-items';
+
+// Update compendium
+const pack = game.packs.get(packName);
+const index = await pack.getIndex();
+const existing = index.find(i => i.name === item.name);
+
+if (existing) {
+  const oldItem = await pack.getDocument(existing._id);
+  await oldItem.delete();
+}
+
+await pack.importDocument(item);
+
+ui.notifications.info(`✅ ${item.name} → ${packName}`);
+
+// Reminder to commit
+console.log(`
+Remember to commit:
+git add packs/${isAetherFuel ? 'aether-fuel' : 'elysium-items'}/
+git commit -m "feat: add ${item.name} to compendium"
+`);
+```
+
 ---
 
 ## Localization (i18n)
