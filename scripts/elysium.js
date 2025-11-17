@@ -13,6 +13,7 @@ import { getStoredSpellByFinger, castSpellFromFinger } from './aethers-grasp/cas
 import { clearSpellFromFinger } from './aethers-grasp/forget.js';
 import { getAvailableAetherFuel, getQualityModifiers } from './aether-fuel/fuel-selection.js';
 import { handleAetherFuelUse as consumeAether } from './aether-fuel/consumption.js';
+import { useAethersLeap } from './aethers-leap/leap.js';
 
 console.log('Elysium | Loading...');
 
@@ -708,6 +709,21 @@ Hooks.on('dnd5e.restCompleted', async (actor, restData) => {
     });
 
     ui.notifications.info(`${actor.name} recovers from aether toxicity!`);
+  }
+});
+
+/**
+ * Hook: Item Used
+ * Handle aether-powered items like Aether's Leap
+ */
+Hooks.on('dnd5e.useItem', async (item, config, options) => {
+  const actor = item.actor;
+  if (!actor) return;
+
+  // Check if this is an Aether's Leap item
+  if (item.getFlag('elysium', 'isAethersLeap')) {
+    console.log(`Elysium | Detected Aether's Leap item: ${item.name}`);
+    await useAethersLeap(actor, item);
   }
 });
 
