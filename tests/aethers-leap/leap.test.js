@@ -17,7 +17,10 @@ describe("Aether's Leap", () => {
       name: 'Test Character',
       flags: {},
       items: {
-        contents: []
+        contents: [],
+        filter: function(fn) {
+          return this.contents.filter(fn);
+        }
       },
       appliedEffects: [],
       getFlag: function(scope, key) {

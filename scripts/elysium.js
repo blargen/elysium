@@ -11,9 +11,10 @@ import { calculateToxicityDC } from './utils/calculations.js';
 import { findFirstLevelScrolls, canImprintMoreSpells, getAvailableFingerSlots, imprintSpellOnFinger, consumeScroll } from './aethers-grasp/imprint.js';
 import { getStoredSpellByFinger, castSpellFromFinger } from './aethers-grasp/cast.js';
 import { clearSpellFromFinger } from './aethers-grasp/forget.js';
-import { getAvailableAetherFuel, getQualityModifiers } from './aether-fuel/fuel-selection.js';
+import { getQualityModifiers } from './aether-fuel/fuel-selection.js';
 import { handleAetherFuelUse as consumeAether } from './aether-fuel/consumption.js';
 import { useAethersLeap } from './aethers-leap/leap.js';
+import { selectAetherFuel } from './utils/fuel-selection-dialog.js';
 import './utils/create-items.js';  // Loads item creator utilities for macros
 
 console.log('Elysium | Loading...');
@@ -485,51 +486,9 @@ async function handleCastFromFinger(actor, aethersGrasp) {
     return;
   }
 
-  // Get available aether fuel
-  const aetherItems = getAvailableAetherFuel(actor);
-  if (aetherItems.length === 0) {
-    ui.notifications.error("No aether fuel available to power the spell!");
-    return;
-  }
-
-  // Show aether selection
-  const aetherId = await new Promise((resolve) => {
-    const buttons = {};
-
-    aetherItems.forEach(aether => {
-      const quality = aether.getFlag('elysium', 'aetherQuality');
-      buttons[aether.id] = {
-        label: aether.name,
-        callback: () => resolve(aether.id)
-      };
-    });
-
-    buttons.cancel = {
-      label: "Cancel",
-      callback: () => resolve(null)
-    };
-
-    new Dialog({
-      title: "Select Aether Fuel",
-      content: `<div class="elysium-dialog-content elysium-text-center"><p>Choose which aether to consume:</p></div>`,
-      buttons,
-      default: "cancel"
-    }).render(true);
-  });
-
-  if (!aetherId) return;
-
-  const aetherItem = actor.items.get(aetherId);
-
-  // Check if unrefined and show toxicity warning
-  const quality = getAetherQuality(aetherItem);
-  if (quality === 'unrefined') {
-    const proceed = await showToxicityWarning(actor);
-    if (!proceed) {
-      ui.notifications.warn("Unrefined aether use cancelled.");
-      return;
-    }
-  }
+  // Select aether fuel (shows dialog with toxicity warning)
+  const aetherItem = await selectAetherFuel(actor);
+  if (!aetherItem) return;  // User cancelled or no fuel available
 
   // Consume aether and get modifiers
   const result = await consumeAether(actor, aetherItem);

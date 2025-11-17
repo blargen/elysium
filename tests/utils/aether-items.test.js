@@ -18,7 +18,10 @@ describe('Generic Aether Item Utility', () => {
       name: 'Test Character',
       flags: {},
       items: {
-        contents: []
+        contents: [],
+        filter: function(fn) {
+          return this.contents.filter(fn);
+        }
       },
       getFlag: function(scope, key) {
         return this.flags[scope]?.[key];

@@ -5,6 +5,7 @@
  */
 
 import { handleAetherFuelUse } from '../aether-fuel/consumption.js';
+import { selectAetherFuel } from './fuel-selection-dialog.js';
 
 /**
  * Use an aether-powered item with automatic fuel handling
@@ -24,25 +25,19 @@ export async function useAetherPoweredItem(actor, item, effectCallback, selected
   console.log(`Elysium | useAetherPoweredItem: ${item.name} for ${actor.name}`);
 
   try {
-    // If no fuel provided, check if actor has any aether fuel
+    // If no fuel provided, show fuel selection dialog
     if (!selectedFuel) {
-      const availableFuel = actor.items.contents.filter(i =>
-        i.getFlag('elysium', 'isAetherFuel') &&
-        (i.system?.uses?.value || 0) > 0
-      );
+      selectedFuel = await selectAetherFuel(actor);
 
-      if (availableFuel.length === 0) {
-        console.log(`Elysium | No aether fuel available`);
+      // User cancelled or no fuel available
+      if (!selectedFuel) {
+        console.log(`Elysium | No aether fuel selected`);
         return {
           success: false,
           reason: 'no-fuel',
           fuelConsumed: false
         };
       }
-
-      // In real use, we'd show fuel selection dialog here
-      // For now, just use the first available fuel
-      selectedFuel = availableFuel[0];
     }
 
     // Consume the aether fuel (handles toxicity automatically)
