@@ -4,7 +4,7 @@
  * Shows a dialog to let the user choose which aether fuel to use
  */
 
-import { getAvailableAetherFuel } from '../aether-fuel/fuel-selection.js';
+import { getAvailableAetherFuel, getQualityDescription } from '../aether-fuel/fuel-selection.js';
 import { getAetherQuality } from './flags.js';
 import { showToxicityWarning } from '../aether-fuel/consumption.js';
 
@@ -37,27 +37,53 @@ export async function selectAetherFuel(actor) {
     return firstFuel;
   }
 
+  // Build HTML content with fuel options
+  let fuelOptionsHtml = '';
+  aetherItems.forEach(aether => {
+    const quality = getAetherQuality(aether);
+    const qualityDesc = getQualityDescription(quality);
+    const uses = aether.system?.uses?.value || 0;
+    const maxUses = aether.system?.uses?.max || 0;
+    const img = aether.img || 'icons/svg/item-bag.svg';
+
+    fuelOptionsHtml += `
+      <div class="elysium-fuel-option" data-fuel-id="${aether.id}">
+        <img src="${img}" class="elysium-fuel-icon" alt="${aether.name}">
+        <div class="elysium-fuel-info">
+          <div class="elysium-fuel-name">${aether.name}</div>
+          <div class="elysium-fuel-uses">${uses} / ${maxUses} uses</div>
+          ${qualityDesc ? `<div class="elysium-fuel-quality">${qualityDesc}</div>` : ''}
+        </div>
+      </div>
+    `;
+  });
+
+  const content = `
+    <div class="elysium-dialog-content">
+      <p class="elysium-dialog-text">Choose which aether to consume:</p>
+      ${fuelOptionsHtml}
+    </div>
+  `;
+
   // Show aether selection dialog
   const aetherId = await new Promise((resolve) => {
-    const buttons = {};
-
-    aetherItems.forEach(aether => {
-      const quality = aether.getFlag('elysium', 'aetherQuality');
-      buttons[aether.id] = {
-        label: aether.name,
-        callback: () => resolve(aether.id)
-      };
-    });
-
-    buttons.cancel = {
-      label: "Cancel",
-      callback: () => resolve(null)
-    };
-
     new Dialog({
       title: "Select Aether Fuel",
-      content: `<div class="elysium-dialog-content elysium-text-center"><p>Choose which aether to consume:</p></div>`,
-      buttons,
+      content: content,
+      buttons: {
+        cancel: {
+          icon: '<i class="fas fa-times"></i>',
+          label: "Cancel",
+          callback: () => resolve(null)
+        }
+      },
+      render: (html) => {
+        html.find('.elysium-fuel-option').click((event) => {
+          const fuelId = event.currentTarget.dataset.fuelId;
+          resolve(fuelId);
+          html.closest('.dialog').find('.dialog-button.cancel').click();
+        });
+      },
       default: "cancel"
     }).render(true);
   });

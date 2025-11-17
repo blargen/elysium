@@ -294,4 +294,72 @@ describe('Aether\'s Grasp - Imprint From Scroll', () => {
       expect(mockScroll.delete).not.toHaveBeenCalled();
     });
   });
+
+  describe('imprintSpellOnFinger - multiple scrolls', () => {
+    test('can imprint multiple different scrolls on different fingers', async () => {
+      mockAethersGrasp.flags.elysium.storedSpells = [];
+
+      const commandData = {
+        name: 'Command',
+        type: 'spell',
+        system: { level: 1 }
+      };
+
+      const witchBoltData = {
+        name: 'Witch Bolt',
+        type: 'spell',
+        system: { level: 1 }
+      };
+
+      // Imprint Command on Thumb (0)
+      await imprintSpellOnFinger(mockAethersGrasp, 0, commandData, 'Spell Scroll: Command');
+
+      // Imprint Witch Bolt on Index (1)
+      await imprintSpellOnFinger(mockAethersGrasp, 1, witchBoltData, 'Spell Scroll: Witch Bolt');
+
+      // Should have been called twice
+      expect(mockAethersGrasp.setFlag).toHaveBeenCalledTimes(2);
+
+      // Get the final state from the last setFlag call
+      const finalSetFlagCall = mockAethersGrasp.setFlag.mock.calls[1];
+      const finalStoredSpells = finalSetFlagCall[2];
+
+      // Should have both spells stored
+      expect(finalStoredSpells).toHaveLength(2);
+      expect(finalStoredSpells[0].spellData.name).toBe('Command');
+      expect(finalStoredSpells[0].fingerIndex).toBe(0);
+      expect(finalStoredSpells[1].spellData.name).toBe('Witch Bolt');
+      expect(finalStoredSpells[1].fingerIndex).toBe(1);
+    });
+
+    test('can imprint same scroll on multiple fingers when scroll has multiple uses', async () => {
+      mockAethersGrasp.flags.elysium.storedSpells = [];
+
+      const witchBoltData = {
+        name: 'Witch Bolt',
+        type: 'spell',
+        system: { level: 1 }
+      };
+
+      // Imprint same spell on Thumb (0)
+      await imprintSpellOnFinger(mockAethersGrasp, 0, witchBoltData, 'Spell Scroll: Witch Bolt');
+
+      // Imprint same spell on Index (1)
+      await imprintSpellOnFinger(mockAethersGrasp, 1, witchBoltData, 'Spell Scroll: Witch Bolt');
+
+      // Should have been called twice
+      expect(mockAethersGrasp.setFlag).toHaveBeenCalledTimes(2);
+
+      // Get the final state from the last setFlag call
+      const finalSetFlagCall = mockAethersGrasp.setFlag.mock.calls[1];
+      const finalStoredSpells = finalSetFlagCall[2];
+
+      // Should have both fingers with the same spell stored
+      expect(finalStoredSpells).toHaveLength(2);
+      expect(finalStoredSpells[0].spellData.name).toBe('Witch Bolt');
+      expect(finalStoredSpells[0].fingerIndex).toBe(0);
+      expect(finalStoredSpells[1].spellData.name).toBe('Witch Bolt');
+      expect(finalStoredSpells[1].fingerIndex).toBe(1);
+    });
+  });
 });

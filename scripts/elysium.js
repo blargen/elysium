@@ -6,7 +6,7 @@
 
 import { resetToxicityOnLongRest, applyUnrefinedAetherUse } from './aether-fuel/toxicity.js';
 import { rollConstitutionSave, showToxicityWarning } from './aether-fuel/consumption.js';
-import { isAetherFuel, getModType, getAetherQuality, getDailyDoses } from './utils/flags.js';
+import { isAetherFuel, getModType, getAetherQuality, getDailyDoses, getStoredSpells, setStoredSpells } from './utils/flags.js';
 import { calculateToxicityDC } from './utils/calculations.js';
 import { findFirstLevelScrolls, canImprintMoreSpells, getAvailableFingerSlots, imprintSpellOnFinger, consumeScroll } from './aethers-grasp/imprint.js';
 import { getStoredSpellByFinger, castSpellFromFinger } from './aethers-grasp/cast.js';
@@ -227,38 +227,57 @@ Hooks.on('dnd5e.postActivityConsumption', async (activity, usageConfig, messageC
  * Handle Aether's Grasp usage - show action selection dialog
  */
 async function handleAethersGraspUse(actor, aethersGrasp) {
+  // Build action option cards
+  const content = `
+    <div class="elysium-dialog-content">
+      <p class="elysium-dialog-text">What would you like to do with <strong>Aether's Grasp</strong>?</p>
+
+      <div class="elysium-action-option" data-action="imprint">
+        <img src="modules/elysium/assets/ImprintFromScroll.png" class="elysium-action-icon" alt="Imprint">
+        <div class="elysium-action-info">
+          <div class="elysium-action-name">Imprint From Scroll</div>
+          <div class="elysium-action-desc">Store a spell from a scroll onto a finger</div>
+        </div>
+      </div>
+
+      <div class="elysium-action-option" data-action="cast">
+        <img src="modules/elysium/assets/CastFromFinger.png" class="elysium-action-icon" alt="Cast">
+        <div class="elysium-action-info">
+          <div class="elysium-action-name">Cast From Finger</div>
+          <div class="elysium-action-desc">Cast a stored spell using aether fuel</div>
+        </div>
+      </div>
+
+      <div class="elysium-action-option" data-action="forget">
+        <img src="modules/elysium/assets/ForgetFromFinger.png" class="elysium-action-icon" alt="Forget">
+        <div class="elysium-action-info">
+          <div class="elysium-action-name">Forget From Finger</div>
+          <div class="elysium-action-desc">Remove a stored spell from a finger</div>
+        </div>
+      </div>
+    </div>
+  `;
+
   // Show action selection dialog
   const action = await new Promise((resolve) => {
     new Dialog({
       title: "Aether's Grasp",
-      content: `
-        <div class="elysium-dialog-content elysium-text-center">
-          <p>What would you like to do with <strong>Aether's Grasp</strong>?</p>
-        </div>
-      `,
+      content: content,
       buttons: {
-        imprint: {
-          icon: '<i class="fas fa-scroll"></i>',
-          label: "Imprint From Scroll",
-          callback: () => resolve('imprint')
-        },
-        cast: {
-          icon: '<i class="fas fa-hand-sparkles"></i>',
-          label: "Cast From Finger",
-          callback: () => resolve('cast')
-        },
-        forget: {
-          icon: '<i class="fas fa-eraser"></i>',
-          label: "Forget From Finger",
-          callback: () => resolve('forget')
-        },
         cancel: {
           icon: '<i class="fas fa-times"></i>',
           label: "Cancel",
           callback: () => resolve(null)
         }
       },
-      default: "cast"
+      render: (html) => {
+        html.find('.elysium-action-option').click((event) => {
+          const actionType = event.currentTarget.dataset.action;
+          resolve(actionType);
+          html.closest('.dialog').find('.dialog-button.cancel').click();
+        });
+      },
+      default: "cancel"
     }).render(true);
   });
 
@@ -367,11 +386,14 @@ async function handleImprintFromScroll(actor, aethersGrasp) {
     return;
   }
 
-  // Process each selection
-  let imprintedCount = 0;
+  // Step 1: Collect all spell data and validate scrolls BEFORE consuming anything
+  const imprintsToMake = [];
   for (const [fingerIndex, scrollId] of Object.entries(selections)) {
     const scroll = actor.items.get(scrollId);
-    if (!scroll) continue;
+    if (!scroll) {
+      console.warn(`Elysium | Scroll ${scrollId} not found, skipping`);
+      continue;
+    }
 
     // In D&D 5e v5.x, spell scrolls have all spell data embedded directly
     // Use the scroll item data as the spell data
@@ -381,21 +403,53 @@ async function handleImprintFromScroll(actor, aethersGrasp) {
     const spellName = scroll.flags?.ddbimporter?.originalName ||
                       scroll.name.replace(/^Spell Scroll:\s*/i, '').trim();
 
-    // Imprint the spell
     const fingerIdx = parseInt(fingerIndex);
     const fingerName = slots[fingerIdx].name;
-    await imprintSpellOnFinger(aethersGrasp, fingerIdx, spellData, scroll.name);
 
-    // Consume the scroll
-    await consumeScroll(scroll);
-
-    ui.notifications.info(`Imprinted ${spellName} on ${fingerName}!`);
-    imprintedCount++;
+    imprintsToMake.push({
+      fingerIdx,
+      fingerName,
+      spellData,
+      spellName,
+      scroll,
+      scrollName: scroll.name
+    });
   }
 
-  if (imprintedCount > 0) {
-    console.log(`Elysium | Imprinted ${imprintedCount} spell(s) on Aether's Grasp`);
+  if (imprintsToMake.length === 0) {
+    ui.notifications.warn("No valid scrolls found to imprint.");
+    return;
   }
+
+  // Step 2: Track stored spells locally to avoid flag caching issues
+  let currentStoredSpells = getStoredSpells(aethersGrasp);
+
+  // Step 3: Imprint all spells
+  for (const imprint of imprintsToMake) {
+    // Create stored spell object (same logic as imprintSpellOnFinger)
+    const storedSpell = {
+      id: foundry?.utils?.randomID?.() || `spell-${Date.now()}-${Math.random()}`,
+      fingerIndex: imprint.fingerIdx,
+      fingerName: imprint.fingerName,
+      spellData: foundry?.utils?.duplicate?.(imprint.spellData) || JSON.parse(JSON.stringify(imprint.spellData)),
+      imprintedAt: Date.now(),
+      originalScrollName: imprint.scrollName
+    };
+
+    // Add to local tracking array
+    currentStoredSpells.push(storedSpell);
+  }
+
+  // Step 4: Save all imprints at once
+  await setStoredSpells(aethersGrasp, currentStoredSpells);
+
+  // Step 5: Consume all scrolls and show notifications
+  for (const imprint of imprintsToMake) {
+    await consumeScroll(imprint.scroll);
+    ui.notifications.info(`Imprinted ${imprint.spellName} on ${imprint.fingerName}!`);
+  }
+
+  console.log(`Elysium | Imprinted ${imprintsToMake.length} spell(s) on Aether's Grasp`);
 }
 
 /**
@@ -617,21 +671,39 @@ async function handleForgetFromFinger(actor, aethersGrasp) {
     return;
   }
 
-  // Clear each selected spell
-  let forgottenCount = 0;
+  // Step 1: Get current stored spells (avoid flag caching issues)
+  let currentStoredSpells = getStoredSpells(aethersGrasp);
+
+  // Step 2: Collect spells to remove and filter them out locally
+  const removedSpells = [];
   for (const fingerIndex of selectedFingers) {
-    const removedSpell = await clearSpellFromFinger(aethersGrasp, fingerIndex);
+    const removedSpell = currentStoredSpells.find(s => s.fingerIndex === fingerIndex);
     if (removedSpell) {
-      const spellName = removedSpell.spellData.flags?.ddbimporter?.originalName ||
-                        removedSpell.spellData.name.replace(/^Spell Scroll:\s*/i, '').trim();
-      ui.notifications.info(`Forgot ${spellName} from ${removedSpell.fingerName}!`);
-      forgottenCount++;
+      removedSpells.push(removedSpell);
     }
   }
 
-  if (forgottenCount > 0) {
-    console.log(`Elysium | Forgot ${forgottenCount} spell(s) from Aether's Grasp`);
+  if (removedSpells.length === 0) {
+    ui.notifications.warn("No valid spells found to forget.");
+    return;
   }
+
+  // Step 3: Filter out all selected spells at once
+  const updatedSpells = currentStoredSpells.filter(
+    spell => !selectedFingers.includes(spell.fingerIndex)
+  );
+
+  // Step 4: Save updated list once
+  await setStoredSpells(aethersGrasp, updatedSpells);
+
+  // Step 5: Show notifications
+  for (const removedSpell of removedSpells) {
+    const spellName = removedSpell.spellData.flags?.ddbimporter?.originalName ||
+                      removedSpell.spellData.name.replace(/^Spell Scroll:\s*/i, '').trim();
+    ui.notifications.info(`Forgot ${spellName} from ${removedSpell.fingerName}!`);
+  }
+
+  console.log(`Elysium | Forgot ${removedSpells.length} spell(s) from Aether's Grasp`);
 }
 
 /**
