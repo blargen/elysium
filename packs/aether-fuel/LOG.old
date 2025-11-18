@@ -1,5 +1,5 @@
-2025/11/16-17:39:38.370245 30e402000 Recovering log #11
-2025/11/16-17:39:38.370473 30e402000 Level-0 table #13: started
-2025/11/16-17:39:38.370778 30e402000 Level-0 table #13: 7988 bytes OK
-2025/11/16-17:39:38.371372 30e402000 Delete type=0 #11
-2025/11/16-17:39:38.371687 30e402000 Delete type=3 #9
+2025/11/16-20:56:15.457544 3111e4000 Log #21: 0 ops saved to Table #24 OK
+2025/11/16-20:56:15.457783 3111e4000 Archiving /Users/eben/Library/Application Support/FoundryVTT/Data/modules/elysium/packs/aether-fuel/000021.log: OK
+2025/11/16-20:56:15.458054 3111e4000 Table #23: 4 entries OK
+2025/11/16-20:56:15.458540 3111e4000 Archiving /Users/eben/Library/Application Support/FoundryVTT/Data/modules/elysium/packs/aether-fuel/MANIFEST-000019: OK
+2025/11/16-20:56:15.458823 3111e4000 **** Repaired leveldb /Users/eben/Library/Application Support/FoundryVTT/Data/modules/elysium/packs/aether-fuel; recovered 1 files; 4078 bytes. Some data may have been lost. ****

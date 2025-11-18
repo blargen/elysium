@@ -14,6 +14,7 @@ import { clearSpellFromFinger } from './aethers-grasp/forget.js';
 import { getQualityModifiers } from './aether-fuel/fuel-selection.js';
 import { handleAetherFuelUse as consumeAether } from './aether-fuel/consumption.js';
 import { useAethersLeap } from './aethers-leap/leap.js';
+import { useAethersDetection, rollDetectionCheck } from './aethers-detection/detection.js';
 import { selectAetherFuel } from './utils/fuel-selection-dialog.js';
 import './utils/create-items.js';  // Loads item creator utilities for macros
 
@@ -754,7 +755,27 @@ Hooks.on('dnd5e.restCompleted', async (actor, restData) => {
 Hooks.on('dnd5e.postActivityConsumption', async (activity, usageConfig, messageConfig, updates) => {
   const item = activity.item;
   const actor = item?.actor;
-  if (!actor) return;
+
+  console.log(`Elysium | postActivityConsumption fired for: ${item?.name}, activity: ${activity?.name}`);
+
+  if (!actor) {
+    console.log(`Elysium | No actor found, returning`);
+    return;
+  }
+
+  // Check for Aether's Detection "Detect" activity by name
+  if (item.getFlag('elysium', 'isAethersDetection') && activity.name === 'Detect') {
+    console.log(`Elysium | Detected Detection roll activity: ${activity.name}`);
+    await rollDetectionCheck(actor, item);
+    return false; // Prevent default activity
+  }
+
+  // Check for Aether's Detection "Activate" activity by name
+  if (item.getFlag('elysium', 'isAethersDetection') && activity.name?.includes('Activate')) {
+    console.log(`Elysium | Detected Activate Detection activity: ${activity.name}`);
+    await useAethersDetection(actor, item);
+    return; // Activity handled
+  }
 
   // Check if this is an Aether's Leap item
   if (item.getFlag('elysium', 'isAethersLeap')) {

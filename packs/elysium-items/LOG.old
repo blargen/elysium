@@ -1,5 +1,5 @@
-2025/11/16-17:39:38.443111 30fc0b000 Recovering log #10
-2025/11/16-17:39:38.443289 30fc0b000 Level-0 table #12: started
-2025/11/16-17:39:38.443553 30fc0b000 Level-0 table #12: 1219 bytes OK
-2025/11/16-17:39:38.443972 30fc0b000 Delete type=0 #10
-2025/11/16-17:39:38.444036 30fc0b000 Delete type=3 #9
+2025/11/16-20:56:15.468845 3101de000 Log #21: 0 ops saved to Table #24 OK
+2025/11/16-20:56:15.469061 3101de000 Archiving /Users/eben/Library/Application Support/FoundryVTT/Data/modules/elysium/packs/elysium-items/000021.log: OK
+2025/11/16-20:56:15.469356 3101de000 Table #23: 2 entries OK
+2025/11/16-20:56:15.469672 3101de000 Archiving /Users/eben/Library/Application Support/FoundryVTT/Data/modules/elysium/packs/elysium-items/MANIFEST-000019: OK
+2025/11/16-20:56:15.470010 3101de000 **** Repaired leveldb /Users/eben/Library/Application Support/FoundryVTT/Data/modules/elysium/packs/elysium-items; recovered 1 files; 2659 bytes. Some data may have been lost. ****
