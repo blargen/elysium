@@ -29,6 +29,22 @@
 }
 
 /* ===============================
+   GLOBAL / BASE
+   =============================== */
+
+body {
+  background-color: var(--aether-bg-dark);
+  color: var(--aether-text-main);
+}
+
+/* Optional: cyberpunk-ish font if loaded in Foundry */
+body,
+.dnd5e2.actor.character {
+  font-family: "Oxanium", "Rajdhani", system-ui, sans-serif;
+  letter-spacing: 0.02em;
+}
+
+/* ===============================
    Chat Log Background
    =============================== */
 #chat-log {
@@ -36,14 +52,15 @@
     radial-gradient(circle at top left, rgba(17, 117, 208, 0.18) 0, transparent 55%),
     radial-gradient(circle at bottom right, rgba(208, 108, 17, 0.15) 0, transparent 50%),
     var(--aether-bg-dark);
-  border-left: 1px solid rgba(255,255,255,0.04);
-  box-shadow: -6px 0 20px rgba(0,0,0,0.7);
+  border-left: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: -6px 0 20px rgba(0, 0, 0, 0.7);
 }
 
 /* Scrollbar */
 #chat-log::-webkit-scrollbar {
   width: 8px;
 }
+
 #chat-log::-webkit-scrollbar-thumb {
   background: linear-gradient(var(--aether-blue-soft), var(--aether-orange));
   border-radius: 4px;
@@ -57,16 +74,14 @@
   margin: 4px 6px;
   padding: 6px 8px;
   border-radius: 6px;
-  background: linear-gradient(
-      135deg,
-      rgba(255,255,255,0.04),
-      rgba(0,0,0,0.6)
-    ),
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.04),
+      rgba(0, 0, 0, 0.6)),
     var(--aether-bg-panel);
   border: 1px solid var(--aether-border-soft);
   color: var(--aether-text-main);
   box-shadow:
-    0 0 12px rgba(0,0,0,0.7),
+    0 0 12px rgba(0, 0, 0, 0.7),
     0 0 6px rgba(17, 117, 208, 0.15);
   overflow: hidden;
 }
@@ -85,7 +100,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--aether-blue);
-  text-shadow: 0 0 6px rgba(17,117,208,0.7);
+  text-shadow: 0 0 6px rgba(17, 117, 208, 0.7);
 }
 
 /* Timestamp */
@@ -127,7 +142,7 @@
 
 .aether-message-success {
   border: 2px solid var(--aether-blue);
-  background: linear-gradient(135deg, rgba(17,117,208,0.2), rgba(0,0,0,0.8));
+  background: linear-gradient(135deg, rgba(17, 117, 208, 0.2), rgba(0, 0, 0, 0.8));
 }
 
 .aether-message-success h3 {
@@ -136,7 +151,7 @@
 
 .aether-message-toxicity {
   border: 2px solid var(--aether-orange);
-  background: linear-gradient(135deg, rgba(208,108,17,0.2), rgba(0,0,0,0.8));
+  background: linear-gradient(135deg, rgba(208, 108, 17, 0.2), rgba(0, 0, 0, 0.8));
 }
 
 .aether-message-toxicity h3 {
@@ -145,7 +160,7 @@
 
 .aether-message-warning {
   border: 2px solid var(--aether-warning);
-  background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(0,0,0,0.8));
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(0, 0, 0, 0.8));
 }
 
 .aether-message-warning h3 {
@@ -180,21 +195,54 @@
   inset: 6px;
   border-radius: inherit;
   background: radial-gradient(circle at top left,
-    rgba(17, 117, 208, 0.16),
-    transparent 60%);
+      rgba(17, 117, 208, 0.16),
+      transparent 60%);
   opacity: 0;
   pointer-events: none;
   animation: aether-pulse 5.5s ease-in-out infinite;
 }
 
 @keyframes aether-scan {
-  0% { background-position: 200% 0%; }
-  100% { background-position: -50% 0%; }
+  0% {
+    background-position: 200% 0%;
+  }
+
+  100% {
+    background-position: -50% 0%;
+  }
 }
 
 @keyframes aether-pulse {
-  0%, 100% { opacity: 0.0; }
-  50% { opacity: 0.28; }
+
+  0%,
+  100% {
+    opacity: 0.0;
+  }
+
+  50% {
+    opacity: 0.28;
+  }
+}
+
+/* Extra flicker for panels / holo effects if needed */
+@keyframes aether-flicker {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  48% {
+    opacity: 0.9;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+
+  52% {
+    opacity: 1;
+  }
 }
 
 /* ===============================
@@ -203,28 +251,28 @@
 .app.dialog,
 .window-app.dialog {
   background:
-    radial-gradient(circle at top center, rgba(17,117,208,0.2) 0, transparent 55%),
+    radial-gradient(circle at top center, rgba(17, 117, 208, 0.2) 0, transparent 55%),
     linear-gradient(145deg, #05070c, #0d1018 50%, #05070c 100%);
   border-radius: 10px;
   border: 1px solid var(--aether-border-soft);
   box-shadow:
-    0 0 25px rgba(0,0,0,0.85),
-    0 0 20px rgba(17,117,208,0.35);
+    0 0 25px rgba(0, 0, 0, 0.85),
+    0 0 20px rgba(17, 117, 208, 0.35);
   color: var(--aether-text-main);
 }
 
 /* Header */
 .app.dialog .window-header {
   background: linear-gradient(90deg,
-      rgba(0,0,0,0.8),
-      rgba(17,117,208,0.3),
-      rgba(0,0,0,0.8));
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+      rgba(0, 0, 0, 0.8),
+      rgba(17, 117, 208, 0.3),
+      rgba(0, 0, 0, 0.8));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 0.8rem;
   color: var(--aether-orange);
-  text-shadow: 0 0 6px rgba(208,108,17,0.8);
+  text-shadow: 0 0 6px rgba(208, 108, 17, 0.8);
 }
 
 /* Content */
@@ -238,8 +286,8 @@
 /* Dialog Buttons */
 .app.dialog .dialog-buttons button {
   background: radial-gradient(circle at 30% 0,
-      rgba(17,117,208,0.35),
-      rgba(0,0,0,0.9));
+      rgba(17, 117, 208, 0.35),
+      rgba(0, 0, 0, 0.9));
   border: 1px solid var(--aether-orange);
   color: var(--aether-text-main);
   text-transform: uppercase;
@@ -247,16 +295,16 @@
   font-size: 0.75rem;
   border-radius: 4px;
   box-shadow:
-    0 0 8px rgba(0,0,0,0.9),
-    0 0 8px rgba(17,117,208,0.3);
+    0 0 8px rgba(0, 0, 0, 0.9),
+    0 0 8px rgba(17, 117, 208, 0.3);
   transition: all 0.2s ease;
 }
 
 .app.dialog .dialog-buttons button:hover {
   border-color: var(--aether-blue);
   box-shadow:
-    0 0 10px rgba(17,117,208,0.6),
-    0 0 16px rgba(208,108,17,0.4);
+    0 0 10px rgba(17, 117, 208, 0.6),
+    0 0 16px rgba(208, 108, 17, 0.4);
 }
 
 /* ===============================
@@ -279,7 +327,7 @@
 /* Headers with Glow */
 .elysium-header {
   color: var(--aether-blue);
-  text-shadow: 0 0 8px rgba(17,117,208,0.8);
+  text-shadow: 0 0 8px rgba(17, 117, 208, 0.8);
   margin: 0 0 8px 0;
   font-size: 1.2rem;
   text-align: center;
@@ -287,7 +335,7 @@
 
 .elysium-header-toxicity {
   color: var(--aether-orange);
-  text-shadow: 0 0 8px rgba(208,108,17,0.8);
+  text-shadow: 0 0 8px rgba(208, 108, 17, 0.8);
 }
 
 /* Tables */
@@ -305,7 +353,7 @@
   padding: 8px;
   text-align: left;
   color: var(--aether-blue);
-  text-shadow: 0 0 6px rgba(17,117,208,0.6);
+  text-shadow: 0 0 6px rgba(17, 117, 208, 0.6);
   font-weight: 600;
   text-transform: uppercase;
   font-size: 0.85rem;
@@ -341,12 +389,12 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   transition: all 0.2s ease;
-  box-shadow: 0 0 8px rgba(17,117,208,0.4);
+  box-shadow: 0 0 8px rgba(17, 117, 208, 0.4);
 }
 
 .elysium-button-cast:hover {
   background: linear-gradient(135deg, #1a85e0, var(--aether-blue));
-  box-shadow: 0 0 12px rgba(17,117,208,0.7);
+  box-shadow: 0 0 12px rgba(17, 117, 208, 0.7);
 }
 
 /* Info Boxes */
@@ -354,14 +402,14 @@
   border: 2px solid var(--aether-blue);
   border-radius: 8px;
   padding: 12px;
-  background: linear-gradient(135deg, rgba(17,117,208,0.1), rgba(0,0,0,0.8));
+  background: linear-gradient(135deg, rgba(17, 117, 208, 0.1), rgba(0, 0, 0, 0.8));
   color: var(--aether-text-main);
   margin: 8px 0;
 }
 
 .elysium-info-box-warning {
   border: 2px solid var(--aether-orange);
-  background: linear-gradient(135deg, rgba(208,108,17,0.2), rgba(0,0,0,0.8));
+  background: linear-gradient(135deg, rgba(208, 108, 17, 0.2), rgba(0, 0, 0, 0.8));
 }
 
 .elysium-info-box p {
@@ -390,7 +438,7 @@
 
 /* Form Elements */
 .elysium-select {
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   border: 1px solid var(--aether-blue-soft);
   border-radius: 4px;
   color: var(--aether-text-main);
@@ -401,7 +449,7 @@
 .elysium-select:focus {
   outline: none;
   border-color: var(--aether-blue);
-  box-shadow: 0 0 8px rgba(17,117,208,0.5);
+  box-shadow: 0 0 8px rgba(17, 117, 208, 0.5);
 }
 
 .elysium-checkbox {
@@ -436,25 +484,25 @@
   padding: 10px 12px;
   margin: 8px 0;
   background: radial-gradient(circle at 30% 0,
-      rgba(17,117,208,0.25),
-      rgba(0,0,0,0.85));
+      rgba(17, 117, 208, 0.25),
+      rgba(0, 0, 0, 0.85));
   border: 1px solid var(--aether-orange);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow:
-    0 0 8px rgba(0,0,0,0.9),
-    0 0 6px rgba(17,117,208,0.25);
+    0 0 8px rgba(0, 0, 0, 0.9),
+    0 0 6px rgba(17, 117, 208, 0.25);
 }
 
 .elysium-fuel-option:hover {
   border-color: var(--aether-blue);
   background: radial-gradient(circle at 30% 0,
-      rgba(17,117,208,0.35),
-      rgba(0,0,0,0.9));
+      rgba(17, 117, 208, 0.35),
+      rgba(0, 0, 0, 0.9));
   box-shadow:
-    0 0 10px rgba(17,117,208,0.6),
-    0 0 16px rgba(208,108,17,0.4);
+    0 0 10px rgba(17, 117, 208, 0.6),
+    0 0 16px rgba(208, 108, 17, 0.4);
   transform: translateY(-1px);
 }
 
@@ -463,7 +511,7 @@
   height: 48px;
   object-fit: contain;
   flex-shrink: 0;
-  filter: drop-shadow(0 0 4px rgba(17,117,208,0.5));
+  filter: drop-shadow(0 0 4px rgba(17, 117, 208, 0.5));
 }
 
 .elysium-fuel-info {
@@ -502,25 +550,25 @@
   padding: 12px 14px;
   margin: 8px 0;
   background: radial-gradient(circle at 30% 0,
-      rgba(17,117,208,0.25),
-      rgba(0,0,0,0.85));
+      rgba(17, 117, 208, 0.25),
+      rgba(0, 0, 0, 0.85));
   border: 1px solid var(--aether-orange);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow:
-    0 0 8px rgba(0,0,0,0.9),
-    0 0 6px rgba(17,117,208,0.25);
+    0 0 8px rgba(0, 0, 0, 0.9),
+    0 0 6px rgba(17, 117, 208, 0.25);
 }
 
 .elysium-action-option:hover {
   border-color: var(--aether-blue);
   background: radial-gradient(circle at 30% 0,
-      rgba(17,117,208,0.35),
-      rgba(0,0,0,0.9));
+      rgba(17, 117, 208, 0.35),
+      rgba(0, 0, 0, 0.9));
   box-shadow:
-    0 0 10px rgba(17,117,208,0.6),
-    0 0 16px rgba(208,108,17,0.4);
+    0 0 10px rgba(17, 117, 208, 0.6),
+    0 0 16px rgba(208, 108, 17, 0.4);
   transform: translateY(-1px);
 }
 
@@ -529,7 +577,7 @@
   height: 64px;
   object-fit: contain;
   flex-shrink: 0;
-  filter: drop-shadow(0 0 6px rgba(17,117,208,0.5));
+  filter: drop-shadow(0 0 6px rgba(17, 117, 208, 0.5));
 }
 
 .elysium-action-info {
@@ -550,4 +598,324 @@
   color: var(--aether-text-muted);
   font-size: 0.8rem;
   line-height: 1.3;
+}
+
+/* ===============================
+   Character Sheet - Aetherpunk Theme
+   =============================== */
+
+/* Root sheet container with background image */
+/* Only style the content area, NOT the window wrapper */
+.dnd5e2.actor.character .window-content {
+  background:
+    radial-gradient(circle at top left, rgba(17, 117, 208, 0.08) 0, transparent 50%),
+    radial-gradient(circle at bottom right, rgba(208, 108, 17, 0.06) 0, transparent 50%),
+    url('../assets/background.png') center/cover no-repeat,
+    var(--aether-bg-dark);
+}
+
+
+/* Header - with background image */
+.dnd5e2.actor.character header.sheet-header {
+  background:
+    radial-gradient(circle at 30% 0, rgba(17, 117, 208, 0.15), transparent 60%),
+    radial-gradient(circle at bottom right, rgba(208, 108, 17, 0.1), transparent 50%),
+    url('../assets/background.png') center/cover no-repeat,
+    rgba(0, 0, 0, 0.6);
+  border-bottom: 1px solid rgba(17, 117, 208, 0.3);
+}
+
+/* Level badge */
+.dnd5e2.actor.character .level-badge {
+  border: 2px solid var(--aether-blue);
+  box-shadow: 0 0 8px rgba(17, 117, 208, 0.8);
+  background: radial-gradient(circle at top,
+      rgba(17, 117, 208, 0.35),
+      rgba(0, 0, 0, 0.9));
+}
+
+/* Rest buttons */
+.dnd5e2.actor.character .gold-button {
+  border: 1px solid var(--aether-orange);
+  background: radial-gradient(circle at top,
+      rgba(208, 108, 17, 0.3),
+      rgba(0, 0, 0, 0.8));
+  box-shadow:
+    0 0 6px rgba(208, 108, 17, 0.7),
+    0 0 10px rgba(0, 0, 0, 0.9);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+}
+
+.dnd5e2.actor.character .gold-button:hover {
+  border-color: var(--aether-orange);
+  box-shadow:
+    0 0 12px rgba(208, 108, 17, 0.9),
+    0 0 16px rgba(17, 117, 208, 0.6);
+  background: radial-gradient(circle at top,
+      rgba(208, 108, 17, 0.5),
+      rgba(0, 0, 0, 0.9));
+}
+
+/* Ability scores */
+.dnd5e2.actor.character .abilities .ability {
+  border: 2px solid var(--aether-blue);
+  border-radius: 6px;
+  background: radial-gradient(circle at top,
+      rgba(17, 117, 208, 0.25),
+      rgba(0, 0, 0, 0.9));
+  box-shadow:
+    0 0 12px rgba(17, 117, 208, 0.8),
+    0 0 6px rgba(208, 108, 17, 0.4),
+    inset 0 0 8px rgba(17, 117, 208, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.dnd5e2.actor.character .abilities .ability:hover {
+  border-color: var(--aether-orange);
+  box-shadow:
+    0 0 20px rgba(17, 117, 208, 1),
+    0 0 30px rgba(208, 108, 17, 0.8),
+    inset 0 0 12px rgba(17, 117, 208, 0.4);
+  transform: translateY(-2px);
+  animation: aether-flicker 0.5s;
+}
+
+/* ===============================
+   Character Sheet - Section Headers
+   =============================== */
+.dnd5e2.actor.character filigree-box h3 {
+  position: relative;
+  z-index: 1; /* Above the animated background */
+  padding-left: 15px;
+  padding-right: 15px;
+  background: linear-gradient(90deg,
+      rgba(17, 117, 208, 0.4),
+      rgba(0, 0, 0, 0.7));
+  border-top: 2px solid var(--aether-blue);
+  border-bottom: 3px solid var(--aether-blue);
+  color: var(--aether-blue);
+  text-shadow: 0 0 8px rgba(17, 117, 208, 1),
+               0 0 12px rgba(17, 117, 208, 0.8);
+  box-shadow: inset 0 0 20px rgba(17, 117, 208, 0.3),
+              0 0 15px rgba(17, 117, 208, 0.5),
+              0 0 5px rgba(208, 108, 17, 0.3);
+}
+
+/* Make the text inside h3 glow too */
+.dnd5e2.actor.character filigree-box h3 span {
+  color: var(--aether-blue);
+  text-shadow: 0 0 8px rgba(17, 117, 208, 1),
+               0 0 12px rgba(17, 117, 208, 0.8);
+}
+
+/* Left accent stripe on section headers */
+.dnd5e2.actor.character filigree-box h3::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--aether-orange), var(--aether-blue));
+  box-shadow: 0 0 8px rgba(208, 108, 17, 0.8);
+}
+
+/* ===============================
+   Character Sheet - Section Containers (Tech Panels)
+   =============================== */
+.dnd5e2.actor.character filigree-box {
+  position: relative;
+  padding: 8px;
+  margin: 8px 0;
+  border: 2px solid var(--aether-orange);
+  border-radius: 4px;
+  background:
+    radial-gradient(circle at top left, rgba(17, 117, 208, 0.25) 0%, transparent 60%),
+    radial-gradient(circle at bottom right, rgba(208, 108, 17, 0.22) 0%, transparent 55%),
+    #0a0f18;
+  box-shadow: 0 0 20px rgba(208, 108, 17, 0.3),
+              inset 0 0 15px rgba(0, 0, 0, 0.5),
+              inset 0 0 5px rgba(208, 108, 17, 0.2);
+  transition: all 0.3s ease;
+}
+
+/* Override the backdrop background with aether gradients */
+.dnd5e2.actor.character filigree-box {
+  --background:
+    radial-gradient(circle at top left, rgba(17, 117, 208, 0.25) 0%, transparent 60%),
+    radial-gradient(circle at bottom right, rgba(208, 108, 17, 0.22) 0%, transparent 55%),
+    #0a0f18;
+}
+
+/* Corner brackets for tech panel effect */
+.dnd5e2.actor.character filigree-box::before,
+.dnd5e2.actor.character filigree-box::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--aether-blue);
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.dnd5e2.actor.character filigree-box::before {
+  top: 0;
+  left: 0;
+  border-right: none;
+  border-bottom: none;
+  box-shadow: -2px -2px 6px rgba(17, 117, 208, 0.6);
+}
+
+.dnd5e2.actor.character filigree-box::after {
+  top: 0;
+  right: 0;
+  border-left: none;
+  border-bottom: none;
+  box-shadow: 2px -2px 6px rgba(17, 117, 208, 0.6);
+}
+
+/* Holographic flicker effect on hover */
+.dnd5e2.actor.character filigree-box:hover {
+  border-color: var(--aether-blue);
+  box-shadow: 0 0 30px rgba(17, 117, 208, 0.8),
+              0 0 15px rgba(17, 117, 208, 0.6),
+              inset 0 0 20px rgba(0, 0, 0, 0.6),
+              inset 0 0 8px rgba(17, 117, 208, 0.3);
+  animation: aether-flicker 0.5s;
+}
+
+.dnd5e2.actor.character filigree-box:hover::before,
+.dnd5e2.actor.character filigree-box:hover::after {
+  border-color: var(--aether-blue);
+  box-shadow: -2px -2px 10px rgba(17, 117, 208, 0.9);
+}
+
+/* General labels in sheet */
+.dnd5e2.actor.character label {
+  color: var(--aether-text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ===============================
+   Inputs, Selects, Checkboxes
+   =============================== */
+.dnd5e2.actor.character input,
+.dnd5e2.actor.character select,
+.dnd5e2.actor.character textarea {
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 4px;
+  border: 1px solid rgba(17, 117, 208, 0.55);
+  color: var(--aether-text-main);
+  font-size: 0.85rem;
+}
+
+.dnd5e2.actor.character input:focus,
+.dnd5e2.actor.character select:focus,
+.dnd5e2.actor.character textarea:focus {
+  outline: none;
+  border-color: var(--aether-blue);
+  box-shadow:
+    0 0 10px rgba(17, 117, 208, 0.7),
+    0 0 14px rgba(208, 108, 17, 0.45);
+}
+
+/* Checkboxes */
+.dnd5e2.actor.character input[type="checkbox"] {
+  accent-color: var(--aether-blue);
+}
+
+/* ===============================
+   Item Lists / Rows
+   =============================== */
+.dnd5e2.actor.character .items-list .item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.dnd5e2.actor.character .items-list .item:nth-child(even) {
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0.02),
+      transparent);
+}
+
+.dnd5e2.actor.character .items-list .item:hover {
+  background: radial-gradient(circle at 0 50%,
+      rgba(17, 117, 208, 0.2),
+      rgba(0, 0, 0, 0.9));
+}
+
+/* ===============================
+   Hide the XP bar and label (milestone leveling)
+   =============================== */
+
+.sheet-header .xp-label,
+.sheet-header .xp-bar {
+  display: none !important;
+}
+
+/* ===============================
+   Character Sheet - Toxicity Display
+   =============================== */
+
+.elysium-toxicity-display {
+  position: relative;
+  z-index: 2; /* Above the animated background */
+  display: flex;
+  gap: 12px;
+  padding: 6px 12px;
+  margin: 10px 0 0 0;
+  background: radial-gradient(circle at 30% 0,
+      rgba(17, 117, 208, 0.2),
+      rgba(0, 0, 0, 0.7));
+  border: 1px solid var(--aether-blue);
+  border-radius: 4px;
+  box-shadow:
+    0 0 6px rgba(0, 0, 0, 0.8),
+    0 0 4px rgba(17, 117, 208, 0.4);
+  justify-content: center;
+  animation: aether-flicker 5.5s infinite;
+}
+
+.elysium-toxicity-display.elysium-toxicity-warning {
+  border-color: var(--aether-orange);
+  background: radial-gradient(circle at 30% 0,
+      rgba(208, 108, 17, 0.25),
+      rgba(0, 0, 0, 0.7));
+  box-shadow:
+    0 0 6px rgba(0, 0, 0, 0.8),
+    0 0 8px rgba(208, 108, 17, 0.45);
+}
+
+.elysium-toxicity-stat {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.elysium-toxicity-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--aether-text-muted);
+  font-weight: 600;
+}
+
+.elysium-toxicity-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--aether-blue);
+  text-shadow: 0 0 6px rgba(17, 117, 208, 0.8);
+  min-width: 20px;
+  text-align: center;
+}
+
+.elysium-toxicity-warning .elysium-toxicity-value {
+  color: var(--aether-orange);
+  text-shadow: 0 0 6px rgba(208, 108, 17, 0.8);
 }
