@@ -9,6 +9,7 @@ Expert in enforcing the Aetherpunk orange & blue theme across all Elysium UI com
 Scan the codebase for inline style attributes and hardcoded color values that should use theme classes instead.
 
 **What to look for:**
+
 - `style="..."` attributes in HTML content
 - Hardcoded colors: `#1175D0`, `#D06C11`, `#f0f8ff`, `#9bb8d3`, etc.
 - Repeated CSS patterns that could be extracted to classes
@@ -19,6 +20,7 @@ Scan the codebase for inline style attributes and hardcoded color values that sh
   - Button elements
 
 **How to report violations:**
+
 ```
 Found inline style violations:
 
@@ -36,12 +38,14 @@ Found inline style violations:
 When you find repeated style patterns, suggest creating new reusable CSS classes.
 
 **Example patterns to watch for:**
+
 - Status indicators (colored badges, pills)
 - Info panels (warning boxes, success boxes)
 - Specific button styles (action buttons, danger buttons)
 - Table variants (inventory tables, skill tables)
 
 **How to suggest:**
+
 ```
 Repeated pattern found (3 occurrences):
 
@@ -67,6 +71,7 @@ Occurrences:
 Review new dialog and chat message code to ensure it uses theme classes.
 
 **Checklist for new code:**
+
 - ✅ Uses theme classes, not inline styles
 - ✅ Uses CSS variables for colors (`var(--aether-blue)`)
 - ✅ Follows existing component patterns
@@ -74,6 +79,7 @@ Review new dialog and chat message code to ensure it uses theme classes.
 - ✅ Proper semantic class names
 
 **Example review:**
+
 ```
 Reviewing new "Item Tooltip" dialog:
 
@@ -261,6 +267,36 @@ Only use inline styles for:
 - `.aether-message-success` - Success (blue)
 - `.aether-message-toxicity` - Toxicity/danger (orange)
 - `.aether-message-warning` - Warning (gold)
+
+### Character Sheet (D&D 5e v2)
+
+The character sheet uses D&D 5e system elements that are automatically styled by Elysium:
+
+**Styled Elements:**
+- `filigree-box` - Section containers (SKILLS, ARMOR, WEAPONS, etc.)
+  - Orange glowing borders (default)
+  - Blue borders on hover
+  - Corner bracket accents (top-left, top-right)
+  - Holographic flicker animation on hover
+
+- `.abilities .ability` - Ability score boxes (STR, DEX, CON, etc.)
+  - Blue glowing borders
+  - Dual-color glow (blue + orange)
+  - Lift animation on hover
+  - Color shift to orange on hover
+
+- `filigree-box h3` - Section headers
+  - Blue glowing text
+  - Gradient background
+  - Orange/blue vertical accent stripe
+  - Top and bottom blue borders
+
+**Note:** Character sheet styling is automatic - no classes needed. The theme applies to D&D 5e v2 sheet elements directly.
+
+**Known Limitations:**
+- `filigree-box` uses closed shadow DOM - background gradients cannot be styled from CSS
+- Borders, colors, and effects work correctly
+- Shadow DOM issue documented for future reference
 ````
 
 ---
@@ -268,6 +304,7 @@ Only use inline styles for:
 ## When to Activate
 
 Activate when user:
+
 - Says "check theme" or "review theme usage"
 - Says "check for inline styles"
 - Asks "is this using the theme correctly?"
@@ -361,6 +398,7 @@ grep -r 'border:.*border-radius:' scripts/
 **User:** "Check theme usage in the new inventory dialog"
 
 **Response:**
+
 ```
 Reviewing scripts/inventory.js for theme compliance...
 
@@ -387,6 +425,7 @@ Should use: <strong> (table cells are already styled blue)
 **User:** "I keep using the same button style for delete actions"
 
 **Response:**
+
 ```
 I see you're using this pattern in 4 places:
 
@@ -421,6 +460,7 @@ Then use it like:
 **User:** "What classes should I use for a new dialog?"
 
 **Response:**
+
 ```
 Here's the standard pattern for dialogs in Elysium:
 
