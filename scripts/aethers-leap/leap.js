@@ -21,6 +21,32 @@ export async function applyLeapEffect(actor, fuelQuality) {
   console.log(`Elysium | Applying Leap effect to ${actor.name} (${fuelQuality} aether)`);
 
   try {
+    // Check if the effect already exists
+    const existingEffect = actor.effects?.contents?.find(
+      e => e.name === "Aether's Leap" && !e.disabled
+    );
+
+    if (existingEffect) {
+      // Refresh the existing effect by updating its duration
+      console.log(`Elysium | Refreshing existing Leap effect`);
+
+      await existingEffect.update({
+        duration: {
+          rounds: 10 // Reset to 1 minute
+        }
+      });
+
+      if (typeof ui !== 'undefined') {
+        ui.notifications?.info(`Aether's Leap effect refreshed!`);
+      }
+
+      return {
+        success: true,
+        effectApplied: true,
+        refreshed: true
+      };
+    }
+
     // Create the Leap active effect
     const effectData = {
       name: "Aether's Leap",
