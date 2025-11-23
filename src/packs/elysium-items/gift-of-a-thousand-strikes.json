@@ -4,7 +4,7 @@
   "img": "assets/GiftOfAThousandStrikes.png",
   "system": {
     "description": {
-      "value": "<p><strong>Gift of a Thousand Strikes</strong> is the standard modification given to all monks who show an aptitude for martial arts. This nervous system modification allows the wearer to\n  channel aether energy directly into their ki pathways, enabling them to perform monk techniques without depleting their natural focus.</p>\n  <h3>Activation</h3>\n  <p>When activated, you may choose to:</p>\n  <ul>\n    <li><strong>Consume Aether:</strong> Use monk abilities without spending ki points</li>\n    <li><strong>Consume Aether and Ki:</strong> Enhanced effects when combining both energies</li>\n  </ul>\n  <h3>Available Techniques</h3>\n  <p><strong>Flurry of Strikes</strong></p>\n  <ul>\n    <li>Normal: Two unarmed strikes as a bonus action (no ki cost)</li>\n    <li>Enhanced (Aether + Ki): <em>Three</em> unarmed strikes as a bonus action</li>\n  </ul>\n  <p><strong>Patient Defense</strong></p>\n  <ul>\n    <li>Normal: Dodge action as bonus action (no ki cost)</li>\n    <li>Enhanced (Aether + Ki): Dodge + <strong>+2 AC</strong> until start of your next turn</li>\n  </ul>\n  <p><strong>Step of the Wind</strong></p>\n  <ul>\n    <li>Normal: Disengage or Dash as bonus action, jump distance doubled (no ki cost)</li>\n    <li>Enhanced (Aether + Ki): Disengage or Dash as bonus action, jump distance <strong>tripled</strong></li>\n  </ul>\n  <p class=\"elysium-info-box\"><strong>Note:</strong> This modification requires attunement and a minimum monk level of 2. Different aether qualities may produce varying effects and risks.</p>",
+      "value": "<p><strong>Gift of a Thousand Strikes</strong> is the standard modification given to all monks who show an aptitude for martial arts. This nervous system modification allows the wearer to\n  channel aether energy directly into their ki pathways, enabling them to perform monk techniques without depleting their natural focus.</p>\n  <h3>Activation</h3>\n  <p>When activated, you may choose to:</p>\n  <ul>\n    <li><strong>Consume Aether:</strong> Use monk abilities without spending focus points</li>\n    <li><strong>Consume Aether and Focus:</strong> Enhanced effects when combining both energies</li>\n  </ul>\n  <h3>Available Techniques</h3>\n  <p><strong>Flurry of Strikes</strong></p>\n  <ul>\n    <li>Normal: Two unarmed strikes as a bonus action (no focus cost)</li>\n    <li>Enhanced (Aether + Focus): <em>Three</em> unarmed strikes as a bonus action</li>\n  </ul>\n  <p><strong>Patient Defense</strong></p>\n  <ul>\n    <li>Normal: Dodge action as bonus action (no focus cost)</li>\n    <li>Enhanced (Aether + Focus): Dodge + <strong>+2 AC</strong> until start of your next turn</li>\n  </ul>\n  <p><strong>Step of the Wind</strong></p>\n  <ul>\n    <li>Normal: Disengage or Dash as bonus action, jump distance doubled (no focus cost)</li>\n    <li>Enhanced (Aether + Focus): Disengage or Dash as bonus action, jump distance <strong>tripled</strong></li>\n  </ul>\n  <p class=\"elysium-info-box\"><strong>Note:</strong> This modification requires attunement and a minimum monk level of 3. Different aether qualities may produce varying effects and risks.</p>",
       "chat": ""
     },
     "quantity": 1,
@@ -28,7 +28,62 @@
       "value": "trinket",
       "baseItem": ""
     },
-    "activities": {},
+    "activities": {
+      "giftActivate": {
+        "type": "utility",
+        "_id": "giftActivate0000",
+        "name": "Activate Gift",
+        "activation": {
+          "type": "bonus",
+          "value": 1,
+          "condition": ""
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          }
+        },
+        "description": {
+          "chatFlavor": ""
+        },
+        "duration": {
+          "concentration": false,
+          "value": "",
+          "units": "",
+          "special": "",
+          "override": false
+        },
+        "range": {
+          "units": "self",
+          "special": "",
+          "override": false
+        },
+        "target": {
+          "template": {
+            "count": "",
+            "contiguous": false,
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "units": ""
+          },
+          "affects": {
+            "count": "",
+            "type": "self",
+            "choice": false,
+            "special": ""
+          },
+          "override": false
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": []
+        }
+      }
+    },
     "uses": {
       "spent": 0,
       "recovery": [],
@@ -54,24 +109,24 @@
       "requiresAether": true,
       "modType": "ki-enhancement",
       "requiredClass": "monk",
-      "requiredLevel": 2,
+      "requiredLevel": 3,
       "allowsKiBoost": true,
       "monkAbilities": {
         "flurry-of-blows": {
           "label": "Flurry of Strikes",
-          "normalEffect": "Make 2 unarmed strikes as a bonus action (no ki cost)",
+          "normalEffect": "Make 2 unarmed strikes as a bonus action (no focus cost)",
           "enhancedEffect": "Make 3 unarmed strikes as a bonus action",
           "enhancedBonus": "extra-strike"
         },
         "patient-defense": {
           "label": "Patient Defense",
-          "normalEffect": "Take Dodge action as bonus action (no ki cost)",
+          "normalEffect": "Take Dodge action as bonus action (no focus cost)",
           "enhancedEffect": "Dodge action + +2 AC until start of next turn",
           "enhancedBonus": "ac-bonus-2"
         },
         "step-of-wind": {
           "label": "Step of the Wind",
-          "normalEffect": "Disengage or Dash as bonus action, jump distance doubled (no ki cost)",
+          "normalEffect": "Disengage or Dash as bonus action, jump distance doubled (no focus cost)",
           "enhancedEffect": "Disengage or Dash as bonus action, jump distance tripled",
           "enhancedBonus": "triple-jump"
         }
