@@ -1,0 +1,100 @@
+{
+  "name": "Gift of a Thousand Strikes",
+  "type": "equipment",
+  "img": "assets/GiftOfAThousandStrikes.png",
+  "system": {
+    "description": {
+      "value": "<p><strong>Gift of a Thousand Strikes</strong> is the standard modification given to all monks who show an aptitude for martial arts. This nervous system modification allows the wearer to\n  channel aether energy directly into their ki pathways, enabling them to perform monk techniques without depleting their natural focus.</p>\n  <h3>Activation</h3>\n  <p>When activated, you may choose to:</p>\n  <ul>\n    <li><strong>Consume Aether:</strong> Use monk abilities without spending ki points</li>\n    <li><strong>Consume Aether and Ki:</strong> Enhanced effects when combining both energies</li>\n  </ul>\n  <h3>Available Techniques</h3>\n  <p><strong>Flurry of Strikes</strong></p>\n  <ul>\n    <li>Normal: Two unarmed strikes as a bonus action (no ki cost)</li>\n    <li>Enhanced (Aether + Ki): <em>Three</em> unarmed strikes as a bonus action</li>\n  </ul>\n  <p><strong>Patient Defense</strong></p>\n  <ul>\n    <li>Normal: Dodge action as bonus action (no ki cost)</li>\n    <li>Enhanced (Aether + Ki): Dodge + <strong>+2 AC</strong> until start of your next turn</li>\n  </ul>\n  <p><strong>Step of the Wind</strong></p>\n  <ul>\n    <li>Normal: Disengage or Dash as bonus action, jump distance doubled (no ki cost)</li>\n    <li>Enhanced (Aether + Ki): Disengage or Dash as bonus action, jump distance <strong>tripled</strong></li>\n  </ul>\n  <p class=\"elysium-info-box\"><strong>Note:</strong> This modification requires attunement and a minimum monk level of 2. Different aether qualities may produce varying effects and risks.</p>",
+      "chat": ""
+    },
+    "quantity": 1,
+    "weight": {
+      "value": 0,
+      "units": "lb"
+    },
+    "price": {
+      "value": 500,
+      "denomination": "gp"
+    },
+    "equipped": false,
+    "identified": true,
+    "rarity": "rare",
+    "attunement": "required",
+    "armor": {
+      "value": null,
+      "dex": null
+    },
+    "type": {
+      "value": "trinket",
+      "baseItem": ""
+    },
+    "activities": {},
+    "uses": {
+      "spent": 0,
+      "recovery": [],
+      "max": ""
+    },
+    "identifier": "gift-of-a-thousand-strikes",
+    "source": {
+      "revision": 1,
+      "rules": "2024"
+    },
+    "unidentified": {
+      "description": ""
+    },
+    "container": null,
+    "attuned": false,
+    "crewed": false,
+    "proficient": null,
+    "properties": [],
+    "strength": null
+  },
+  "flags": {
+    "elysium": {
+      "requiresAether": true,
+      "modType": "ki-enhancement",
+      "requiredClass": "monk",
+      "requiredLevel": 2,
+      "allowsKiBoost": true,
+      "monkAbilities": {
+        "flurry-of-blows": {
+          "label": "Flurry of Strikes",
+          "normalEffect": "Make 2 unarmed strikes as a bonus action (no ki cost)",
+          "enhancedEffect": "Make 3 unarmed strikes as a bonus action",
+          "enhancedBonus": "extra-strike"
+        },
+        "patient-defense": {
+          "label": "Patient Defense",
+          "normalEffect": "Take Dodge action as bonus action (no ki cost)",
+          "enhancedEffect": "Dodge action + +2 AC until start of next turn",
+          "enhancedBonus": "ac-bonus-2"
+        },
+        "step-of-wind": {
+          "label": "Step of the Wind",
+          "normalEffect": "Disengage or Dash as bonus action, jump distance doubled (no ki cost)",
+          "enhancedEffect": "Disengage or Dash as bonus action, jump distance tripled",
+          "enhancedBonus": "triple-jump"
+        }
+      }
+    }
+  },
+  "_id": "XLkhL24uMReggngV",
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "zMBoaDVDk3GaHGLc": 3
+  },
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "13.350",
+    "systemId": "dnd5e",
+    "systemVersion": "5.1.10",
+    "createdTime": 1763716740992,
+    "modifiedTime": 1763768758699,
+    "lastModifiedBy": "zMBoaDVDk3GaHGLc"
+  }
+}

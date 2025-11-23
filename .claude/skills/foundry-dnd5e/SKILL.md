@@ -301,6 +301,7 @@ await actor.unsetFlag("module-id", "customData");
 ### Item Types
 
 D&D 5e item types:
+
 - `weapon`
 - `equipment` (armor, shields)
 - `consumable` (potions, scrolls)
@@ -509,6 +510,7 @@ await roll.toMessage({
 ### Ability Checks and Saves
 
 **IMPORTANT:** As of dnd5e v4.1+, the methods were renamed:
+
 - `rollAbilityTest` → `rollAbilityCheck`
 - `rollAbilitySave` → `rollSavingThrow`
 
@@ -1003,26 +1005,196 @@ const aetherItems = items.filter(i =>
 );
 ```
 
+---
+
+## Professional Compendium Workflow (Pack/Unpack)
+
+**IMPORTANT:** For professional module development, you should use a **source-based workflow** where human-readable JSON files are your source of truth, and binary LevelDB files are build artifacts.
+
+### Why Source-Based Development?
+
+**Problems with committing LevelDB binary files to Git:**
+- Binary files can't be diffed or reviewed in PRs
+- Merge conflicts are impossible to resolve
+- Git stores complete copies (no deltas), bloating repository size
+- Can't see what changed between versions
+
+**Solution: Pack/Unpack Workflow**
+- Store JSON files in `src/packs/` (version controlled)
+- Generate LevelDB files in `packs/` (gitignored, built on demand)
+- Use custom scripts to convert between formats
+
+### Directory Structure
+
+```
+elysium/
+├── src/packs/                # Source files (commit these!)
+│   ├── aether-fuel/
+│   │   ├── unrefined-aether.json
+│   │   ├── basic-refined-aether.json
+│   │   └── ...
+│   └── elysium-items/
+│       ├── aethers-grasp.json
+│       ├── aethers-detection.json
+│       └── ...
+├── packs/                    # Built compendiums (gitignore these!)
+│   ├── aether-fuel/          # LevelDB binary files
+│   │   ├── 000001.ldb
+│   │   ├── MANIFEST-*
+│   │   └── CURRENT
+│   └── elysium-items/
+└── tools/                    # Build scripts
+    ├── extract-packs.js      # Unpack: LevelDB → JSON
+    └── pack-packs.js         # Pack: JSON → LevelDB
+```
+
+### The Two Operations
+
+#### Unpack (Extract: LevelDB → JSON)
+
+**What it does:** Reads binary LevelDB files and extracts each item to a separate JSON file.
+
+**When to use:** After editing items in Foundry UI, extract to JSON so you can commit changes to Git.
+
+```bash
+npm run unpack
+```
+
+**What happens:**
+```
+packs/elysium-items/         src/packs/elysium-items/
+  000038.ldb           →       aethers-grasp.json
+  MANIFEST-*                    aethers-detection.json
+  CURRENT                       gift-of-a-thousand-strikes.json
+  (binary files)                (readable JSON files)
+```
+
+#### Pack (Build: JSON → LevelDB)
+
+**What it does:** Reads JSON files and builds the binary LevelDB database that Foundry loads.
+
+**When to use:** After editing JSON files (or pulling changes from Git), rebuild the database so Foundry can load the changes.
+
+```bash
+npm run pack
+```
+
+**What happens:**
+```
+src/packs/elysium-items/     packs/elysium-items/
+  aethers-grasp.json     →     000038.ldb
+  aethers-detection.json       MANIFEST-*
+  gift-of-a-thousand.json      CURRENT
+  (readable JSON)              (binary LevelDB)
+```
+
+### Development Workflows
+
+#### Workflow 1: Edit in Foundry UI
+
+```bash
+# 1. Edit "Aether's Grasp" in Foundry UI
+# 2. Close Foundry
+# 3. Extract to JSON
+npm run unpack
+
+# 4. Review changes
+git diff src/packs/elysium-items/aethers-grasp.json
+
+# 5. Commit the JSON
+git add src/packs/elysium-items/aethers-grasp.json
+git commit -m "feat: buff Aether's Grasp damage"
+
+# 6. Push to GitHub
+git push
+```
+
+#### Workflow 2: Edit JSON Directly
+
+```bash
+# 1. Edit src/packs/elysium-items/aethers-grasp.json in VS Code
+
+# 2. Build the database
+npm run pack
+
+# 3. Open Foundry and test (it will load the updated item)
+
+# 4. Commit the JSON
+git add src/packs/elysium-items/aethers-grasp.json
+git commit -m "feat: buff Aether's Grasp damage"
+```
+
+#### Workflow 3: Pull Changes from Collaborators
+
+```bash
+# 1. Pull changes from GitHub
+git pull
+
+# 2. Rebuild the databases
+npm run pack
+
+# 3. Open Foundry (now has the updated items)
+```
+
+### NPM Scripts
+
+Add these to `package.json`:
+
+```json
+{
+  "scripts": {
+    "unpack": "node tools/extract-packs.js",
+    "pack": "node tools/pack-packs.js",
+    "build": "npm run pack"
+  }
+}
+```
+
+### .gitignore Setup
+
+**Ignore the binary packs, commit the source files:**
+
+```gitignore
+# Binary LevelDB files (built from src/packs/)
+packs/*/
+!packs/*/.gitkeep
+
+# Keep source files
+!src/
+```
+
 ### Elysium Workflow: Creating Items
 
 **Standard workflow for creating Elysium items:**
 
 1. **Create item in world** (via UI)
 2. **Set required flags** (via console or macro)
+
    ```javascript
    const item = game.items.getName("Aether's Leap");
    await item.setFlag('elysium', 'isAethersLeap', true);
    await item.setFlag('elysium', 'requiresAether', true);
    ```
+
 3. **Test in-game** (use the item, verify hooks work)
-4. **Add to compendium** (via macro or console)
-   ```javascript
-   await updateItemInCompendium(item, 'elysium.elysium-items');
-   ```
-5. **Commit compendium changes** (git add + commit)
+4. **Close Foundry** (so LevelDB isn't locked)
+5. **Extract to source files**
+
    ```bash
-   git add packs/elysium-items/
+   npm run unpack
+   ```
+
+6. **Commit source files**
+
+   ```bash
+   git add src/packs/elysium-items/aethers-leap.json
    git commit -m "feat: add Aether's Leap to compendium"
+   ```
+
+7. **Push to GitHub**
+
+   ```bash
+   git push
    ```
 
 **Create a macro for this workflow:**
@@ -1104,6 +1276,7 @@ const formatted = game.i18n.format("MODULE.Message", {
 ### Module Structure
 
 ✅ **DO:**
+
 - Organize code into focused files
 - Use hooks instead of overwriting core functions
 - Store module data in flags
@@ -1113,6 +1286,7 @@ const formatted = game.i18n.format("MODULE.Message", {
 - Test with different Foundry versions
 
 ❌ **DON'T:**
+
 - Modify core Foundry or system code directly
 - Put all code in one massive file
 - Hardcode strings in the UI
@@ -1242,6 +1416,7 @@ devLog('Item used', item);
 ## When to Use This Skill
 
 Activate when:
+
 - Working with FoundryVTT core features
 - Implementing D&D 5e mechanics
 - Setting up hooks

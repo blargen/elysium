@@ -1,0 +1,178 @@
+{
+  "name": "Aether's Grasp",
+  "type": "equipment",
+  "img": "modules/elysium/assets/AethersGraspSquare.png",
+  "system": {
+    "type": {
+      "value": "trinket",
+      "baseItem": ""
+    },
+    "equipped": false,
+    "attunement": "required",
+    "rarity": "rare",
+    "description": {
+      "value": "<p>A hand modification that allows you to store spells on your fingers and cast them using aether fuel.</p>\n              <h3>Features:</h3>\n              <ul>\n                <li><strong>Capacity:</strong> 5 spells (one per finger)</li>\n                <li><strong>Spell Level:</strong> 1st level spells only</li>\n                <li><strong>Imprint:</strong> Consume a spell scroll to store it on a finger</li>\n                <li><strong>Cast:</strong> Use aether fuel to cast stored spells</li>\n              </ul>",
+      "chat": ""
+    },
+    "activities": {
+      "use": {
+        "type": "utility",
+        "name": "Use Aether's Grasp",
+        "activation": {
+          "type": "action",
+          "value": 1,
+          "override": false
+        },
+        "_id": "zXfgNOYoSE09V3GH",
+        "sort": 0,
+        "consumption": {
+          "scaling": {
+            "allowed": false
+          },
+          "spellSlot": true,
+          "targets": []
+        },
+        "description": {},
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": false
+        },
+        "effects": [],
+        "range": {
+          "units": "self",
+          "override": false
+        },
+        "target": {
+          "template": {
+            "contiguous": false,
+            "units": "ft"
+          },
+          "affects": {
+            "choice": false
+          },
+          "override": false,
+          "prompt": true
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": []
+        },
+        "roll": {
+          "prompt": false,
+          "visible": false
+        },
+        "useConditionText": "",
+        "useConditionReason": "",
+        "effectConditionText": "",
+        "macroData": {
+          "name": "",
+          "command": ""
+        },
+        "ignoreTraits": {
+          "idi": false,
+          "idr": false,
+          "idv": false,
+          "ida": false,
+          "idm": false
+        },
+        "midiProperties": {
+          "ignoreTraits": [],
+          "triggeredActivityId": "none",
+          "triggeredActivityConditionText": "",
+          "triggeredActivityTargets": "targets",
+          "triggeredActivityRollAs": "self",
+          "autoConsume": false,
+          "forceConsumeDialog": "default",
+          "forceRollDialog": "default",
+          "forceDamageDialog": "default",
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "automationOnly": false,
+          "otherActivityCompatible": true,
+          "otherActivityAsParentType": true,
+          "identifier": "",
+          "displayActivityName": false,
+          "rollMode": "default",
+          "chooseEffects": false,
+          "toggleEffect": false,
+          "ignoreFullCover": false,
+          "removeChatButtons": "default",
+          "magicEffect": false,
+          "magicDamage": false,
+          "noConcentrationCheck": false,
+          "autoCEEffects": "default"
+        },
+        "isOverTimeFlag": false,
+        "overTimeProperties": {
+          "saveRemoves": true,
+          "preRemoveConditionText": "",
+          "postRemoveConditionText": ""
+        },
+        "otherActivityId": "none",
+        "otherActivityAsParentType": true
+      }
+    },
+    "uses": {
+      "spent": 0,
+      "recovery": []
+    },
+    "identifier": "aethers-grasp",
+    "source": {
+      "revision": 1,
+      "rules": "2024"
+    },
+    "identified": true,
+    "unidentified": {
+      "description": ""
+    },
+    "container": null,
+    "quantity": 1,
+    "weight": {
+      "value": 0,
+      "units": "lb"
+    },
+    "price": {
+      "value": 0,
+      "denomination": "gp"
+    },
+    "attuned": false,
+    "crewed": false,
+    "armor": {
+      "value": null,
+      "dex": null
+    },
+    "proficient": null,
+    "properties": [],
+    "strength": null
+  },
+  "flags": {
+    "elysium": {
+      "requiresAether": true,
+      "modType": "spell-storage",
+      "maxStoredSpells": 5,
+      "allowedSpellLevel": 1,
+      "storedSpells": []
+    }
+  },
+  "_id": "bwN39wtmupNKyCql",
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0,
+    "zMBoaDVDk3GaHGLc": 3
+  },
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "13.350",
+    "systemId": "dnd5e",
+    "systemVersion": "5.1.10",
+    "createdTime": 1763269253872,
+    "modifiedTime": 1763269253872,
+    "lastModifiedBy": "zMBoaDVDk3GaHGLc"
+  }
+}

@@ -5,6 +5,7 @@
 **Elysium** is a FoundryVTT module for D&D 5e featuring a unique fantasy/cyberpunk fusion world. Players experience a full adventure with custom items, NPCs, journals, maps, and story elements.
 
 ### Core Concept
+
 A fantasy world enhanced with cyberpunk-like technology and modifications, all powered by a mystical resource called **aether**.
 
 ---
@@ -49,6 +50,7 @@ Elysium features multiple aether qualities, each with different properties:
 ### Core Aether Mechanics
 
 **Toxicity System (Unrefined only):**
+
 - Track daily doses on actor: `actor.getFlag("elysium", "dailyDoses")`
 - Track ATL (Aether Toxicity Level): `actor.getFlag("elysium", "atl")`
 - Each dose requires CON save (DC = 8 + 2 * newDailyDoses)
@@ -56,11 +58,13 @@ Elysium features multiple aether qualities, each with different properties:
 - Long rest resets toxicity counters and removes conditions
 
 **Item Consumption:**
+
 - All aether items track uses: `item.system.uses.value`
 - Module handles consumption automatically (not in macros)
 - Store aether type in item flags: `flags.elysium.aetherType`
 
-### Design Guidelines:
+### Design Guidelines
+
 - Store all aether data in `flags.elysium.aether` object
 - Module should handle effects via hooks, not item macros
 - Effects should integrate with midi-qol when possible
@@ -94,10 +98,19 @@ elysium/
 │   └── utils/               # Utility functions
 │       ├── flags.js         # Flag management
 │       └── calculations.js  # Pure calculation functions
+├── src/                     # Source files (version controlled)
+│   └── packs/               # Compendium source (JSON)
+│       ├── aether-fuel/     # Aether fuel items
+│       └── elysium-items/   # Elysium items
+├── packs/                   # Built compendiums (LevelDB, gitignored)
+│   ├── aether-fuel/         # Binary database files
+│   └── elysium-items/       # Binary database files
+├── tools/                   # Build scripts
+│   ├── extract-packs.js     # Unpack: LevelDB → JSON
+│   └── pack-packs.js        # Pack: JSON → LevelDB
 ├── styles/                  # SCSS stylesheets
 ├── templates/               # Handlebars templates for UI
 ├── lang/                    # Localization files (i18n)
-├── packs/                   # Compendiums (items, NPCs, journals, etc.)
 ├── assets/                  # Images, icons, maps
 ├── tests/                   # Test files (mirrors src structure)
 │   ├── aether-system.test.js
@@ -105,6 +118,8 @@ elysium/
 │   └── utils/
 │       └── calculations.test.js
 ├── .claude/                 # Claude Code configuration
+├── .gitignore               # Git ignore rules
+├── .gitattributes           # Git file handling rules
 ├── module.json              # FoundryVTT module manifest
 ├── package.json             # NPM dependencies and scripts
 ├── jest.config.js           # Jest testing configuration
@@ -112,6 +127,7 @@ elysium/
 ```
 
 **Key Principles:**
+
 - **Small files**: Each file has one clear purpose
 - **Separation**: Business logic separate from Foundry API calls
 - **Testable**: Pure functions in `utils/`, easy to test
@@ -120,14 +136,175 @@ elysium/
 
 ---
 
+## Compendium Workflow (Pack/Unpack)
+
+### Overview
+
+Elysium uses a **source-based compendium workflow** for professional development. This means:
+
+- **Source files** (`src/packs/*.json`) are human-readable and version controlled
+- **Binary files** (`packs/*`) are generated build artifacts (gitignored)
+
+### Why This Approach?
+
+**Problems with binary LevelDB in Git:**
+- Can't review changes in pull requests
+- Merge conflicts are impossible to resolve
+- Repository size bloats (Git stores complete copies, no diffs)
+- No visibility into what changed
+
+**Benefits of source-based workflow:**
+- ✅ Review item changes in PRs
+- ✅ Resolve merge conflicts easily
+- ✅ Smaller repository size
+- ✅ Professional development workflow
+- ✅ Easy collaboration
+
+### The Two Commands
+
+#### `npm run unpack` - Extract from Foundry
+
+**What it does:** Reads LevelDB binary files and extracts each item to a separate JSON file
+
+**When to use:** After editing items in Foundry UI
+
+```bash
+# 1. Edit items in Foundry
+# 2. Close Foundry (so database isn't locked)
+# 3. Extract to JSON
+npm run unpack
+
+# 4. Review changes
+git diff src/packs/
+
+# 5. Commit
+git add src/packs/elysium-items/aethers-grasp.json
+git commit -m "feat: buff Aether's Grasp damage"
+```
+
+#### `npm run pack` - Build for Foundry
+
+**What it does:** Reads JSON files and builds the LevelDB binary database
+
+**When to use:** After editing JSON files or pulling changes from Git
+
+```bash
+# 1. Edit JSON file in VS Code
+# OR pull changes from Git
+git pull
+
+# 2. Build the databases
+npm run pack
+
+# 3. Open Foundry (items are updated!)
+```
+
+### Common Workflows
+
+#### Workflow 1: Create New Item in Foundry
+
+```bash
+# 1. Create item in Foundry UI
+# 2. Add flags via console
+const item = game.items.getName("New Item");
+await item.setFlag('elysium', 'requiresAether', true);
+
+# 3. Test in-game
+
+# 4. Close Foundry
+
+# 5. Extract to source
+npm run unpack
+
+# 6. Commit
+git add src/packs/elysium-items/new-item.json
+git commit -m "feat: add New Item to compendium"
+```
+
+#### Workflow 2: Edit Item JSON Directly
+
+```bash
+# 1. Edit src/packs/elysium-items/aethers-grasp.json
+
+# 2. Build database
+npm run pack
+
+# 3. Test in Foundry
+
+# 4. Commit
+git add src/packs/elysium-items/aethers-grasp.json
+git commit -m "feat: update Aether's Grasp description"
+```
+
+#### Workflow 3: Pull Changes from Team
+
+```bash
+# 1. Pull changes
+git pull
+
+# 2. Rebuild databases
+npm run pack
+
+# 3. Test in Foundry (items are updated)
+```
+
+### Build Command
+
+For a complete build (lint + test + pack):
+
+```bash
+npm run build
+```
+
+Or use the slash command:
+
+```
+/build
+```
+
+This runs:
+1. ESLint (code quality)
+2. Jest tests (all tests must pass)
+3. Pack compendiums (build databases)
+
+### File Organization
+
+**Commit to Git:**
+- ✅ `src/packs/**/*.json` - Source files
+- ✅ `tools/*.js` - Build scripts
+- ✅ `.gitignore` - Ignore rules
+- ✅ `.gitattributes` - File handling rules
+
+**Never commit:**
+- ❌ `packs/*/` - Binary LevelDB files (auto-generated)
+- ❌ `node_modules/` - Dependencies
+- ❌ `.DS_Store` - OS files
+
+### Troubleshooting
+
+**"Iterator is not open" error when unpacking:**
+- Close Foundry first (LevelDB is locked while Foundry runs)
+
+**Items not showing up in Foundry:**
+- Run `npm run pack` to rebuild databases
+- Restart Foundry
+
+**Merge conflict in src/packs/*.json:**
+- JSON conflicts are easy to resolve manually
+- Edit the file, remove conflict markers, commit
+
+---
+
 ## Coding Standards
 
 ### TypeScript
+
 - Use TypeScript for all new code
 - Enable strict type checking
 - Document complex types with comments
 
 ### Code Style
+
 - Use Prettier for formatting (automatic via hooks)
 - Follow ESLint rules
 - Use async/await over promises
@@ -140,6 +317,7 @@ elysium/
 **⚠️ ALWAYS WRITE TESTS FIRST - NO EXCEPTIONS ⚠️**
 
 This is a hard requirement for this project. Before writing any new feature or function:
+
 1. **STOP** - Do not write implementation code yet
 2. **WRITE THE TEST FIRST** - Create the test file and test cases
 3. **RUN THE TEST** - Verify it fails (Red)
@@ -147,6 +325,7 @@ This is a hard requirement for this project. Before writing any new feature or f
 5. **REFACTOR** - Clean up while keeping tests green
 
 **Test-Driven Development (TDD):**
+
 - **ALWAYS use TDD when possible** - write tests first, then implement
 - Red → Green → Refactor cycle
 - Tests document expected behavior and requirements
@@ -154,18 +333,21 @@ This is a hard requirement for this project. Before writing any new feature or f
 - Catches bugs early in development
 
 **TDD Workflow:**
+
 1. **Red**: Write a failing test for the next small piece of functionality
 2. **Green**: Write the minimal code to make the test pass
 3. **Refactor**: Clean up the code while keeping tests green
 4. Repeat
 
 **Prefer small, focused modules:**
+
 - Break code into small, single-purpose functions
 - Each file should have one clear responsibility
 - Functions should do one thing well
 - Aim for functions under 50 lines when possible
 
 **Make code testable:**
+
 - Write pure functions where possible (same input = same output)
 - Avoid side effects in business logic
 - Separate data transformation from Foundry API calls
@@ -173,6 +355,7 @@ This is a hard requirement for this project. Before writing any new feature or f
 - Mock Foundry globals in tests
 
 **Test coverage:**
+
 - Write tests for all business logic
 - Test aether consumption logic
 - Test toxicity calculations
@@ -182,11 +365,13 @@ This is a hard requirement for this project. Before writing any new feature or f
 - Mock Foundry API (`game`, `actor`, `item`, etc.)
 
 **Change with confidence:**
+
 - If it has tests, you can refactor fearlessly
 - Tests document expected behavior
 - Catch regressions early
 
 ### FoundryVTT Conventions
+
 - Register settings in `init` hook
 - Initialize features in `ready` hook
 - Document all Foundry hooks used
@@ -194,12 +379,14 @@ This is a hard requirement for this project. Before writing any new feature or f
 - Prefix module-specific flags with `elysium.`
 
 ### D&D 5e System
+
 - Always check system version compatibility
 - Use proper D&D 5e data models
 - Handle character types (PCs, NPCs, monsters)
 - Respect system hooks and workflows
 
 ### Aether Items
+
 - **NO item macros**: All logic goes in module scripts, not individual item macros
 - Always specify aether quality when creating modified items
 - Store aether type in `flags.elysium.aetherType`
@@ -220,6 +407,7 @@ This is a hard requirement for this project. Before writing any new feature or f
 6. **Create PR**: Review before merging
 
 ### Git Workflow
+
 - Add files individually (not `git add .`)
 - Write clear, descriptive commit messages
 - Follow conventional commits (feat:, fix:, docs:, etc.)
@@ -231,12 +419,14 @@ This is a hard requirement for this project. Before writing any new feature or f
 Items are the **core feature** of Elysium.
 
 ### Standard Item Properties
+
 - Name, description, rarity
 - D&D 5e stats and properties
 - Icon/image assets
 - Localization strings
 
 ### Aether-Fueled Modifications
+
 - **Aether Quality**: Specify tier/level
 - **Positive Effects**: Benefits granted by mod
 - **Negative Effects**: Risks or drawbacks
@@ -244,6 +434,7 @@ Items are the **core feature** of Elysium.
 - **Resource Cost**: Aether consumption if applicable
 
 ### midi-qol Integration
+
 - Define workflow flags for automation
 - Test automation with various character builds
 - Handle edge cases (immunities, resistances, etc.)
@@ -258,6 +449,7 @@ Items are the **core feature** of Elysium.
 - **dnd5e system**: Base game system
 
 **Dev Dependencies:**
+
 - **Jest**: Testing framework
 - **@testing-library**: For testing utilities
 - **TypeScript**: Type safety
@@ -360,12 +552,14 @@ Add to `package.json`:
 ### What to Test
 
 **✅ Always test:**
+
 - Pure calculation functions (DC calculations, damage rolls)
 - Data transformations (flag parsing, item data extraction)
 - Business logic (toxicity progression, aether selection rules)
 - Edge cases (no aether available, ATL at max, etc.)
 
 **⚠️ Hard to test (focus on integration):**
+
 - Foundry hooks (test the functions they call)
 - UI rendering (test dialog data generation)
 - Chat messages (test message content generation)
@@ -403,24 +597,28 @@ test('calculateToxicityDC', () => {
 ## Best Practices
 
 ### Scalability
+
 - Write modular, reusable code
 - Keep components focused and single-purpose
 - Plan for future expansion of aether system
 - Design for easy addition of new item types
 
 ### Performance
+
 - Lazy-load heavy resources
 - Cache computed values when appropriate
 - Minimize DOM manipulation
 - Use efficient data access patterns
 
 ### User Experience
+
 - Localize all user-facing text
 - Provide clear feedback (notifications, dialogs)
 - Handle errors gracefully
 - Respect user settings and permissions
 
 ### Accessibility
+
 - Use semantic HTML in templates
 - Provide keyboard navigation
 - Ensure contrast for readability
@@ -431,11 +629,14 @@ test('calculateToxicityDC', () => {
 ## Module Architecture Notes
 
 ### Inspiration Sources
+
 We're drawing patterns from:
+
 - **Enhanced Combat HUD**: Build system, TypeScript, SCSS, i18n-first
 - **Monk's Active Tiles**: Action-trigger pattern, extensibility
 
 ### Future Considerations
+
 - Aether modification system is not fully designed yet
 - Keep item structure flexible for future mod mechanics
 - Plan for potential upgrade/progression systems
@@ -446,6 +647,7 @@ We're drawing patterns from:
 ## Quick Reference
 
 ### Common Tasks
+
 - Create item: Use `/item` command
 - Create NPC: Use `/npc` command
 - Review code: Use `/review` command
@@ -453,11 +655,13 @@ We're drawing patterns from:
 - Build module: `npm run build`
 
 ### Important Files
+
 - `module.json` - Module manifest (version, dependencies)
 - `scripts/elysium.js` - Main module entry point
 - `packs/` - Compendium content
 
 ### Getting Help
+
 - FoundryVTT API: Use MCP docs server
 - D&D 5e system API: Use MCP docs server
 - midi-qol: Use MCP docs server
