@@ -65,7 +65,7 @@ describe("Aether's Leap", () => {
         },
       },
       system: {
-        uses: { value: 5, max: 5 },
+        uses: { value: 1, max: 1 },
         quantity: 1,
       },
       getFlag: function (scope, key) {
@@ -75,8 +75,12 @@ describe("Aether's Leap", () => {
         if (data["system.uses.value"] !== undefined) {
           this.system.uses.value = data["system.uses.value"];
         }
+        if (data["system.quantity"] !== undefined) {
+          this.system.quantity = data["system.quantity"];
+        }
         return this;
       }),
+      delete: jest.fn(),
     };
 
     // Add aether fuel to actor's inventory
@@ -131,9 +135,7 @@ describe("Aether's Leap", () => {
     test("consumes aether fuel when used", async () => {
       await useAethersLeap(mockActor, mockItem, mockAetherFuel);
 
-      expect(mockAetherFuel.update).toHaveBeenCalledWith({
-        "system.uses.value": 4,
-      });
+      expect(mockAetherFuel.delete).toHaveBeenCalled();
     });
 
     test("applies Leap effect to actor", async () => {
@@ -175,7 +177,8 @@ describe("Aether's Leap", () => {
 
       for (const quality of qualities) {
         mockAetherFuel.flags.elysium.aetherQuality = quality;
-        mockAetherFuel.system.uses.value = 5; // Reset
+        mockAetherFuel.system.uses.value = 1; // Reset
+        mockAetherFuel.system.quantity = 1; // Reset
         mockActor.appliedEffects = []; // Reset
         mockActor.createEmbeddedDocuments.mockClear();
         mockActor.rollSavingThrow = jest.fn(async () => [

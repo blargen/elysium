@@ -89,9 +89,10 @@ describe("Gift of a Thousand Strikes", () => {
     // Mock aether fuel
     mockAetherFuel = {
       name: "Basic Refined Aether",
-      system: { uses: { value: 5, max: 5 } },
+      system: { uses: { value: 1, max: 1 }, quantity: 1 },
       getFlag: jest.fn(() => "basic-refined"),
       update: jest.fn(),
+      delete: jest.fn(),
     };
 
     mockActor.items.filter.mockReturnValue([mockAetherFuel]);
@@ -149,7 +150,7 @@ describe("Gift of a Thousand Strikes", () => {
       expect(result.ability).toBe("flurry-of-blows");
       expect(result.enhanced).toBe(false);
       expect(result.effect).toContain("2 unarmed strikes");
-      expect(mockAetherFuel.update).toHaveBeenCalled();
+      expect(mockAetherFuel.delete).toHaveBeenCalled();
     });
 
     test("should activate Patient Defense without consuming ki", async () => {
@@ -185,9 +186,7 @@ describe("Gift of a Thousand Strikes", () => {
         aetherFuel: mockAetherFuel,
       });
 
-      expect(mockAetherFuel.update).toHaveBeenCalledWith({
-        "system.uses.value": 4,
-      });
+      expect(mockAetherFuel.delete).toHaveBeenCalled();
     });
   });
 
@@ -251,7 +250,7 @@ describe("Gift of a Thousand Strikes", () => {
       expect(result.enhanced).toBe(true);
 
       // Should consume aether
-      expect(mockAetherFuel.update).toHaveBeenCalled();
+      expect(mockAetherFuel.delete).toHaveBeenCalled();
 
       // NOTE: Focus consumption now happens automatically when the monk ability activity
       // is triggered, not by us calling update() directly. In test environment,

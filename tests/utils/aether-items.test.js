@@ -55,7 +55,7 @@ describe("Generic Aether Item Utility", () => {
         },
       },
       system: {
-        uses: { value: 5, max: 5 },
+        uses: { value: 1, max: 1 },
         quantity: 1,
       },
       getFlag: function (scope, key) {
@@ -65,8 +65,12 @@ describe("Generic Aether Item Utility", () => {
         if (data["system.uses.value"] !== undefined) {
           this.system.uses.value = data["system.uses.value"];
         }
+        if (data["system.quantity"] !== undefined) {
+          this.system.quantity = data["system.quantity"];
+        }
         return this;
       }),
+      delete: jest.fn(),
     };
 
     mockEffectCallback = jest.fn(async (actor, fuelQuality) => {
@@ -100,9 +104,7 @@ describe("Generic Aether Item Utility", () => {
         mockAetherFuel,
       );
 
-      expect(mockAetherFuel.update).toHaveBeenCalledWith({
-        "system.uses.value": 4,
-      });
+      expect(mockAetherFuel.delete).toHaveBeenCalled();
       expect(result.success).toBe(true);
     });
 
@@ -178,7 +180,7 @@ describe("Generic Aether Item Utility", () => {
       );
 
       // Fuel IS consumed even if effect fails (like a spell slot used for a fizzled spell)
-      expect(mockAetherFuel.system.uses.value).toBe(4);
+      expect(mockAetherFuel.delete).toHaveBeenCalled();
     });
 
     test("works with different aether qualities", async () => {
@@ -192,7 +194,8 @@ describe("Generic Aether Item Utility", () => {
 
       for (const quality of qualities) {
         mockAetherFuel.flags.elysium.aetherQuality = quality;
-        mockAetherFuel.system.uses.value = 5; // Reset
+        mockAetherFuel.system.uses.value = 1; // Reset
+        mockAetherFuel.system.quantity = 1; // Reset
         mockActor.rollSavingThrow = jest.fn(async () => [
           { _total: 20, total: 20 },
         ]);
