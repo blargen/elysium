@@ -4,8 +4,17 @@
  * Handles unrefined aether toxicity tracking and effects
  */
 
-import { getDailyDoses, setDailyDoses, getATL, setATL, getAetherQuality } from '../utils/flags.js';
-import { calculateToxicityDC, shouldAddExhaustion } from '../utils/calculations.js';
+import {
+  getDailyDoses,
+  setDailyDoses,
+  getATL,
+  setATL,
+  getAetherQuality,
+} from "../utils/flags.js";
+import {
+  calculateToxicityDC,
+  shouldAddExhaustion,
+} from "../utils/calculations.js";
 
 /**
  * Apply unrefined aether use with CON save and toxicity tracking
@@ -32,7 +41,9 @@ export async function applyUnrefinedAetherUse(actor, roll) {
   const rollTotal = actualRoll?._total ?? actualRoll?.total ?? 0;
   const success = rollTotal >= dc;
 
-  console.log(`Elysium | Toxicity Save: ${success ? '✅ SUCCEEDED' : '❌ FAILED'} (rolled ${rollTotal} vs DC ${dc})`);
+  console.log(
+    `Elysium | Toxicity Save: ${success ? "✅ SUCCEEDED" : "❌ FAILED"} (rolled ${rollTotal} vs DC ${dc})`,
+  );
 
   if (!success) {
     // Failed save - increase ATL and apply effects
@@ -53,7 +64,7 @@ export async function applyUnrefinedAetherUse(actor, roll) {
  */
 export function shouldShowToxicityWarning(item) {
   const quality = getAetherQuality(item);
-  return quality === 'unrefined';
+  return quality === "unrefined";
 }
 
 /**
@@ -77,8 +88,8 @@ export function getToxicityWarningData(actor) {
  */
 async function checkAetherMadness(actor, dc) {
   const roll = await actor.rollSavingThrow({
-    ability: 'wis',
-    targetValue: dc
+    ability: "wis",
+    targetValue: dc,
   });
 
   // Extract actual roll from array
@@ -88,7 +99,7 @@ async function checkAetherMadness(actor, dc) {
 
   if (!success) {
     // Failed Aether Madness save - apply charmed condition
-    await actor.toggleStatusEffect('charmed', { active: true });
+    await actor.toggleStatusEffect("charmed", { active: true });
 
     ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor }),
@@ -100,12 +111,12 @@ async function checkAetherMadness(actor, dc) {
           <p><strong>${actor.name}</strong> succumbs to aether-induced madness!</p>
           <p class="elysium-text-orange" style="font-size: 0.9em;">Applied: Charmed condition</p>
         </div>
-      `
+      `,
     });
   } else {
     ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor }),
-      content: `<p><strong>${actor.name}</strong> resists the aether madness! (rolled ${rollTotal} vs DC ${dc})</p>`
+      content: `<p><strong>${actor.name}</strong> resists the aether madness! (rolled ${rollTotal} vs DC ${dc})</p>`,
     });
   }
 }
@@ -118,8 +129,8 @@ async function checkAetherMadness(actor, dc) {
  */
 async function checkStunned(actor, dc) {
   const roll = await actor.rollSavingThrow({
-    ability: 'con',
-    targetValue: dc
+    ability: "con",
+    targetValue: dc,
   });
 
   // Extract actual roll from array
@@ -129,7 +140,7 @@ async function checkStunned(actor, dc) {
 
   if (!success) {
     // Failed Stunned save - apply stunned condition
-    await actor.toggleStatusEffect('stunned', { active: true });
+    await actor.toggleStatusEffect("stunned", { active: true });
 
     ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor }),
@@ -141,12 +152,12 @@ async function checkStunned(actor, dc) {
           <p><strong>${actor.name}</strong> is overwhelmed by toxic aether!</p>
           <p class="elysium-text-orange" style="font-size: 0.9em;">Applied: Stunned condition</p>
         </div>
-      `
+      `,
     });
   } else {
     ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor }),
-      content: `<p><strong>${actor.name}</strong> resists being stunned! (rolled ${rollTotal} vs DC ${dc})</p>`
+      content: `<p><strong>${actor.name}</strong> resists being stunned! (rolled ${rollTotal} vs DC ${dc})</p>`,
     });
   }
 }
@@ -159,11 +170,11 @@ async function checkStunned(actor, dc) {
 export async function applyToxicityEffects(actor, atl) {
   // Progressive effects based on ATL
   const effectsByLevel = {
-    1: { conditions: ['poisoned'] },
-    2: { conditions: ['poisoned', 'blinded'] },
-    3: { conditions: ['poisoned', 'blinded'], checks: ['madness'] },
-    4: { conditions: ['poisoned', 'blinded'], checks: ['madness', 'stunned'] },
-    5: { conditions: ['poisoned', 'blinded', 'paralyzed'] }
+    1: { conditions: ["poisoned"] },
+    2: { conditions: ["poisoned", "blinded"] },
+    3: { conditions: ["poisoned", "blinded"], checks: ["madness"] },
+    4: { conditions: ["poisoned", "blinded"], checks: ["madness", "stunned"] },
+    5: { conditions: ["poisoned", "blinded", "paralyzed"] },
   };
 
   const effects = effectsByLevel[Math.min(atl, 5)];
@@ -177,7 +188,7 @@ export async function applyToxicityEffects(actor, atl) {
   if (shouldAddExhaustion(atl)) {
     const currentExhaustion = actor.system.attributes?.exhaustion || 0;
     await actor.update({
-      'system.attributes.exhaustion': currentExhaustion + 1
+      "system.attributes.exhaustion": currentExhaustion + 1,
     });
   }
 
@@ -187,10 +198,10 @@ export async function applyToxicityEffects(actor, atl) {
 
   // Special checks at ATL 3 and 4
   if (effects.checks) {
-    if (effects.checks.includes('madness')) {
+    if (effects.checks.includes("madness")) {
       await checkAetherMadness(actor, dc);
     }
-    if (effects.checks.includes('stunned')) {
+    if (effects.checks.includes("stunned")) {
       await checkStunned(actor, dc);
     }
   }
@@ -216,13 +227,19 @@ export async function resetToxicityOnLongRest(actor) {
 
   // Reset exhaustion
   await actor.update({
-    'system.attributes.exhaustion': 0
+    "system.attributes.exhaustion": 0,
   });
 
   // Remove all toxicity-related conditions
-  const toxicityConditions = ['poisoned', 'blinded', 'paralyzed', 'charmed', 'stunned'];
+  const toxicityConditions = [
+    "poisoned",
+    "blinded",
+    "paralyzed",
+    "charmed",
+    "stunned",
+  ];
   for (const condition of toxicityConditions) {
-    const effect = actor.effects.find(e => e.statuses?.has(condition));
+    const effect = actor.effects.find((e) => e.statuses?.has(condition));
     if (effect) {
       await effect.delete();
     }

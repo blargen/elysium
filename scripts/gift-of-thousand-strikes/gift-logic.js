@@ -4,7 +4,10 @@
  */
 
 import { handleAetherFuelUse } from "../aether-fuel/consumption.js";
-import { triggerMonkAbility, isMonkFocusItem } from "../utils/monk-abilities.js";
+import {
+  triggerMonkAbility,
+  isMonkFocusItem,
+} from "../utils/monk-abilities.js";
 
 /**
  * Use Gift of a Thousand Strikes to perform a monk ability

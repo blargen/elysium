@@ -42,10 +42,7 @@ async function packCompendium(packInfo) {
   let count = 0;
 
   try {
-    console.log('   Opening database...');
-
-    // Clear existing data
-    await db.clear();
+    console.log('   Packing items...');
 
     // Read all JSON files from source
     const files = fs.readdirSync(packInfo.src)

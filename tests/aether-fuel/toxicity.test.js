@@ -10,61 +10,62 @@
  * - Long rest reset
  */
 
-import { describe, test, expect, beforeEach, jest } from '@jest/globals';
+import { describe, test, expect, beforeEach, jest } from "@jest/globals";
 import {
   applyUnrefinedAetherUse,
   shouldShowToxicityWarning,
   getToxicityWarningData,
   applyToxicityEffects,
-  resetToxicityOnLongRest
-} from '../../scripts/aether-fuel/toxicity.js';
-import { getDailyDoses, getATL } from '../../scripts/utils/flags.js';
+  resetToxicityOnLongRest,
+} from "../../scripts/aether-fuel/toxicity.js";
+import { getDailyDoses, getATL } from "../../scripts/utils/flags.js";
 
-describe('Toxicity Application System', () => {
+describe("Toxicity Application System", () => {
   let mockActor;
 
   beforeEach(() => {
     // Mock actor with flag management
     mockActor = {
-      name: 'Test Character',
+      name: "Test Character",
       flags: {},
       system: {
         abilities: {
-          con: { mod: 2 }
+          con: { mod: 2 },
         },
         attributes: {
-          exhaustion: 0
-        }
+          exhaustion: 0,
+        },
       },
       effects: [],
-      getFlag: function(scope, key) {
+      getFlag: function (scope, key) {
         return this.flags[scope]?.[key];
       },
-      setFlag: async function(scope, key, value) {
+      setFlag: async function (scope, key, value) {
         if (!this.flags[scope]) this.flags[scope] = {};
         this.flags[scope][key] = value;
         return this;
       },
-      update: jest.fn(async function(data) {
+      update: jest.fn(async function (data) {
         // Mock update for exhaustion
-        if (data['system.attributes.exhaustion'] !== undefined) {
-          this.system.attributes.exhaustion = data['system.attributes.exhaustion'];
+        if (data["system.attributes.exhaustion"] !== undefined) {
+          this.system.attributes.exhaustion =
+            data["system.attributes.exhaustion"];
         }
         return this;
       }),
-      toggleStatusEffect: jest.fn(async function(condition, options) {
+      toggleStatusEffect: jest.fn(async function (condition, options) {
         // Mock adding conditions
         return this;
       }),
-      rollSavingThrow: jest.fn(async function(options) {
+      rollSavingThrow: jest.fn(async function (options) {
         // Mock returning a successful roll (new v4.1+ API)
         return [{ _total: 15, total: 15 }];
-      })
+      }),
     };
   });
 
-  describe('applyUnrefinedAetherUse', () => {
-    test('increments daily doses on use', async () => {
+  describe("applyUnrefinedAetherUse", () => {
+    test("increments daily doses on use", async () => {
       // Mock a successful CON save so we only test dose increment
       const mockRoll = { total: 20 };
 
@@ -73,7 +74,7 @@ describe('Toxicity Application System', () => {
       expect(getDailyDoses(mockActor)).toBe(1);
     });
 
-    test('does not increment ATL on successful save', async () => {
+    test("does not increment ATL on successful save", async () => {
       mockActor.flags.elysium = { dailyDoses: 0, atl: 0 };
       const mockRoll = { total: 20 }; // High roll = success
 
@@ -82,7 +83,7 @@ describe('Toxicity Application System', () => {
       expect(getATL(mockActor)).toBe(0); // Still 0
     });
 
-    test('increments ATL on failed save', async () => {
+    test("increments ATL on failed save", async () => {
       mockActor.flags.elysium = { dailyDoses: 0, atl: 0 };
       const mockRoll = { total: 5 }; // Low roll = fail (DC is 10)
 
@@ -91,7 +92,7 @@ describe('Toxicity Application System', () => {
       expect(getATL(mockActor)).toBe(1);
     });
 
-    test('DC increases with each daily dose', async () => {
+    test("DC increases with each daily dose", async () => {
       // First dose: DC 10 (8 + 2*1)
       mockActor.flags.elysium = { dailyDoses: 0, atl: 0 };
       let mockRoll = { total: 11 };
@@ -115,24 +116,24 @@ describe('Toxicity Application System', () => {
     });
   });
 
-  describe('shouldShowToxicityWarning', () => {
-    test('returns true for unrefined aether', () => {
+  describe("shouldShowToxicityWarning", () => {
+    test("returns true for unrefined aether", () => {
       const mockItem = {
-        getFlag: () => 'unrefined'
+        getFlag: () => "unrefined",
       };
       expect(shouldShowToxicityWarning(mockItem)).toBe(true);
     });
 
-    test('returns false for non-unrefined aether', () => {
+    test("returns false for non-unrefined aether", () => {
       const mockItem = {
-        getFlag: () => 'basic-refined'
+        getFlag: () => "basic-refined",
       };
       expect(shouldShowToxicityWarning(mockItem)).toBe(false);
     });
   });
 
-  describe('getToxicityWarningData', () => {
-    test('calculates correct next DC for first dose', () => {
+  describe("getToxicityWarningData", () => {
+    test("calculates correct next DC for first dose", () => {
       mockActor.flags.elysium = { dailyDoses: 0, atl: 0 };
 
       const data = getToxicityWarningData(mockActor);
@@ -142,7 +143,7 @@ describe('Toxicity Application System', () => {
       expect(data.nextDC).toBe(10); // 8 + 2*1
     });
 
-    test('calculates correct next DC for fourth dose', () => {
+    test("calculates correct next DC for fourth dose", () => {
       mockActor.flags.elysium = { dailyDoses: 3, atl: 2 };
 
       const data = getToxicityWarningData(mockActor);
@@ -153,31 +154,37 @@ describe('Toxicity Application System', () => {
     });
   });
 
-  describe('applyToxicityEffects', () => {
-    test('applies poisoned condition at ATL 1', async () => {
+  describe("applyToxicityEffects", () => {
+    test("applies poisoned condition at ATL 1", async () => {
       await applyToxicityEffects(mockActor, 1);
 
-      expect(mockActor.toggleStatusEffect).toHaveBeenCalledWith('poisoned', { active: true });
+      expect(mockActor.toggleStatusEffect).toHaveBeenCalledWith("poisoned", {
+        active: true,
+      });
     });
 
-    test('applies poisoned and blinded at ATL 2', async () => {
+    test("applies poisoned and blinded at ATL 2", async () => {
       await applyToxicityEffects(mockActor, 2);
 
-      expect(mockActor.toggleStatusEffect).toHaveBeenCalledWith('poisoned', { active: true });
-      expect(mockActor.toggleStatusEffect).toHaveBeenCalledWith('blinded', { active: true });
+      expect(mockActor.toggleStatusEffect).toHaveBeenCalledWith("poisoned", {
+        active: true,
+      });
+      expect(mockActor.toggleStatusEffect).toHaveBeenCalledWith("blinded", {
+        active: true,
+      });
     });
 
-    test('adds exhaustion at ATL 2', async () => {
+    test("adds exhaustion at ATL 2", async () => {
       mockActor.system.attributes.exhaustion = 0;
 
       await applyToxicityEffects(mockActor, 2);
 
       expect(mockActor.update).toHaveBeenCalledWith({
-        'system.attributes.exhaustion': 1
+        "system.attributes.exhaustion": 1,
       });
     });
 
-    test('does not add exhaustion at ATL 3', async () => {
+    test("does not add exhaustion at ATL 3", async () => {
       mockActor.system.attributes.exhaustion = 1;
 
       await applyToxicityEffects(mockActor, 3);
@@ -186,27 +193,33 @@ describe('Toxicity Application System', () => {
       expect(mockActor.system.attributes.exhaustion).toBe(1);
     });
 
-    test('adds second exhaustion level at ATL 4', async () => {
+    test("adds second exhaustion level at ATL 4", async () => {
       mockActor.system.attributes.exhaustion = 1;
 
       await applyToxicityEffects(mockActor, 4);
 
       expect(mockActor.update).toHaveBeenCalledWith({
-        'system.attributes.exhaustion': 2
+        "system.attributes.exhaustion": 2,
       });
     });
 
-    test('applies paralyzed at ATL 5', async () => {
+    test("applies paralyzed at ATL 5", async () => {
       await applyToxicityEffects(mockActor, 5);
 
-      expect(mockActor.toggleStatusEffect).toHaveBeenCalledWith('poisoned', { active: true });
-      expect(mockActor.toggleStatusEffect).toHaveBeenCalledWith('blinded', { active: true });
-      expect(mockActor.toggleStatusEffect).toHaveBeenCalledWith('paralyzed', { active: true });
+      expect(mockActor.toggleStatusEffect).toHaveBeenCalledWith("poisoned", {
+        active: true,
+      });
+      expect(mockActor.toggleStatusEffect).toHaveBeenCalledWith("blinded", {
+        active: true,
+      });
+      expect(mockActor.toggleStatusEffect).toHaveBeenCalledWith("paralyzed", {
+        active: true,
+      });
     });
   });
 
-  describe('resetToxicityOnLongRest', () => {
-    test('resets dailyDoses to 0', async () => {
+  describe("resetToxicityOnLongRest", () => {
+    test("resets dailyDoses to 0", async () => {
       mockActor.flags.elysium = { dailyDoses: 5, atl: 3 };
 
       await resetToxicityOnLongRest(mockActor);
@@ -214,7 +227,7 @@ describe('Toxicity Application System', () => {
       expect(getDailyDoses(mockActor)).toBe(0);
     });
 
-    test('resets ATL to 0', async () => {
+    test("resets ATL to 0", async () => {
       mockActor.flags.elysium = { dailyDoses: 5, atl: 3 };
 
       await resetToxicityOnLongRest(mockActor);
@@ -222,18 +235,18 @@ describe('Toxicity Application System', () => {
       expect(getATL(mockActor)).toBe(0);
     });
 
-    test('resets exhaustion to 0', async () => {
+    test("resets exhaustion to 0", async () => {
       mockActor.flags.elysium = { dailyDoses: 5, atl: 4 };
       mockActor.system.attributes.exhaustion = 2;
 
       await resetToxicityOnLongRest(mockActor);
 
       expect(mockActor.update).toHaveBeenCalledWith({
-        'system.attributes.exhaustion': 0
+        "system.attributes.exhaustion": 0,
       });
     });
 
-    test('does nothing if no toxicity present', async () => {
+    test("does nothing if no toxicity present", async () => {
       mockActor.flags.elysium = { dailyDoses: 0, atl: 0 };
 
       const result = await resetToxicityOnLongRest(mockActor);
@@ -241,7 +254,7 @@ describe('Toxicity Application System', () => {
       expect(result).toBe(false); // No reset needed
     });
 
-    test('returns true if reset occurred', async () => {
+    test("returns true if reset occurred", async () => {
       mockActor.flags.elysium = { dailyDoses: 3, atl: 2 };
 
       const result = await resetToxicityOnLongRest(mockActor);

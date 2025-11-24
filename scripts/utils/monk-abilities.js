@@ -15,10 +15,7 @@ export function isMonkFocusItem(item) {
   if (item.name === "Monk's Focus") return true;
 
   // Fallback: check item type and identifier
-  if (
-    item.type === "feat" &&
-    item.system?.identifier === "monks-focus"
-  ) {
+  if (item.type === "feat" && item.system?.identifier === "monks-focus") {
     return true;
   }
 
@@ -72,14 +69,8 @@ export function findMonkAbilityActivity(actor, abilityKey) {
       "Flurry of Blows",
       "Flurry of Strikes",
     ],
-    "patient-defense": [
-      "Patient Defense (Focus Point)",
-      "Patient Defense",
-    ],
-    "step-of-wind": [
-      "Step of the Wind (Focus Point)",
-      "Step of the Wind",
-    ],
+    "patient-defense": ["Patient Defense (Focus Point)", "Patient Defense"],
+    "step-of-wind": ["Step of the Wind (Focus Point)", "Step of the Wind"],
   };
 
   const possibleNames = activityNameMap[abilityKey];

@@ -4,10 +4,10 @@
  * Handles consuming aether fuel items and triggering effects
  */
 
-import { isAetherFuel, getAetherQuality } from '../utils/flags.js';
-import { applyUnrefinedAetherUse } from './toxicity.js';
-import { calculateToxicityDC } from '../utils/calculations.js';
-import { getDailyDoses } from '../utils/flags.js';
+import { isAetherFuel, getAetherQuality } from "../utils/flags.js";
+import { applyUnrefinedAetherUse } from "./toxicity.js";
+import { calculateToxicityDC } from "../utils/calculations.js";
+import { getDailyDoses } from "../utils/flags.js";
 
 /**
  * Consume one use of an aether fuel item
@@ -18,7 +18,9 @@ export async function consumeAetherFuelItem(item) {
   const currentUses = item.system?.uses?.value || 0;
   const currentQuantity = item.system?.quantity || 1;
 
-  console.log(`Elysium | Consuming ${item.name}: ${currentUses} uses, ${currentQuantity} quantity`);
+  console.log(
+    `Elysium | Consuming ${item.name}: ${currentUses} uses, ${currentQuantity} quantity`,
+  );
 
   if (currentUses <= 0) {
     console.log(`Elysium | Cannot consume - no uses remaining`);
@@ -28,16 +30,20 @@ export async function consumeAetherFuelItem(item) {
   if (currentUses > 1) {
     // Decrement uses (multiple uses per item)
     await item.update({
-      'system.uses.value': currentUses - 1
+      "system.uses.value": currentUses - 1,
     });
-    console.log(`Elysium | ${item.name} consumed (${currentUses - 1} uses remaining)`);
+    console.log(
+      `Elysium | ${item.name} consumed (${currentUses - 1} uses remaining)`,
+    );
   } else if (currentQuantity > 1) {
     // Last use of this item, but more in the stack - decrement quantity and reset uses
     await item.update({
-      'system.quantity': currentQuantity - 1,
-      'system.uses.value': item.system.uses?.max || 1
+      "system.quantity": currentQuantity - 1,
+      "system.uses.value": item.system.uses?.max || 1,
     });
-    console.log(`Elysium | ${item.name} consumed (${currentQuantity - 1} remaining in stack)`);
+    console.log(
+      `Elysium | ${item.name} consumed (${currentQuantity - 1} remaining in stack)`,
+    );
   } else {
     // Last use of last item - delete
     await item.delete();
@@ -53,8 +59,8 @@ export async function consumeAetherFuelItem(item) {
  * @returns {Promise<boolean>} True if user wants to proceed, false if cancelled
  */
 export async function showToxicityWarning(actor) {
-  const dailyDoses = actor.getFlag('elysium', 'dailyDoses') || 0;
-  const atl = actor.getFlag('elysium', 'atl') || 0;
+  const dailyDoses = actor.getFlag("elysium", "dailyDoses") || 0;
+  const atl = actor.getFlag("elysium", "atl") || 0;
   const nextDC = 8 + 2 * (dailyDoses + 1);
 
   return new Promise((resolve) => {
@@ -89,16 +95,16 @@ export async function showToxicityWarning(actor) {
         proceed: {
           icon: '<i class="fas fa-bolt"></i>',
           label: "⚡ Use Anyway",
-          callback: () => resolve(true)
+          callback: () => resolve(true),
         },
         cancel: {
           icon: '<i class="fas fa-times"></i>',
           label: "❌ Cancel",
-          callback: () => resolve(false)
-        }
+          callback: () => resolve(false),
+        },
       },
       default: "cancel",
-      close: () => resolve(false)
+      close: () => resolve(false),
     }).render(true);
   });
 }
@@ -112,8 +118,8 @@ export async function showToxicityWarning(actor) {
 export async function rollConstitutionSave(actor, dc) {
   // dnd5e v4.1+ uses rollSavingThrow (was rollAbilitySave in older versions)
   const roll = await actor.rollSavingThrow({
-    ability: 'con',
-    targetValue: dc
+    ability: "con",
+    targetValue: dc,
   });
   return roll;
 }
@@ -145,7 +151,7 @@ export async function handleAetherFuelUse(actor, item) {
 
   // Handle unrefined toxicity BEFORE consuming
   // (Actor updates can cause item collection to reload, reverting consumption)
-  if (quality === 'unrefined') {
+  if (quality === "unrefined") {
     const dailyDoses = getDailyDoses(actor);
     const dc = calculateToxicityDC(dailyDoses);
 
@@ -163,7 +169,11 @@ export async function handleAetherFuelUse(actor, item) {
 
   if (!consumed) {
     console.log(`Elysium | Consumption failed unexpectedly`);
-    return { consumed: false, quality, toxicityApplied: quality === 'unrefined' };
+    return {
+      consumed: false,
+      quality,
+      toxicityApplied: quality === "unrefined",
+    };
   }
 
   console.log(`Elysium | Consumption succeeded, quality: ${quality}`);
@@ -171,6 +181,6 @@ export async function handleAetherFuelUse(actor, item) {
   return {
     consumed: true,
     quality,
-    toxicityApplied: quality === 'unrefined'
+    toxicityApplied: quality === "unrefined",
   };
 }

@@ -4,7 +4,7 @@
  * Logic for removing stored spells from finger slots
  */
 
-import { getStoredSpells, setStoredSpells } from '../utils/flags.js';
+import { getStoredSpells, setStoredSpells } from "../utils/flags.js";
 
 /**
  * Clear/forget a spell from a specific finger
@@ -16,14 +16,16 @@ export async function clearSpellFromFinger(aethersGraspItem, fingerIndex) {
   const storedSpells = getStoredSpells(aethersGraspItem);
 
   // Find the spell being removed
-  const removedSpell = storedSpells.find(s => s.fingerIndex === fingerIndex);
+  const removedSpell = storedSpells.find((s) => s.fingerIndex === fingerIndex);
 
   if (!removedSpell) {
     return null;
   }
 
   // Filter out the spell at this finger
-  const updatedSpells = storedSpells.filter(s => s.fingerIndex !== fingerIndex);
+  const updatedSpells = storedSpells.filter(
+    (s) => s.fingerIndex !== fingerIndex,
+  );
 
   // Save updated list
   await setStoredSpells(aethersGraspItem, updatedSpells);

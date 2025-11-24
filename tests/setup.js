@@ -5,41 +5,41 @@
  * running a full Foundry instance.
  */
 
-import { jest } from '@jest/globals';
+import { jest } from "@jest/globals";
 
 // Mock game object
 global.game = {
   user: {
-    id: 'test-user-id',
+    id: "test-user-id",
     character: null,
-    isGM: false
+    isGM: false,
   },
   settings: {
     get: jest.fn(),
     set: jest.fn(),
-    register: jest.fn()
+    register: jest.fn(),
   },
   i18n: {
-    localize: jest.fn(key => key),
-    format: jest.fn((key, data) => key)
+    localize: jest.fn((key) => key),
+    format: jest.fn((key, data) => key),
   },
   actors: {
     get: jest.fn(),
     getName: jest.fn(),
-    filter: jest.fn(() => [])
+    filter: jest.fn(() => []),
   },
   items: {
     get: jest.fn(),
     getName: jest.fn(),
-    filter: jest.fn(() => [])
+    filter: jest.fn(() => []),
   },
-  packs: new Map()
+  packs: new Map(),
 };
 
 // Mock ChatMessage
 global.ChatMessage = {
   create: jest.fn(),
-  getSpeaker: jest.fn(() => ({ alias: 'Test Speaker' }))
+  getSpeaker: jest.fn(() => ({ alias: "Test Speaker" })),
 };
 
 // Mock Dialog
@@ -50,8 +50,8 @@ global.ui = {
   notifications: {
     info: jest.fn(),
     warn: jest.fn(),
-    error: jest.fn()
-  }
+    error: jest.fn(),
+  },
 };
 
 // Mock Hooks (we'll test the hook callbacks, not the hook system itself)
@@ -59,15 +59,15 @@ global.Hooks = {
   on: jest.fn(),
   once: jest.fn(),
   call: jest.fn(),
-  callAll: jest.fn()
+  callAll: jest.fn(),
 };
 
 // Mock foundry utils
 global.foundry = {
   utils: {
-    randomID: jest.fn(() => 'mock-random-id'),
-    duplicate: jest.fn(obj => JSON.parse(JSON.stringify(obj)))
-  }
+    randomID: jest.fn(() => "mock-random-id"),
+    duplicate: jest.fn((obj) => JSON.parse(JSON.stringify(obj))),
+  },
 };
 
 // Mock Roll
@@ -77,6 +77,6 @@ global.Roll = jest.fn();
 global.CONST = {
   CHAT_MESSAGE_TYPES: {
     OTHER: 0,
-    ROLL: 5
-  }
+    ROLL: 5,
+  },
 };

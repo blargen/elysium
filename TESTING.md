@@ -22,6 +22,7 @@ ln -s /Users/eben/code/elysium ~/foundrydata/Data/modules/elysium
 ### 3. Verify Installation
 
 Open console (F12) and look for:
+
 ```
 Elysium | Loading...
 Elysium | Initializing...
@@ -92,6 +93,7 @@ ui.notifications.info("Created Unrefined Aether Vial!");
 ### Create Other Aether Qualities
 
 **Basic Refined (Safe):**
+
 ```javascript
 const basicAether = {
   name: "Basic Refined Aether",
@@ -113,6 +115,7 @@ await actor.createEmbeddedDocuments("Item", [basicAether]);
 ```
 
 **Rarefied (+1 bonus):**
+
 ```javascript
 const rarefiedAether = {
   name: "Rarefied Aether",
@@ -134,6 +137,7 @@ await actor.createEmbeddedDocuments("Item", [rarefiedAether]);
 ```
 
 **Prometheum (+5 bonus):**
+
 ```javascript
 const prometheumAether = {
   name: "Prometheum",
@@ -321,12 +325,14 @@ await actor.longRest();
 ## ✅ What's Fully Working
 
 ### Aether Fuel System
+
 - ✅ All 5 quality tiers
 - ✅ Automatic consumption on use
 - ✅ Quality modifiers applied
 - ✅ Fuel selection dialogs
 
 ### Toxicity System
+
 - ✅ Daily dose tracking
 - ✅ Escalating CON save DC
 - ✅ ATL progression
@@ -335,6 +341,7 @@ await actor.longRest();
 - ✅ Long rest reset (automatic)
 
 ### Aether's Grasp
+
 - ✅ Cast from finger (FULLY WORKING!)
 - ✅ Finger selection dialog
 - ✅ Aether selection dialog
@@ -356,6 +363,7 @@ await actor.longRest();
 ## 📊 Test Coverage
 
 All systems have **100% unit test coverage**:
+
 - **101 passing tests**
 - **7 test suites**
 - Pure logic fully tested
@@ -375,9 +383,10 @@ Run tests: `npm test`
 
 ---
 
-## 🎉 Have Fun Testing!
+## 🎉 Have Fun Testing
 
 You built a complete FoundryVTT module with:
+
 - ✅ **101 passing tests**
 - ✅ **TDD methodology**
 - ✅ **Modular, maintainable code**

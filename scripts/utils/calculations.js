@@ -13,7 +13,7 @@
  * @returns {number} The Constitution save DC
  */
 export function calculateToxicityDC(dailyDoses) {
-  return 8 + (2 * (dailyDoses + 1));
+  return 8 + 2 * (dailyDoses + 1);
 }
 
 /**

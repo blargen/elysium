@@ -11,7 +11,7 @@
     "attunement": "required",
     "rarity": "rare",
     "description": {
-      "value": "<p>A hand modification that allows you to store spells on your fingers and cast them using aether fuel.</p>\n              <h3>Features:</h3>\n              <ul>\n                <li><strong>Capacity:</strong> 5 spells (one per finger)</li>\n                <li><strong>Spell Level:</strong> 1st level spells only</li>\n                <li><strong>Imprint:</strong> Consume a spell scroll to store it on a finger</li>\n                <li><strong>Cast:</strong> Use aether fuel to cast stored spells</li>\n              </ul>",
+      "value": "<p>A hand modification that allows wizards to store spells on their fingers and cast them using aether fuel.</p>\n              <h3>Features:</h3>\n              <ul>\n                <li><strong>Capacity:</strong> 5 spells (one per finger)</li>\n                <li><strong>Spell Level:</strong> 1st level wizard spells only</li>\n                <li><strong>Imprint:</strong> Consume a wizard spell scroll to store it on a finger</li>\n                <li><strong>Cast:</strong> Use aether fuel to cast stored spells</li>\n                <li><strong>Upcast:</strong> Spend a spell slot to cast at 2nd level</li>\n              </ul>\n              <p class=\"elysium-info-box\"><strong>Note:</strong> This modification requires attunement and a minimum wizard level of 3. Different aether qualities may produce varying effects and risks.</p>",
       "chat": ""
     },
     "activities": {
@@ -151,6 +151,8 @@
     "elysium": {
       "requiresAether": true,
       "modType": "spell-storage",
+      "requiredClass": "wizard",
+      "requiredLevel": 3,
       "maxStoredSpells": 5,
       "allowedSpellLevel": 1,
       "storedSpells": []

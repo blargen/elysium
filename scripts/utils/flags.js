@@ -15,7 +15,7 @@
  * @returns {number}
  */
 export function getDailyDoses(actor) {
-  return actor.getFlag('elysium', 'dailyDoses') || 0;
+  return actor.getFlag("elysium", "dailyDoses") || 0;
 }
 
 /**
@@ -24,7 +24,7 @@ export function getDailyDoses(actor) {
  * @param {number} doses
  */
 export async function setDailyDoses(actor, doses) {
-  return await actor.setFlag('elysium', 'dailyDoses', doses);
+  return await actor.setFlag("elysium", "dailyDoses", doses);
 }
 
 /**
@@ -33,7 +33,7 @@ export async function setDailyDoses(actor, doses) {
  * @returns {number}
  */
 export function getATL(actor) {
-  return actor.getFlag('elysium', 'atl') || 0;
+  return actor.getFlag("elysium", "atl") || 0;
 }
 
 /**
@@ -42,7 +42,7 @@ export function getATL(actor) {
  * @param {number} atl
  */
 export async function setATL(actor, atl) {
-  return await actor.setFlag('elysium', 'atl', atl);
+  return await actor.setFlag("elysium", "atl", atl);
 }
 
 // ============================================================================
@@ -55,7 +55,7 @@ export async function setATL(actor, atl) {
  * @returns {boolean}
  */
 export function isAetherFuel(item) {
-  return item.getFlag('elysium', 'isAetherFuel') || false;
+  return item.getFlag("elysium", "isAetherFuel") || false;
 }
 
 /**
@@ -64,7 +64,7 @@ export function isAetherFuel(item) {
  * @returns {boolean}
  */
 export function requiresAether(item) {
-  return item.getFlag('elysium', 'requiresAether') || false;
+  return item.getFlag("elysium", "requiresAether") || false;
 }
 
 /**
@@ -73,7 +73,7 @@ export function requiresAether(item) {
  * @returns {string|null} - "unrefined", "basic-refined", "rarefied", "prometheum", "wild", or null
  */
 export function getAetherQuality(item) {
-  return item.getFlag('elysium', 'aetherQuality') || null;
+  return item.getFlag("elysium", "aetherQuality") || null;
 }
 
 /**
@@ -82,7 +82,7 @@ export function getAetherQuality(item) {
  * @returns {string|null} - "spell-storage", "weapon-enhancement", etc., or null
  */
 export function getModType(item) {
-  return item.getFlag('elysium', 'modType') || null;
+  return item.getFlag("elysium", "modType") || null;
 }
 
 /**
@@ -91,7 +91,7 @@ export function getModType(item) {
  * @returns {Array}
  */
 export function getStoredSpells(item) {
-  return item.getFlag('elysium', 'storedSpells') || [];
+  return item.getFlag("elysium", "storedSpells") || [];
 }
 
 /**
@@ -100,5 +100,5 @@ export function getStoredSpells(item) {
  * @param {Array} spells
  */
 export async function setStoredSpells(item, spells) {
-  return await item.setFlag('elysium', 'storedSpells', spells);
+  return await item.setFlag("elysium", "storedSpells", spells);
 }

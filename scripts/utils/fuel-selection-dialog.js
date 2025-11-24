@@ -4,9 +4,12 @@
  * Shows a dialog to let the user choose which aether fuel to use
  */
 
-import { getAvailableAetherFuel, getQualityDescription } from '../aether-fuel/fuel-selection.js';
-import { getAetherQuality } from './flags.js';
-import { showToxicityWarning } from '../aether-fuel/consumption.js';
+import {
+  getAvailableAetherFuel,
+  getQualityDescription,
+} from "../aether-fuel/fuel-selection.js";
+import { getAetherQuality } from "./flags.js";
+import { showToxicityWarning } from "../aether-fuel/consumption.js";
 
 /**
  * Show fuel selection dialog and return the selected fuel item
@@ -19,18 +22,18 @@ export async function selectAetherFuel(actor) {
   const aetherItems = getAvailableAetherFuel(actor);
 
   if (aetherItems.length === 0) {
-    if (typeof ui !== 'undefined') {
+    if (typeof ui !== "undefined") {
       ui.notifications.error("No aether fuel available!");
     }
     return null;
   }
 
   // If Dialog doesn't exist (test environment), just return the first fuel
-  if (typeof Dialog === 'undefined') {
+  if (typeof Dialog === "undefined") {
     const firstFuel = aetherItems[0];
     // Still check for unrefined toxicity
     const quality = getAetherQuality(firstFuel);
-    if (quality === 'unrefined') {
+    if (quality === "unrefined") {
       const proceed = await showToxicityWarning(actor);
       if (!proceed) return null;
     }
@@ -38,13 +41,13 @@ export async function selectAetherFuel(actor) {
   }
 
   // Build HTML content with fuel options
-  let fuelOptionsHtml = '';
-  aetherItems.forEach(aether => {
+  let fuelOptionsHtml = "";
+  aetherItems.forEach((aether) => {
     const quality = getAetherQuality(aether);
     const qualityDesc = getQualityDescription(quality);
     const uses = aether.system?.uses?.value || 0;
     const maxUses = aether.system?.uses?.max || 0;
-    const img = aether.img || 'icons/svg/item-bag.svg';
+    const img = aether.img || "icons/svg/item-bag.svg";
 
     fuelOptionsHtml += `
       <div class="elysium-fuel-option" data-fuel-id="${aether.id}">
@@ -52,7 +55,7 @@ export async function selectAetherFuel(actor) {
         <div class="elysium-fuel-info">
           <div class="elysium-fuel-name">${aether.name}</div>
           <div class="elysium-fuel-uses">${uses} / ${maxUses} uses</div>
-          ${qualityDesc ? `<div class="elysium-fuel-quality">${qualityDesc}</div>` : ''}
+          ${qualityDesc ? `<div class="elysium-fuel-quality">${qualityDesc}</div>` : ""}
         </div>
       </div>
     `;
@@ -74,17 +77,17 @@ export async function selectAetherFuel(actor) {
         cancel: {
           icon: '<i class="fas fa-times"></i>',
           label: "Cancel",
-          callback: () => resolve(null)
-        }
+          callback: () => resolve(null),
+        },
       },
       render: (html) => {
-        html.find('.elysium-fuel-option').click((event) => {
+        html.find(".elysium-fuel-option").click((event) => {
           const fuelId = event.currentTarget.dataset.fuelId;
           resolve(fuelId);
-          html.closest('.dialog').find('.dialog-button.cancel').click();
+          html.closest(".dialog").find(".dialog-button.cancel").click();
         });
       },
-      default: "cancel"
+      default: "cancel",
     }).render(true);
   });
 
@@ -94,7 +97,7 @@ export async function selectAetherFuel(actor) {
 
   // Check if unrefined and show toxicity warning
   const quality = getAetherQuality(aetherItem);
-  if (quality === 'unrefined') {
+  if (quality === "unrefined") {
     const proceed = await showToxicityWarning(actor);
     if (!proceed) {
       ui.notifications.warn("Unrefined aether use cancelled.");

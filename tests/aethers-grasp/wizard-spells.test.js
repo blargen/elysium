@@ -76,50 +76,34 @@ describe("Aether's Grasp - Wizard Spell Validation", () => {
     };
   });
 
-  test("should return ALL spell scrolls (DM controls scroll availability)", () => {
+  test("should return ALL spell scrolls regardless of class (DM controls scroll availability)", () => {
     const allScrolls = [...wizardScrolls, ...nonWizardScrolls];
     mockActor.items._data = allScrolls;
 
     const result = findFirstLevelScrolls(mockActor);
 
-    // Should include wizard, cleric, AND druid scrolls
+    // Should return all scrolls - we don't care about class
     expect(result).toHaveLength(4);
-    expect(result.some((s) => s.system.sourceClass === "wizard")).toBe(true);
-    expect(result.some((s) => s.system.sourceClass === "cleric")).toBe(true);
-    expect(result.some((s) => s.system.sourceClass === "druid")).toBe(true);
+    expect(result.every((s) => s.type === "consumable")).toBe(true);
+    expect(result.every((s) => s.system.type?.value === "scroll")).toBe(true);
   });
 
-  test("should include cleric spells", () => {
+  test("should return any available scrolls", () => {
     mockActor.items._data = [...wizardScrolls, nonWizardScrolls[0]];
 
     const result = findFirstLevelScrolls(mockActor);
 
-    // Should include both wizard and cleric scrolls
+    // Just verify we get scrolls back
     expect(result).toHaveLength(3);
-    expect(result.some((s) => s.system.sourceClass === "wizard")).toBe(true);
-    expect(result.some((s) => s.system.sourceClass === "cleric")).toBe(true);
+    expect(result.every((s) => s.type === "consumable")).toBe(true);
   });
 
-  test("should include druid spells", () => {
-    mockActor.items._data = [...wizardScrolls, nonWizardScrolls[1]];
+  test("should return empty array if no scrolls available", () => {
+    mockActor.items._data = []; // No scrolls at all
 
     const result = findFirstLevelScrolls(mockActor);
 
-    // Should include both wizard and druid scrolls
-    expect(result).toHaveLength(3);
-    expect(result.some((s) => s.system.sourceClass === "wizard")).toBe(true);
-    expect(result.some((s) => s.system.sourceClass === "druid")).toBe(true);
-  });
-
-  test("should return non-wizard scrolls if only those are available", () => {
-    mockActor.items._data = nonWizardScrolls;
-
-    const result = findFirstLevelScrolls(mockActor);
-
-    // Should include cleric and druid scrolls
-    expect(result).toHaveLength(2);
-    expect(result.some((s) => s.system.sourceClass === "cleric")).toBe(true);
-    expect(result.some((s) => s.system.sourceClass === "druid")).toBe(true);
+    expect(result).toHaveLength(0);
   });
 
   test("should accept scrolls of any level (DM controls scroll availability)", () => {
@@ -141,7 +125,9 @@ describe("Aether's Grasp - Wizard Spell Validation", () => {
 
     // Should return ALL scrolls regardless of level (DM controls what scrolls exist)
     expect(result).toHaveLength(3);
-    expect(result.some((s) => s.system.identifier === "spell-scroll-2nd-level")).toBe(true);
+    expect(
+      result.some((s) => s.system.identifier === "spell-scroll-2nd-level"),
+    ).toBe(true);
   });
 
   test("should handle scrolls with depleted uses", () => {

@@ -4,7 +4,7 @@
  * Allows casting Jump spell on self using aether fuel
  */
 
-import { useAetherPoweredItem } from '../utils/aether-items.js';
+import { useAetherPoweredItem } from "../utils/aether-items.js";
 
 /**
  * Apply the Jump spell effect to an actor (Aether's Leap)
@@ -18,12 +18,14 @@ import { useAetherPoweredItem } from '../utils/aether-items.js';
  * @returns {Promise<Object>} Result with success and effectApplied
  */
 export async function applyLeapEffect(actor, fuelQuality) {
-  console.log(`Elysium | Applying Leap effect to ${actor.name} (${fuelQuality} aether)`);
+  console.log(
+    `Elysium | Applying Leap effect to ${actor.name} (${fuelQuality} aether)`,
+  );
 
   try {
     // Check if the effect already exists
     const existingEffect = actor.effects?.contents?.find(
-      e => e.name === "Aether's Leap" && !e.disabled
+      (e) => e.name === "Aether's Leap" && !e.disabled,
     );
 
     if (existingEffect) {
@@ -32,51 +34,51 @@ export async function applyLeapEffect(actor, fuelQuality) {
 
       await existingEffect.update({
         duration: {
-          rounds: 10 // Reset to 1 minute
-        }
+          rounds: 10, // Reset to 1 minute
+        },
       });
 
-      if (typeof ui !== 'undefined') {
+      if (typeof ui !== "undefined") {
         ui.notifications?.info(`Aether's Leap effect refreshed!`);
       }
 
       return {
         success: true,
         effectApplied: true,
-        refreshed: true
+        refreshed: true,
       };
     }
 
     // Create the Leap active effect
     const effectData = {
       name: "Aether's Leap",
-      icon: 'modules/elysium/assets/AethersLeap.png',
+      icon: "modules/elysium/assets/AethersLeap.png",
       origin: actor.uuid,
       duration: {
-        rounds: 10 // 1 minute = 10 rounds
+        rounds: 10, // 1 minute = 10 rounds
       },
       flags: {
         dnd5e: {
-          concentration: true // Requires concentration
+          concentration: true, // Requires concentration
         },
         elysium: {
           aetherPowered: true,
-          fuelQuality: fuelQuality
-        }
+          fuelQuality: fuelQuality,
+        },
       },
       changes: [
         // The Jump spell doesn't add numerical bonuses in 5e
         // It's a narrative effect that allows jumping 30ft with 10ft movement
         // We document this in the effect description
-      ]
+      ],
     };
 
-    await actor.createEmbeddedDocuments('ActiveEffect', [effectData]);
+    await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
 
     console.log(`Elysium | Leap effect applied successfully`);
 
     // Show a chat message about the effect
-    if (typeof ChatMessage !== 'undefined') {
+    if (typeof ChatMessage !== "undefined") {
       ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor }),
         content: `
@@ -90,21 +92,20 @@ export async function applyLeapEffect(actor, fuelQuality) {
               Requires concentration. Powered by ${fuelQuality} aether.
             </p>
           </div>
-        `
+        `,
       });
     }
 
     return {
       success: true,
-      effectApplied: true
+      effectApplied: true,
     };
-
   } catch (error) {
     console.error(`Elysium | Failed to apply Leap effect:`, error);
     return {
       success: false,
       effectApplied: false,
-      error: error.message
+      error: error.message,
     };
   }
 }

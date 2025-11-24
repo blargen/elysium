@@ -4,80 +4,81 @@
  * Testing the full flow of consuming aether fuel items in-game
  */
 
-import { describe, test, expect, beforeEach, jest } from '@jest/globals';
+import { describe, test, expect, beforeEach, jest } from "@jest/globals";
 import {
   handleAetherFuelUse,
   consumeAetherFuelItem,
-  rollConstitutionSave
-} from '../../scripts/aether-fuel/consumption.js';
+  rollConstitutionSave,
+} from "../../scripts/aether-fuel/consumption.js";
 
-describe('Aether Fuel Consumption', () => {
+describe("Aether Fuel Consumption", () => {
   let mockActor;
   let mockItem;
 
   beforeEach(() => {
     mockActor = {
-      name: 'Test Character',
+      name: "Test Character",
       flags: {},
       system: {
         abilities: {
-          con: { mod: 2 }
+          con: { mod: 2 },
         },
         attributes: {
-          exhaustion: 0
-        }
+          exhaustion: 0,
+        },
       },
-      getFlag: function(scope, key) {
+      getFlag: function (scope, key) {
         return this.flags[scope]?.[key];
       },
-      setFlag: jest.fn(async function(scope, key, value) {
+      setFlag: jest.fn(async function (scope, key, value) {
         if (!this.flags[scope]) this.flags[scope] = {};
         this.flags[scope][key] = value;
         return this;
       }),
-      rollAbilitySave: jest.fn(async function(ability, options) {
+      rollAbilitySave: jest.fn(async function (ability, options) {
         // Mock returning a successful roll (old API)
         return { total: 15 };
       }),
-      rollSavingThrow: jest.fn(async function(options) {
+      rollSavingThrow: jest.fn(async function (options) {
         // Mock returning a successful roll (new v4.1+ API)
         return [{ _total: 15, total: 15 }];
       }),
-      toggleStatusEffect: jest.fn(async function(condition, options) {
+      toggleStatusEffect: jest.fn(async function (condition, options) {
         return this;
       }),
-      update: jest.fn(async function(data) {
-        if (data['system.attributes.exhaustion'] !== undefined) {
-          this.system.attributes.exhaustion = data['system.attributes.exhaustion'];
+      update: jest.fn(async function (data) {
+        if (data["system.attributes.exhaustion"] !== undefined) {
+          this.system.attributes.exhaustion =
+            data["system.attributes.exhaustion"];
         }
         return this;
-      })
+      }),
     };
 
     mockItem = {
-      name: 'Test Aether',
+      name: "Test Aether",
       flags: {},
       system: {
         uses: { value: 5, max: 5 },
-        quantity: 1
+        quantity: 1,
       },
-      getFlag: function(scope, key) {
+      getFlag: function (scope, key) {
         return this.flags[scope]?.[key];
       },
-      update: jest.fn(async function(data) {
-        if (data['system.uses.value'] !== undefined) {
-          this.system.uses.value = data['system.uses.value'];
+      update: jest.fn(async function (data) {
+        if (data["system.uses.value"] !== undefined) {
+          this.system.uses.value = data["system.uses.value"];
         }
         return this;
       }),
-      delete: jest.fn(async function() {
+      delete: jest.fn(async function () {
         return this;
-      })
+      }),
     };
   });
 
-  describe('consumeAetherFuelItem', () => {
-    test('deletes the item when last use and last quantity', async () => {
+  describe("consumeAetherFuelItem", () => {
+    test("deletes the item when last use and last quantity", async () => {
       mockItem.system.uses.value = 1;
       mockItem.system.quantity = 1;
 
@@ -87,31 +88,31 @@ describe('Aether Fuel Consumption', () => {
       expect(mockItem.update).not.toHaveBeenCalled();
     });
 
-    test('decrements uses when multiple uses remaining', async () => {
+    test("decrements uses when multiple uses remaining", async () => {
       mockItem.system.uses.value = 5;
       mockItem.system.quantity = 1;
 
       await consumeAetherFuelItem(mockItem);
 
       expect(mockItem.update).toHaveBeenCalledWith({
-        'system.uses.value': 4
+        "system.uses.value": 4,
       });
       expect(mockItem.delete).not.toHaveBeenCalled();
     });
 
-    test('decrements from 2 to 1 without deleting', async () => {
+    test("decrements from 2 to 1 without deleting", async () => {
       mockItem.system.uses.value = 2;
       mockItem.system.quantity = 1;
 
       await consumeAetherFuelItem(mockItem);
 
       expect(mockItem.update).toHaveBeenCalledWith({
-        'system.uses.value': 1
+        "system.uses.value": 1,
       });
       expect(mockItem.delete).not.toHaveBeenCalled();
     });
 
-    test('decrements quantity and resets uses when stack > 1', async () => {
+    test("decrements quantity and resets uses when stack > 1", async () => {
       mockItem.system.uses.value = 1;
       mockItem.system.quantity = 5;
       mockItem.system.uses.max = 1;
@@ -119,13 +120,13 @@ describe('Aether Fuel Consumption', () => {
       await consumeAetherFuelItem(mockItem);
 
       expect(mockItem.update).toHaveBeenCalledWith({
-        'system.quantity': 4,
-        'system.uses.value': 1
+        "system.quantity": 4,
+        "system.uses.value": 1,
       });
       expect(mockItem.delete).not.toHaveBeenCalled();
     });
 
-    test('decrements quantity from 2 to 1', async () => {
+    test("decrements quantity from 2 to 1", async () => {
       mockItem.system.uses.value = 1;
       mockItem.system.quantity = 2;
       mockItem.system.uses.max = 1;
@@ -133,13 +134,13 @@ describe('Aether Fuel Consumption', () => {
       await consumeAetherFuelItem(mockItem);
 
       expect(mockItem.update).toHaveBeenCalledWith({
-        'system.quantity': 1,
-        'system.uses.value': 1
+        "system.quantity": 1,
+        "system.uses.value": 1,
       });
       expect(mockItem.delete).not.toHaveBeenCalled();
     });
 
-    test('does not consume if no uses remaining', async () => {
+    test("does not consume if no uses remaining", async () => {
       mockItem.system.uses.value = 0;
 
       const result = await consumeAetherFuelItem(mockItem);
@@ -149,7 +150,7 @@ describe('Aether Fuel Consumption', () => {
       expect(mockItem.update).not.toHaveBeenCalled();
     });
 
-    test('returns true on successful consumption (single-use)', async () => {
+    test("returns true on successful consumption (single-use)", async () => {
       mockItem.system.uses.value = 1;
 
       const result = await consumeAetherFuelItem(mockItem);
@@ -157,7 +158,7 @@ describe('Aether Fuel Consumption', () => {
       expect(result).toBe(true);
     });
 
-    test('returns true on successful consumption (multi-use)', async () => {
+    test("returns true on successful consumption (multi-use)", async () => {
       mockItem.system.uses.value = 5;
 
       const result = await consumeAetherFuelItem(mockItem);
@@ -165,7 +166,7 @@ describe('Aether Fuel Consumption', () => {
       expect(result).toBe(true);
     });
 
-    test('returns false when no uses remaining', async () => {
+    test("returns false when no uses remaining", async () => {
       mockItem.system.uses.value = 0;
 
       const result = await consumeAetherFuelItem(mockItem);
@@ -174,19 +175,19 @@ describe('Aether Fuel Consumption', () => {
     });
   });
 
-  describe('rollConstitutionSave', () => {
-    test('calls actor.rollSavingThrow with correct DC (v4.1+ API)', async () => {
+  describe("rollConstitutionSave", () => {
+    test("calls actor.rollSavingThrow with correct DC (v4.1+ API)", async () => {
       const dc = 12;
 
       await rollConstitutionSave(mockActor, dc);
 
       expect(mockActor.rollSavingThrow).toHaveBeenCalledWith({
-        ability: 'con',
-        targetValue: 12
+        ability: "con",
+        targetValue: 12,
       });
     });
 
-    test('returns the roll result', async () => {
+    test("returns the roll result", async () => {
       mockActor.rollSavingThrow.mockResolvedValue([{ _total: 18, total: 18 }]);
 
       const roll = await rollConstitutionSave(mockActor, 15);
@@ -196,45 +197,45 @@ describe('Aether Fuel Consumption', () => {
     });
   });
 
-  describe('handleAetherFuelUse', () => {
-    test('consumes item and returns quality for basic-refined', async () => {
+  describe("handleAetherFuelUse", () => {
+    test("consumes item and returns quality for basic-refined", async () => {
       mockItem.flags.elysium = {
         isAetherFuel: true,
-        aetherQuality: 'basic-refined'
+        aetherQuality: "basic-refined",
       };
 
       const result = await handleAetherFuelUse(mockActor, mockItem);
 
       expect(result).toEqual({
         consumed: true,
-        quality: 'basic-refined',
-        toxicityApplied: false
+        quality: "basic-refined",
+        toxicityApplied: false,
       });
       // Item has 5 uses by default, so it should decrement, not delete
       expect(mockItem.update).toHaveBeenCalledWith({
-        'system.uses.value': 4
+        "system.uses.value": 4,
       });
       expect(mockItem.delete).not.toHaveBeenCalled();
     });
 
-    test('applies toxicity for unrefined aether', async () => {
+    test("applies toxicity for unrefined aether", async () => {
       mockItem.flags.elysium = {
         isAetherFuel: true,
-        aetherQuality: 'unrefined'
+        aetherQuality: "unrefined",
       };
       mockActor.rollAbilitySave.mockResolvedValue({ total: 5 }); // Fail the save
 
       const result = await handleAetherFuelUse(mockActor, mockItem);
 
       expect(result.consumed).toBe(true);
-      expect(result.quality).toBe('unrefined');
+      expect(result.quality).toBe("unrefined");
       expect(result.toxicityApplied).toBe(true);
       expect(mockActor.setFlag).toHaveBeenCalled();
     });
 
-    test('does not consume item if not aether fuel', async () => {
+    test("does not consume item if not aether fuel", async () => {
       mockItem.flags.elysium = {
-        isAetherFuel: false
+        isAetherFuel: false,
       };
 
       const result = await handleAetherFuelUse(mockActor, mockItem);
@@ -243,10 +244,10 @@ describe('Aether Fuel Consumption', () => {
       expect(mockItem.update).not.toHaveBeenCalled();
     });
 
-    test('does not consume if no uses remaining', async () => {
+    test("does not consume if no uses remaining", async () => {
       mockItem.flags.elysium = {
         isAetherFuel: true,
-        aetherQuality: 'basic-refined'
+        aetherQuality: "basic-refined",
       };
       mockItem.system.uses.value = 0;
 
@@ -255,10 +256,10 @@ describe('Aether Fuel Consumption', () => {
       expect(result.consumed).toBe(false);
     });
 
-    test('increments daily doses for unrefined', async () => {
+    test("increments daily doses for unrefined", async () => {
       mockItem.flags.elysium = {
         isAetherFuel: true,
-        aetherQuality: 'unrefined'
+        aetherQuality: "unrefined",
       };
       mockActor.flags.elysium = { dailyDoses: 2 };
       mockActor.rollAbilitySave.mockResolvedValue({ total: 20 }); // Pass the save
@@ -267,7 +268,9 @@ describe('Aether Fuel Consumption', () => {
 
       // Should have called setFlag to increment dailyDoses
       const setFlagCalls = mockActor.setFlag.mock.calls;
-      const dailyDosesCall = setFlagCalls.find(call => call[1] === 'dailyDoses');
+      const dailyDosesCall = setFlagCalls.find(
+        (call) => call[1] === "dailyDoses",
+      );
       expect(dailyDosesCall).toBeTruthy();
       expect(dailyDosesCall[2]).toBe(3); // Incremented from 2 to 3
     });

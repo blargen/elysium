@@ -4,7 +4,7 @@
  * Grants advantage on Investigation checks for examining fine details (like Eyes of Minute Seeing)
  */
 
-import { useAetherPoweredItem } from '../utils/aether-items.js';
+import { useAetherPoweredItem } from "../utils/aether-items.js";
 
 /**
  * Apply the Investigation advantage effect to an actor (Aether's Detection)
@@ -18,12 +18,14 @@ import { useAetherPoweredItem } from '../utils/aether-items.js';
  * @returns {Promise<Object>} Result with success and effectApplied
  */
 export async function applyDetectionEffect(actor, fuelQuality) {
-  console.log(`Elysium | Applying Detection effect to ${actor.name} (${fuelQuality} aether)`);
+  console.log(
+    `Elysium | Applying Detection effect to ${actor.name} (${fuelQuality} aether)`,
+  );
 
   try {
     // Check if the effect already exists
     const existingEffect = actor.effects?.contents?.find(
-      e => e.name === "Aether's Detection" && !e.disabled
+      (e) => e.name === "Aether's Detection" && !e.disabled,
     );
 
     if (existingEffect) {
@@ -32,45 +34,45 @@ export async function applyDetectionEffect(actor, fuelQuality) {
 
       await existingEffect.update({
         duration: {
-          rounds: 100 // Reset to 10 minutes
-        }
+          rounds: 100, // Reset to 10 minutes
+        },
       });
 
-      if (typeof ui !== 'undefined') {
+      if (typeof ui !== "undefined") {
         ui.notifications?.info(`Aether's Detection effect refreshed!`);
       }
 
       return {
         success: true,
         effectApplied: true,
-        refreshed: true
+        refreshed: true,
       };
     }
 
     // Create the Detection active effect (just a timer/marker, no stat changes)
     const effectData = {
       name: "Aether's Detection",
-      icon: 'modules/elysium/assets/AethersDetection.png',
+      icon: "modules/elysium/assets/AethersDetection.png",
       origin: actor.uuid,
       duration: {
         rounds: 100, // 10 minutes = 100 rounds
-        seconds: 600 // Also track real time outside combat
+        seconds: 600, // Also track real time outside combat
       },
       flags: {
         elysium: {
           aetherPowered: true,
-          fuelQuality: fuelQuality
-        }
+          fuelQuality: fuelQuality,
+        },
       },
-      changes: [] // No stat changes - the Detect action grants advantage when rolled
+      changes: [], // No stat changes - the Detect action grants advantage when rolled
     };
 
-    await actor.createEmbeddedDocuments('ActiveEffect', [effectData]);
+    await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
 
     console.log(`Elysium | Detection effect applied successfully`);
 
     // Show a chat message about the effect
-    if (typeof ChatMessage !== 'undefined') {
+    if (typeof ChatMessage !== "undefined") {
       ChatMessage.create({
         speaker: ChatMessage.getSpeaker({ actor }),
         content: `
@@ -85,21 +87,20 @@ export async function applyDetectionEffect(actor, fuelQuality) {
               Powered by ${fuelQuality} aether.
             </p>
           </div>
-        `
+        `,
       });
     }
 
     return {
       success: true,
-      effectApplied: true
+      effectApplied: true,
     };
-
   } catch (error) {
     console.error(`Elysium | Failed to apply Detection effect:`, error);
     return {
       success: false,
       effectApplied: false,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -119,18 +120,23 @@ export async function useAethersDetection(actor, item, selectedFuel = null) {
   if (!item.system?.equipped) {
     console.log(`Elysium | ${item.name} is not equipped`);
 
-    if (typeof ui !== 'undefined') {
+    if (typeof ui !== "undefined") {
       ui.notifications?.warn(`You must equip ${item.name} to use it!`);
     }
 
     return {
       success: false,
-      reason: 'not-equipped',
-      fuelConsumed: false
+      reason: "not-equipped",
+      fuelConsumed: false,
     };
   }
 
-  return await useAetherPoweredItem(actor, item, applyDetectionEffect, selectedFuel);
+  return await useAetherPoweredItem(
+    actor,
+    item,
+    applyDetectionEffect,
+    selectedFuel,
+  );
 }
 
 /**
@@ -148,31 +154,33 @@ export async function rollDetectionCheck(actor, item) {
   if (!item.system?.equipped) {
     console.log(`Elysium | ${item.name} is not equipped`);
 
-    if (typeof ui !== 'undefined') {
+    if (typeof ui !== "undefined") {
       ui.notifications?.warn(`You must equip ${item.name} to use it!`);
     }
 
     return {
       success: false,
-      reason: 'not-equipped'
+      reason: "not-equipped",
     };
   }
 
   // Check if the Detection effect is active
   const hasActiveEffect = actor.effects?.contents?.some(
-    effect => effect.name === "Aether's Detection" && !effect.disabled
+    (effect) => effect.name === "Aether's Detection" && !effect.disabled,
   );
 
   if (!hasActiveEffect) {
     console.log(`Elysium | Aether's Detection effect is not active`);
 
-    if (typeof ui !== 'undefined') {
-      ui.notifications?.warn(`You must activate Aether's Detection first (costs aether fuel)!`);
+    if (typeof ui !== "undefined") {
+      ui.notifications?.warn(
+        `You must activate Aether's Detection first (costs aether fuel)!`,
+      );
     }
 
     return {
       success: false,
-      reason: 'effect-not-active'
+      reason: "effect-not-active",
     };
   }
 
@@ -181,14 +189,14 @@ export async function rollDetectionCheck(actor, item) {
     console.log(`Elysium | Auto-rolling Investigation check with advantage`);
 
     const roll = await actor.rollSkill({
-      skill: "inv",            // Investigation
-      advantage: true,         // Force advantage
-      configure: false,        // dnd5e v5.x: skip configuration dialog
+      skill: "inv", // Investigation
+      advantage: true, // Force advantage
+      configure: false, // dnd5e v5.x: skip configuration dialog
       chatMessage: true,
       flavor: "👁️ Aether's Detection — Investigation (Advantage)",
       midiOptions: {
-        skipRollDialog: true   // midi-qol: skip midi's dialog
-      }
+        skipRollDialog: true, // midi-qol: skip midi's dialog
+      },
     });
 
     console.log(`Elysium | Detection check rolled:`, roll?.total);
@@ -196,14 +204,13 @@ export async function rollDetectionCheck(actor, item) {
     return {
       success: true,
       total: roll?.total,
-      roll
+      roll,
     };
-
   } catch (error) {
     console.error(`Elysium | Failed to roll Detection check:`, error);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 }

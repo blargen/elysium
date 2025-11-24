@@ -4,8 +4,8 @@
  * Reusable handler for all aether-powered items
  */
 
-import { handleAetherFuelUse } from '../aether-fuel/consumption.js';
-import { selectAetherFuel } from './fuel-selection-dialog.js';
+import { handleAetherFuelUse } from "../aether-fuel/consumption.js";
+import { selectAetherFuel } from "./fuel-selection-dialog.js";
 
 /**
  * Use an aether-powered item with automatic fuel handling
@@ -21,7 +21,12 @@ import { selectAetherFuel } from './fuel-selection-dialog.js';
  *   await applyJumpSpell(actor, quality);
  * });
  */
-export async function useAetherPoweredItem(actor, item, effectCallback, selectedFuel = null) {
+export async function useAetherPoweredItem(
+  actor,
+  item,
+  effectCallback,
+  selectedFuel = null,
+) {
   console.log(`Elysium | useAetherPoweredItem: ${item.name} for ${actor.name}`);
 
   try {
@@ -34,8 +39,8 @@ export async function useAetherPoweredItem(actor, item, effectCallback, selected
         console.log(`Elysium | No aether fuel selected`);
         return {
           success: false,
-          reason: 'no-fuel',
-          fuelConsumed: false
+          reason: "no-fuel",
+          fuelConsumed: false,
         };
       }
     }
@@ -47,8 +52,8 @@ export async function useAetherPoweredItem(actor, item, effectCallback, selected
       console.log(`Elysium | Fuel consumption failed`);
       return {
         success: false,
-        reason: 'consumption-failed',
-        fuelConsumed: false
+        reason: "consumption-failed",
+        fuelConsumed: false,
       };
     }
 
@@ -65,16 +70,15 @@ export async function useAetherPoweredItem(actor, item, effectCallback, selected
       fuelConsumed: true,
       fuelQuality,
       toxicityApplied: consumptionResult.toxicityApplied,
-      ...effectResult
+      ...effectResult,
     };
-
   } catch (error) {
     console.error(`Elysium | useAetherPoweredItem error:`, error);
 
     return {
       success: false,
       error: error.message,
-      fuelConsumed: false
+      fuelConsumed: false,
     };
   }
 }

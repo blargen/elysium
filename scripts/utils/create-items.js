@@ -27,7 +27,7 @@ export async function createAetherItem(config) {
     flagName,
     activityName = `Activate ${name}`,
     activationType = "action",
-    activationValue = 1
+    activationValue = 1,
   } = config;
 
   const itemData = {
@@ -36,7 +36,7 @@ export async function createAetherItem(config) {
     img: img,
     system: {
       description: {
-        value: description
+        value: description,
       },
       rarity: rarity,
       identified: true,
@@ -47,25 +47,25 @@ export async function createAetherItem(config) {
           name: activityName,
           activation: {
             type: activationType,
-            value: activationValue
+            value: activationValue,
           },
           consumption: {
-            targets: []  // No built-in consumption - handled by module hooks
-          }
-        }
-      }
+            targets: [], // No built-in consumption - handled by module hooks
+          },
+        },
+      },
     },
     flags: {
       elysium: {
         [flagName]: true,
         requiresAether: true,
-        category: "aether-items"
-      }
-    }
+        category: "aether-items",
+      },
+    },
   };
 
   // Get the compendium
-  const pack = game.packs.get('elysium.elysium-items');
+  const pack = game.packs.get("elysium.elysium-items");
   if (!pack) {
     ui.notifications.error("Elysium Items compendium not found!");
     throw new Error("Compendium not found");
@@ -73,7 +73,7 @@ export async function createAetherItem(config) {
 
   // Delete old version if it exists
   const index = await pack.getIndex();
-  const existing = index.find(i => i.name === name);
+  const existing = index.find((i) => i.name === name);
 
   if (existing) {
     const oldItem = await pack.getDocument(existing._id);
@@ -111,14 +111,16 @@ export async function createAethersLeap() {
     flagName: "isAethersLeap",
     activityName: "Activate Aether's Leap",
     activationType: "action",
-    activationValue: 1
+    activationValue: 1,
   });
 }
 
 // Make functions available globally for macros
 window.ElysiumItemCreator = {
   createAetherItem,
-  createAethersLeap
+  createAethersLeap,
 };
 
-console.log("Elysium | Item creator loaded. Use window.ElysiumItemCreator from macros.");
+console.log(
+  "Elysium | Item creator loaded. Use window.ElysiumItemCreator from macros.",
+);
