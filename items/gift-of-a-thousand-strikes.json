@@ -1,0 +1,96 @@
+{
+  "name": "Gift of a Thousand Strikes",
+  "type": "equipment",
+  "img": "modules/elysium/assets/icons/GiftOfAThousandStrikes.png",
+  "system": {
+    "description": {
+      "value": "<p><strong>Gift of a Thousand Strikes</strong> is the standard modification given to all monks who show an aptitude for martial arts. This nervous system modification allows the wearer to channel aether energy directly into their ki pathways, enabling them to perform monk techniques without depleting their natural focus.</p><h3>Activation</h3><p>When activated, you may choose to:</p><ul><li><strong>Consume Aether:</strong> Use monk abilities without spending ki points</li><li><strong>Consume Aether and Ki:</strong> Enhanced effects when combining both energies</li></ul><h3>Available Techniques</h3><p><strong>Flurry of Strikes</strong></p><ul><li>Normal: Two unarmed strikes as a bonus action (no ki cost)</li><li>Enhanced (Aether + Ki): <em>Three</em> unarmed strikes as a bonus action</li></ul><p><strong>Patient Defense</strong></p><ul><li>Normal: Dodge action as bonus action (no ki cost)</li><li>Enhanced (Aether + Ki): Dodge + <strong>+2 AC</strong> until start of your next turn</li></ul><p><strong>Step of the Wind</strong></p><ul><li>Normal: Disengage or Dash as bonus action, jump distance doubled (no ki cost)</li><li>Enhanced (Aether + Ki): Disengage or Dash as bonus action, jump distance <strong>tripled</strong></li></ul><p class='elysium-info-box'><strong>Note:</strong> This modification requires attunement and a minimum monk level of 2. Different aether qualities may produce varying effects and risks.</p>"
+    },
+    "quantity": 1,
+    "weight": 0,
+    "price": { "value": 500, "denomination": "gp" },
+    "equipped": false,
+    "identified": true,
+    "rarity": "rare",
+    "attunement": 1,
+    "armor": {
+      "type": "trinket"
+    },
+    "activities": {
+      "activate": {
+        "type": "utility",
+        "_id": "activate000000001",
+        "name": "Activate Gift of a Thousand Strikes",
+        "activation": {
+          "type": "bonus",
+          "value": 1,
+          "condition": ""
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          }
+        },
+        "description": {
+          "chatFlavor": "Channeling aether through ki pathways..."
+        },
+        "duration": {
+          "value": "",
+          "units": ""
+        },
+        "range": {
+          "value": "",
+          "units": "self"
+        },
+        "target": {
+          "template": {
+            "count": "",
+            "contiguous": false,
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "units": ""
+          },
+          "affects": {
+            "count": "",
+            "type": "self",
+            "choice": false,
+            "special": ""
+          }
+        }
+      }
+    }
+  },
+  "flags": {
+    "elysium": {
+      "requiresAether": true,
+      "modType": "ki-enhancement",
+      "requiredClass": "monk",
+      "requiredLevel": 2,
+      "allowsKiBoost": true,
+      "monkAbilities": {
+        "flurry-of-blows": {
+          "label": "Flurry of Strikes",
+          "normalEffect": "Make 2 unarmed strikes as a bonus action (no ki cost)",
+          "enhancedEffect": "Make 3 unarmed strikes as a bonus action",
+          "enhancedBonus": "extra-strike"
+        },
+        "patient-defense": {
+          "label": "Patient Defense",
+          "normalEffect": "Take Dodge action as bonus action (no ki cost)",
+          "enhancedEffect": "Dodge action + +2 AC until start of next turn",
+          "enhancedBonus": "ac-bonus-2"
+        },
+        "step-of-wind": {
+          "label": "Step of the Wind",
+          "normalEffect": "Disengage or Dash as bonus action, jump distance doubled (no ki cost)",
+          "enhancedEffect": "Disengage or Dash as bonus action, jump distance tripled",
+          "enhancedBonus": "triple-jump"
+        }
+      }
+    }
+  }
+}

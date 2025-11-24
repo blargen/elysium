@@ -167,6 +167,25 @@ body,
   color: var(--aether-warning);
 }
 
+/* Bonus text for enhanced effects */
+.elysium-bonus-text {
+  font-size: 0.9em;
+  color: var(--aether-warning);
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+/* Automation status indicators */
+.elysium-auto-success {
+  font-size: 0.8em;
+  color: #66ff66;
+}
+
+.elysium-auto-manual {
+  font-size: 0.8em;
+  color: var(--aether-warning);
+}
+
 /* ===============================
    Aether Pulse & Scan FX
    =============================== */
@@ -918,4 +937,65 @@ body,
 .elysium-toxicity-warning .elysium-toxicity-value {
   color: var(--aether-orange);
   text-shadow: 0 0 6px rgba(208, 108, 17, 0.8);
+}
+
+/* ===============================
+   Toggle Switch
+   =============================== */
+.elysium-toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
+.elysium-toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.elysium-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: 0.3s;
+  border-radius: 26px;
+  border: 1px solid var(--aether-border-soft);
+}
+
+.elysium-toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: var(--aether-text-muted);
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.elysium-toggle-switch input:checked + .elysium-toggle-slider {
+  background-color: var(--aether-blue);
+  border-color: var(--aether-blue);
+  box-shadow: 0 0 8px rgba(17, 117, 208, 0.6);
+}
+
+.elysium-toggle-switch input:checked + .elysium-toggle-slider:before {
+  transform: translateX(24px);
+  background-color: var(--aether-text-main);
+}
+
+.elysium-toggle-switch input:disabled + .elysium-toggle-slider {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.elysium-toggle-switch input:disabled + .elysium-toggle-slider:before {
+  background-color: #666;
 }

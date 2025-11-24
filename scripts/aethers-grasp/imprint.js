@@ -4,22 +4,25 @@
  * Logic for storing spells from scrolls onto finger slots
  */
 
-import { getStoredSpells, setStoredSpells } from '../utils/flags.js';
+import { getStoredSpells, setStoredSpells } from "../utils/flags.js";
 
-const FINGER_NAMES = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky'];
+const FINGER_NAMES = ["Thumb", "Index", "Middle", "Ring", "Pinky"];
 const MAX_STORED_SPELLS = 5;
 
 /**
- * Find all 1st level spell scrolls in actor's inventory with uses > 0
+ * Find all spell scrolls in actor's inventory with uses > 0
+ * DM controls what scrolls players have access to - no filtering by level or class
  * @param {Actor} actor
  * @returns {Array<Item>}
  */
 export function findFirstLevelScrolls(actor) {
-  return actor.items.filter(item => {
-    return item.type === 'consumable' &&
-           item.system.type?.value === 'scroll' &&
-           item.system.identifier === 'spell-scroll-1st-level' &&
-           (item.system.uses?.value || 0) > 0;
+  return actor.items.filter((item) => {
+    // Just check if it's a scroll with uses remaining
+    return (
+      item.type === "consumable" &&
+      item.system.type?.value === "scroll" &&
+      (item.system.uses?.value || 0) > 0
+    );
   });
 }
 
@@ -32,13 +35,13 @@ export function getAvailableFingerSlots(aethersGraspItem) {
   const storedSpells = getStoredSpells(aethersGraspItem);
 
   return FINGER_NAMES.map((name, index) => {
-    const spell = storedSpells.find(s => s.fingerIndex === index);
+    const spell = storedSpells.find((s) => s.fingerIndex === index);
 
     return {
       index,
       name,
       occupied: !!spell,
-      spell: spell || null
+      spell: spell || null,
     };
   });
 }
@@ -61,7 +64,12 @@ export function canImprintMoreSpells(aethersGraspItem) {
  * @param {string} originalScrollName - Name of the scroll consumed
  * @returns {Promise<Object>} The stored spell object
  */
-export async function imprintSpellOnFinger(aethersGraspItem, fingerIndex, spellData, originalScrollName) {
+export async function imprintSpellOnFinger(
+  aethersGraspItem,
+  fingerIndex,
+  spellData,
+  originalScrollName,
+) {
   const storedSpells = getStoredSpells(aethersGraspItem);
 
   // Create the stored spell object
@@ -69,9 +77,11 @@ export async function imprintSpellOnFinger(aethersGraspItem, fingerIndex, spellD
     id: foundry?.utils?.randomID?.() || `spell-${Date.now()}-${Math.random()}`, // Fallback for tests
     fingerIndex,
     fingerName: FINGER_NAMES[fingerIndex],
-    spellData: foundry?.utils?.duplicate?.(spellData) || JSON.parse(JSON.stringify(spellData)), // Deep copy
+    spellData:
+      foundry?.utils?.duplicate?.(spellData) ||
+      JSON.parse(JSON.stringify(spellData)), // Deep copy
     imprintedAt: Date.now(),
-    originalScrollName
+    originalScrollName,
   };
 
   // Add to stored spells array
@@ -101,14 +111,14 @@ export async function consumeScroll(scrollItem) {
     } else {
       // Reduce quantity and reset uses
       await scrollItem.update({
-        'system.quantity': quantity - 1,
-        'system.uses.value': maxUses
+        "system.quantity": quantity - 1,
+        "system.uses.value": maxUses,
       });
     }
   } else {
     // Just reduce uses
     await scrollItem.update({
-      'system.uses.value': currentUses - 1
+      "system.uses.value": currentUses - 1,
     });
   }
 
