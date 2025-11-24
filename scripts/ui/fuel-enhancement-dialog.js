@@ -50,15 +50,20 @@ export async function showFuelEnhancementDialog(options) {
       <h3 class="elysium-header" style="font-size: 0.9rem; margin: 12px 0 8px 0;">Select Aether Fuel</h3>
       ${aetherFuel
         .map(
-          (fuel, index) => `
+          (fuel, index) => {
+            const quantity = fuel.system?.quantity || 1;
+            const img = fuel.img || "icons/svg/item-bag.svg";
+            return `
         <label class="elysium-fuel-option">
           <input type="radio" name="aether-fuel" value="${fuel.id}" ${index === 0 ? "checked" : ""} class="elysium-checkbox">
+          <img src="${img}" class="elysium-fuel-icon" alt="${fuel.name}">
           <div class="elysium-fuel-info">
             <div class="elysium-fuel-name">${fuel.name}</div>
-            <div class="elysium-fuel-uses">${fuel.system.uses.value} uses remaining</div>
+            <div class="elysium-fuel-uses">${quantity} available</div>
           </div>
         </label>
-      `,
+      `;
+          },
         )
         .join("")}
 
