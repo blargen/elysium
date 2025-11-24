@@ -45,8 +45,7 @@ export async function selectAetherFuel(actor) {
   aetherItems.forEach((aether) => {
     const quality = getAetherQuality(aether);
     const qualityDesc = getQualityDescription(quality);
-    const uses = aether.system?.uses?.value || 0;
-    const maxUses = aether.system?.uses?.max || 0;
+    const quantity = aether.system?.quantity || 1;
     const img = aether.img || "icons/svg/item-bag.svg";
 
     fuelOptionsHtml += `
@@ -54,7 +53,7 @@ export async function selectAetherFuel(actor) {
         <img src="${img}" class="elysium-fuel-icon" alt="${aether.name}">
         <div class="elysium-fuel-info">
           <div class="elysium-fuel-name">${aether.name}</div>
-          <div class="elysium-fuel-uses">${uses} / ${maxUses} uses</div>
+          <div class="elysium-fuel-uses">${quantity} available</div>
           ${qualityDesc ? `<div class="elysium-fuel-quality">${qualityDesc}</div>` : ""}
         </div>
       </div>

@@ -27,25 +27,16 @@ export async function consumeAetherFuelItem(item) {
     return false; // Cannot consume
   }
 
-  if (currentUses > 1) {
-    // Decrement uses (multiple uses per item)
-    await item.update({
-      "system.uses.value": currentUses - 1,
-    });
-    console.log(
-      `Elysium | ${item.name} consumed (${currentUses - 1} uses remaining)`,
-    );
-  } else if (currentQuantity > 1) {
-    // Last use of this item, but more in the stack - decrement quantity and reset uses
+  if (currentQuantity > 1) {
+    // More pieces in stack - decrement quantity
     await item.update({
       "system.quantity": currentQuantity - 1,
-      "system.uses.value": item.system.uses?.max || 1,
     });
     console.log(
-      `Elysium | ${item.name} consumed (${currentQuantity - 1} remaining in stack)`,
+      `Elysium | ${item.name} consumed (${currentQuantity - 1} remaining)`,
     );
   } else {
-    // Last use of last item - delete
+    // Last piece - delete the item
     await item.delete();
     console.log(`Elysium | ${item.name} consumed and deleted (last one)`);
   }

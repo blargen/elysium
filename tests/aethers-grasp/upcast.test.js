@@ -17,9 +17,10 @@ describe("Aether's Grasp Spell Upcasting", () => {
     mockAetherFuel = {
       id: "fuel-1",
       name: "Basic Refined Aether",
-      system: { uses: { value: 5, max: 5 } },
+      system: { uses: { value: 1, max: 1 }, quantity: 1 },
       getFlag: jest.fn(() => "basic-refined"),
       update: jest.fn(),
+      delete: jest.fn(),
     };
 
     // Mock wizard actor with spell slots
@@ -154,9 +155,7 @@ describe("Aether's Grasp Spell Upcasting", () => {
         mockAetherFuel,
       );
 
-      expect(mockAetherFuel.update).toHaveBeenCalledWith({
-        "system.uses.value": 4, // 5 - 1 = 4
-      });
+      expect(mockAetherFuel.delete).toHaveBeenCalled();
     });
   });
 

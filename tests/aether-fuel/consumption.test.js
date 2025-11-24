@@ -59,7 +59,7 @@ describe("Aether Fuel Consumption", () => {
       name: "Test Aether",
       flags: {},
       system: {
-        uses: { value: 5, max: 5 },
+        uses: { value: 1, max: 1 },
         quantity: 1,
       },
       getFlag: function (scope, key) {
@@ -68,6 +68,9 @@ describe("Aether Fuel Consumption", () => {
       update: jest.fn(async function (data) {
         if (data["system.uses.value"] !== undefined) {
           this.system.uses.value = data["system.uses.value"];
+        }
+        if (data["system.quantity"] !== undefined) {
+          this.system.quantity = data["system.quantity"];
         }
         return this;
       }),
@@ -78,7 +81,7 @@ describe("Aether Fuel Consumption", () => {
   });
 
   describe("consumeAetherFuelItem", () => {
-    test("deletes the item when last use and last quantity", async () => {
+    test("deletes the item when last piece", async () => {
       mockItem.system.uses.value = 1;
       mockItem.system.quantity = 1;
 
@@ -88,31 +91,7 @@ describe("Aether Fuel Consumption", () => {
       expect(mockItem.update).not.toHaveBeenCalled();
     });
 
-    test("decrements uses when multiple uses remaining", async () => {
-      mockItem.system.uses.value = 5;
-      mockItem.system.quantity = 1;
-
-      await consumeAetherFuelItem(mockItem);
-
-      expect(mockItem.update).toHaveBeenCalledWith({
-        "system.uses.value": 4,
-      });
-      expect(mockItem.delete).not.toHaveBeenCalled();
-    });
-
-    test("decrements from 2 to 1 without deleting", async () => {
-      mockItem.system.uses.value = 2;
-      mockItem.system.quantity = 1;
-
-      await consumeAetherFuelItem(mockItem);
-
-      expect(mockItem.update).toHaveBeenCalledWith({
-        "system.uses.value": 1,
-      });
-      expect(mockItem.delete).not.toHaveBeenCalled();
-    });
-
-    test("decrements quantity and resets uses when stack > 1", async () => {
+    test("decrements quantity when multiple pieces in stack", async () => {
       mockItem.system.uses.value = 1;
       mockItem.system.quantity = 5;
       mockItem.system.uses.max = 1;
@@ -121,7 +100,6 @@ describe("Aether Fuel Consumption", () => {
 
       expect(mockItem.update).toHaveBeenCalledWith({
         "system.quantity": 4,
-        "system.uses.value": 1,
       });
       expect(mockItem.delete).not.toHaveBeenCalled();
     });
@@ -135,7 +113,6 @@ describe("Aether Fuel Consumption", () => {
 
       expect(mockItem.update).toHaveBeenCalledWith({
         "system.quantity": 1,
-        "system.uses.value": 1,
       });
       expect(mockItem.delete).not.toHaveBeenCalled();
     });
@@ -150,16 +127,9 @@ describe("Aether Fuel Consumption", () => {
       expect(mockItem.update).not.toHaveBeenCalled();
     });
 
-    test("returns true on successful consumption (single-use)", async () => {
+    test("returns true on successful consumption", async () => {
       mockItem.system.uses.value = 1;
-
-      const result = await consumeAetherFuelItem(mockItem);
-
-      expect(result).toBe(true);
-    });
-
-    test("returns true on successful consumption (multi-use)", async () => {
-      mockItem.system.uses.value = 5;
+      mockItem.system.quantity = 3;
 
       const result = await consumeAetherFuelItem(mockItem);
 
@@ -211,11 +181,9 @@ describe("Aether Fuel Consumption", () => {
         quality: "basic-refined",
         toxicityApplied: false,
       });
-      // Item has 5 uses by default, so it should decrement, not delete
-      expect(mockItem.update).toHaveBeenCalledWith({
-        "system.uses.value": 4,
-      });
-      expect(mockItem.delete).not.toHaveBeenCalled();
+      // Item has quantity 1 by default, so it should delete
+      expect(mockItem.delete).toHaveBeenCalled();
+      expect(mockItem.update).not.toHaveBeenCalled();
     });
 
     test("applies toxicity for unrefined aether", async () => {
