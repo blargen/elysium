@@ -29,6 +29,12 @@ import { handleGiftOfThousandStrikes } from "./gift-of-thousand-strikes/gift-han
 import { handleAethersGraspUse } from "./aethers-grasp/grasp-handler.js";
 import { validateEquipRequirements } from "./utils/equip-validation.js";
 import { isMonkFocusItem } from "./utils/monk-abilities.js";
+import { registerAethersEdgeRestHandler } from "./aethers-edge/rest-handler.js";
+import {
+  activateExtraAttack,
+  activateBattleCry,
+  activateElementalStrike,
+} from "./aethers-edge/edge-abilities.js";
 import "./utils/create-items.js"; // Loads item creator utilities for macros
 
 console.log("Elysium | Loading...");
@@ -40,6 +46,9 @@ Hooks.once("init", function () {
 Hooks.once("ready", async function () {
   console.log("Elysium | Ready!");
   console.log("Elysium | All systems online.");
+
+  // Register Aether's Edge rest handler
+  registerAethersEdgeRestHandler();
 
   // Make utilities available globally for console testing
   window.Elysium = {
@@ -288,7 +297,16 @@ Hooks.on("dnd5e.restCompleted", async (actor, restData) => {
     console.log(
       `Elysium | Removing ${aetherEffects.length} aether effects from ${actor.name}`,
     );
-    await Promise.all(aetherEffects.map((effect) => effect.delete()));
+    // Delete effects safely, catching errors for effects that no longer exist
+    await Promise.all(
+      aetherEffects.map((effect) =>
+        effect.delete().catch((err) => {
+          console.warn(
+            `Elysium | Could not delete effect ${effect.id}: ${err.message}`,
+          );
+        }),
+      ),
+    );
   }
 
   if (resetOccurred || aetherEffects.length > 0) {
@@ -370,6 +388,53 @@ Hooks.on(
       console.log(`Elysium | Detected Aether's Leap item: ${item.name}`);
       await useAethersLeap(actor, item);
     }
+
+    // Check if this is Aether's Edge
+    if (item.getFlag("elysium", "isAethersEdge")) {
+      console.log(
+        `Elysium | Detected Aether's Edge activity: ${activity.name}`,
+      );
+
+      // Handle Extra Attack
+      if (activity.name === "Extra Attack") {
+        await activateExtraAttack(actor, item);
+        return;
+      }
+
+      // Handle Battle Cry
+      if (activity.name === "Battle Cry") {
+        await activateBattleCry(actor, item);
+        return;
+      }
+
+      // Handle Elemental Strike
+      if (activity.name === "Elemental Strike") {
+        // Prompt user to select element type
+        const elementType = await Dialog.prompt({
+          title: "Elemental Strike",
+          content: `
+            <form>
+              <div class="form-group">
+                <label>Choose element type:</label>
+                <select name="element">
+                  <option value="fire">Fire</option>
+                  <option value="cold">Cold</option>
+                  <option value="lightning">Lightning</option>
+                  <option value="thunder">Thunder</option>
+                </select>
+              </div>
+            </form>
+          `,
+          callback: (html) => html.find('[name="element"]').val(),
+          rejectClose: false,
+        });
+
+        if (elementType) {
+          await activateElementalStrike(actor, item, null, elementType);
+        }
+        return;
+      }
+    }
   },
 );
 
@@ -407,10 +472,11 @@ Hooks.on("preUpdateItem", (item, changes, options, userId) => {
     }
   }
 
-  // Validate equipping requirements
-  if (changes.system?.equipped === true && !item.system.equipped) {
-    if (!actor) return true; // No actor, allow (item not on character sheet)
+  // Validate equipping and attunement requirements
+  const isEquipping = changes.system?.equipped === true && !item.system.equipped;
+  const isAttuning = changes.system?.attuned === true && !item.system.attuned;
 
+  if ((isEquipping || isAttuning) && actor) {
     // Check if this is an Elysium mod item
     const requiredClass = item.getFlag("elysium", "requiredClass");
     const requiredLevel = item.getFlag("elysium", "requiredLevel");
@@ -420,7 +486,7 @@ Hooks.on("preUpdateItem", (item, changes, options, userId) => {
       if (!validation.allowed) {
         ui.notifications.error(validation.reason);
         console.log(
-          `Elysium | Blocked equipping ${item.name}: ${validation.reason}`,
+          `Elysium | Blocked ${isAttuning ? "attuning" : "equipping"} ${item.name}: ${validation.reason}`,
         );
         return false; // Prevent the update
       }

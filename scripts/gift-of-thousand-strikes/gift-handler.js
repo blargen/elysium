@@ -146,9 +146,9 @@ export async function handleGiftOfThousandStrikes(actor, item) {
     } else if (result.bonus === "triple-jump") {
       bonusText =
         '<p class="elysium-bonus-text">✨ Enhanced Bonus: Jump distance tripled</p>';
-    } else if (result.bonus === "extra-strike") {
+    } else if (result.bonus === "extra-strikes-2") {
       bonusText =
-        '<p class="elysium-bonus-text">✨ Enhanced Bonus: Make 3 unarmed strikes instead of 2</p>';
+        '<p class="elysium-bonus-text">✨ Enhanced Bonus: Make 4 unarmed strikes instead of 2</p>';
     }
   }
 

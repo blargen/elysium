@@ -1,0 +1,46 @@
+{
+  "_id": "AE7hK9mXpL2nQw5t",
+  "name": "Aether's Edge",
+  "type": "equipment",
+  "img": "modules/elysium/assets/icons/AethersEdge.png",
+  "system": {
+    "type": {
+      "value": "trinket"
+    },
+    "equipped": false,
+    "attunement": 1,
+    "rarity": "rare",
+    "description": {
+      "value": "<p>A mystical weapon enhancement that channels aether energy to enhance combat prowess. This modification adapts to your fighting style, granting both passive bonuses and powerful active abilities.</p><h3>Daily Choice</h3><p>On each long rest, choose one of three combat stances:</p><ul><li><strong>Aggressive Stance:</strong> +2 to attack rolls and +2 to damage rolls</li><li><strong>Defensive Stance:</strong> +2 to AC</li><li><strong>Balanced Stance:</strong> +1 to attack rolls and +1 to damage rolls</li></ul><h3>Aether-Powered Abilities</h3><p>Each stance grants a unique ability that costs 1 aether fuel to activate:</p><ul><li><strong>Extra Attack (Aggressive):</strong> Make one additional weapon attack as part of your Attack action this turn</li><li><strong>Battle Cry (Defensive):</strong> All allies within 10 feet gain +1 AC until the start of your next turn</li><li><strong>Elemental Strike (Balanced):</strong> Your next melee attack deals an extra 1d6 damage of your chosen type (fire, cold, lightning, or thunder)</li></ul><h3>Temporary Fighting Style</h3><p>When you choose your stance during a long rest, you may also temporarily learn one fighting style you don't already know (Archery, Defense, Great Weapon Fighting, or Two-Weapon Fighting). This benefit lasts until your next long rest.</p><h3>Requirements</h3><p>Requires attunement by a fighter of at least 3rd level.</p><p><em>Complete a long rest to choose your stance and gain access to your ability.</em></p>"
+    },
+    "activities": {}
+  },
+  "flags": {
+    "elysium": {
+      "isAethersEdge": true,
+      "requiredClass": "fighter",
+      "requiredLevel": 3,
+      "requiresAether": true,
+      "stances": {
+        "aggressive": {
+          "name": "Aggressive Stance",
+          "passive": "+2 to attack rolls and +2 to damage rolls",
+          "abilityName": "Extra Attack",
+          "abilityDescription": "Make one additional weapon attack as part of your Attack action this turn"
+        },
+        "defensive": {
+          "name": "Defensive Stance",
+          "passive": "+2 to AC",
+          "abilityName": "Battle Cry",
+          "abilityDescription": "All allies within 10 feet gain +1 AC until the start of your next turn"
+        },
+        "balanced": {
+          "name": "Balanced Stance",
+          "passive": "+1 to attack rolls and +1 to damage rolls",
+          "abilityName": "Elemental Strike",
+          "abilityDescription": "Your next melee attack deals an extra 1d6 damage of your chosen type (fire, cold, lightning, or thunder)"
+        }
+      }
+    }
+  }
+}

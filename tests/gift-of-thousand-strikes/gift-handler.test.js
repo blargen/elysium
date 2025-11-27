@@ -59,7 +59,7 @@ describe("Gift of a Thousand Strikes Handler", () => {
               label: "Flurry of Strikes",
               normalEffect: "Make 2 unarmed strikes",
               enhancedEffect: "Make 3 unarmed strikes",
-              enhancedBonus: "extra-strike",
+              enhancedBonus: "extra-strikes-2",
             },
             "patient-defense": {
               label: "Patient Defense",

@@ -66,7 +66,7 @@ describe("Gift of a Thousand Strikes", () => {
               label: "Flurry of Strikes",
               normalEffect: "Make 2 unarmed strikes",
               enhancedEffect: "Make 3 unarmed strikes",
-              enhancedBonus: "extra-strike",
+              enhancedBonus: "extra-strikes-2",
             },
             "patient-defense": {
               label: "Patient Defense",
@@ -203,7 +203,7 @@ describe("Gift of a Thousand Strikes", () => {
       expect(result.success).toBe(true);
       expect(result.enhanced).toBe(true);
       expect(result.effect).toContain("3 unarmed strikes");
-      expect(result.bonus).toBe("extra-strike");
+      expect(result.bonus).toBe("extra-strikes-2");
     });
 
     test("should enhance Patient Defense with +2 AC", async () => {

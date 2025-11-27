@@ -1,10 +1,10 @@
 {
   "name": "Gift of a Thousand Strikes",
   "type": "equipment",
-  "img": "assets/GiftOfAThousandStrikes.png",
+  "img": "modules/elysium/assets/icons/GiftOfAThousandStrikes.png",
   "system": {
     "description": {
-      "value": "<p><strong>Gift of a Thousand Strikes</strong> is the standard modification given to all monks who show an aptitude for martial arts. This nervous system modification allows the wearer to\n  channel aether energy directly into their ki pathways, enabling them to perform monk techniques without depleting their natural focus.</p>\n  <h3>Activation</h3>\n  <p>When activated, you may choose to:</p>\n  <ul>\n    <li><strong>Consume Aether:</strong> Use monk abilities without spending focus points</li>\n    <li><strong>Consume Aether and Focus:</strong> Enhanced effects when combining both energies</li>\n  </ul>\n  <h3>Available Techniques</h3>\n  <p><strong>Flurry of Strikes</strong></p>\n  <ul>\n    <li>Normal: Two unarmed strikes as a bonus action (no focus cost)</li>\n    <li>Enhanced (Aether + Focus): <em>Three</em> unarmed strikes as a bonus action</li>\n  </ul>\n  <p><strong>Patient Defense</strong></p>\n  <ul>\n    <li>Normal: Dodge action as bonus action (no focus cost)</li>\n    <li>Enhanced (Aether + Focus): Dodge + <strong>+2 AC</strong> until start of your next turn</li>\n  </ul>\n  <p><strong>Step of the Wind</strong></p>\n  <ul>\n    <li>Normal: Disengage or Dash as bonus action, jump distance doubled (no focus cost)</li>\n    <li>Enhanced (Aether + Focus): Disengage or Dash as bonus action, jump distance <strong>tripled</strong></li>\n  </ul>\n  <p class=\"elysium-info-box\"><strong>Note:</strong> This modification requires attunement and a minimum monk level of 3. Different aether qualities may produce varying effects and risks.</p>",
+      "value": "<p><strong>Gift of a Thousand Strikes</strong> is the standard modification given to all monks who show an aptitude for martial arts. This nervous system modification allows the wearer to\n  channel aether energy directly into their ki pathways, enabling them to perform monk techniques without depleting their natural focus.</p>\n  <h3>Activation</h3>\n  <p>When activated, you may choose to:</p>\n  <ul>\n    <li><strong>Consume Aether:</strong> Use monk abilities without spending focus points</li>\n    <li><strong>Consume Aether and Focus:</strong> Enhanced effects when combining both energies</li>\n  </ul>\n  <h3>Available Techniques</h3>\n  <p><strong>Flurry of Strikes</strong></p>\n  <ul>\n    <li>Normal: Two unarmed strikes as a bonus action (no focus cost)</li>\n    <li>Enhanced (Aether + Focus): <em>Four</em> unarmed strikes as a bonus action</li>\n  </ul>\n  <p><strong>Patient Defense</strong></p>\n  <ul>\n    <li>Normal: Dodge action as bonus action (no focus cost)</li>\n    <li>Enhanced (Aether + Focus): Dodge + <strong>+2 AC</strong> until start of your next turn</li>\n  </ul>\n  <p><strong>Step of the Wind</strong></p>\n  <ul>\n    <li>Normal: Disengage or Dash as bonus action, jump distance doubled (no focus cost)</li>\n    <li>Enhanced (Aether + Focus): Disengage or Dash as bonus action, jump distance <strong>tripled</strong></li>\n  </ul>\n  <p class=\"elysium-info-box\"><strong>Note:</strong> This modification requires attunement and a minimum monk level of 3. Different aether qualities may produce varying effects and risks.</p>",
       "chat": ""
     },
     "quantity": 1,
@@ -115,8 +115,8 @@
         "flurry-of-blows": {
           "label": "Flurry of Strikes",
           "normalEffect": "Make 2 unarmed strikes as a bonus action (no focus cost)",
-          "enhancedEffect": "Make 3 unarmed strikes as a bonus action",
-          "enhancedBonus": "extra-strike"
+          "enhancedEffect": "Make 4 unarmed strikes as a bonus action",
+          "enhancedBonus": "extra-strikes-2"
         },
         "patient-defense": {
           "label": "Patient Defense",

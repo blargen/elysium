@@ -201,12 +201,39 @@ export async function useGiftOfThousandStrikes(actor, item, options) {
         // Step of the Wind: Triple jump distance
         // This is typically handled narratively or with a reminder
         console.log("Elysium | Jump distance tripled (narrative bonus)");
-      } else if (bonus === "extra-strike") {
-        // Flurry of Blows: 3rd strike
-        // This is complex - would need to add an extra attack
-        console.log(
-          "Elysium | Extra strike available (player should make 3rd attack)",
-        );
+      } else if (bonus === "extra-strikes-2") {
+        // Flurry of Blows: 2 additional strikes (4 total)
+        try {
+          await actor.createEmbeddedDocuments("ActiveEffect", [
+            {
+              name: "Gift Enhancement: 2 Extra Strikes",
+              icon: item.img || "modules/elysium/assets/icons/GiftOfAThousandStrikes.png",
+              origin: item.uuid,
+              duration: {
+                turns: 1,
+              },
+              changes: [],
+              flags: {
+                elysium: {
+                  isAetherEffect: true,
+                  extraStrikes: 2,
+                },
+              },
+            },
+          ]);
+          console.log("Elysium | Applied 2 extra strikes effect");
+
+          if (typeof ui !== "undefined" && ui.notifications) {
+            ui.notifications.info(
+              `${actor.name} can make 2 additional unarmed strikes this turn!`,
+            );
+          }
+        } catch (error) {
+          console.error("Elysium | Failed to apply extra strikes effect:", error);
+          ui.notifications.warn(
+            "Could not apply extra strikes effect - you may make 2 additional unarmed strikes",
+          );
+        }
       }
     }
 
