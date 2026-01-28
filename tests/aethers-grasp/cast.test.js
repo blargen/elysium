@@ -7,32 +7,42 @@
 import { describe, test, expect, beforeEach, jest } from "@jest/globals";
 import {
   getStoredSpellByFinger,
-  createTemporarySpellItem,
-  applyAetherModifiersToSpell,
   castSpellFromFinger,
+  authorizedGraspCasts,
+  getSpellFromSpellbook,
 } from "../../scripts/aethers-grasp/cast.js";
 
 describe("Aether's Grasp - Cast From Finger", () => {
   let mockActor;
   let mockAethersGrasp;
+  let mockSpellbookSpell;
 
   beforeEach(() => {
-    mockActor = {
-      name: "Test Character",
-      createEmbeddedDocuments: jest.fn(async (type, data) => {
-        return [
-          {
-            id: "temp-spell-id",
-            ...data[0],
-            use: jest.fn(async () => ({
-              /* roll result */
-            })),
-            delete: jest.fn(async () => true),
-          },
-        ];
-      }),
+    // Mock spell in actor's spellbook with use() method
+    mockSpellbookSpell = {
+      id: "spellbook-spell-1",
+      name: "Magic Missile (Thumb)",
+      type: "spell",
+      use: jest.fn(async () => ({ success: true })),
     };
 
+    mockActor = {
+      name: "Test Character",
+      items: {
+        get: jest.fn((id) => {
+          if (id === "spellbook-spell-1") return mockSpellbookSpell;
+          if (id === "spellbook-spell-2") return {
+            id: "spellbook-spell-2",
+            name: "Shield (Middle)",
+            type: "spell",
+            use: jest.fn(async () => ({ success: true })),
+          };
+          return undefined;
+        }),
+      },
+    };
+
+    // Stored spell references (no spellData - just links to spellbook)
     mockAethersGrasp = {
       name: "Aether's Grasp",
       flags: {
@@ -42,26 +52,15 @@ describe("Aether's Grasp - Cast From Finger", () => {
               id: "spell-1",
               fingerIndex: 0,
               fingerName: "Thumb",
-              spellData: {
-                name: "Magic Missile",
-                type: "spell",
-                system: {
-                  level: 1,
-                  preparation: { mode: "prepared" },
-                  damage: { parts: [["1d4+1", "force"]] },
-                  attackBonus: 0,
-                },
-              },
+              spellName: "Magic Missile",
+              spellbookItemId: "spellbook-spell-1",
             },
             {
               id: "spell-2",
               fingerIndex: 2,
               fingerName: "Middle",
-              spellData: {
-                name: "Shield",
-                type: "spell",
-                system: { level: 1 },
-              },
+              spellName: "Shield",
+              spellbookItemId: "spellbook-spell-2",
             },
           ],
         },
@@ -78,7 +77,8 @@ describe("Aether's Grasp - Cast From Finger", () => {
 
       expect(spell).toBeTruthy();
       expect(spell.fingerName).toBe("Thumb");
-      expect(spell.spellData.name).toBe("Magic Missile");
+      expect(spell.spellName).toBe("Magic Missile");
+      expect(spell.spellbookItemId).toBe("spellbook-spell-1");
     });
 
     test("returns null when finger has no spell", () => {
@@ -94,218 +94,143 @@ describe("Aether's Grasp - Cast From Finger", () => {
     });
   });
 
-  describe("createTemporarySpellItem", () => {
-    test("creates spell item with preparation mode set to atwill", () => {
-      const spellData = {
-        name: "Magic Missile",
-        system: {
-          level: 1,
-          preparation: { mode: "prepared" },
-        },
-      };
-
-      const tempData = createTemporarySpellItem(spellData);
-
-      expect(tempData.system.preparation.mode).toBe("atwill");
-    });
-
-    test("marks spell as temporary with aethersGrasp flag", () => {
-      const spellData = {
-        name: "Shield",
-        system: { level: 1 },
-      };
-
-      const tempData = createTemporarySpellItem(spellData);
-
-      expect(tempData.flags.aethersGrasp).toBeTruthy();
-      expect(tempData.flags.aethersGrasp.temporary).toBe(true);
-    });
-
-    test("preserves original spell data", () => {
-      const spellData = {
-        name: "Mage Armor",
-        system: {
-          level: 1,
-          damage: { parts: [] },
-        },
-      };
-
-      const tempData = createTemporarySpellItem(spellData);
-
-      expect(tempData.name).toBe("Mage Armor");
-      expect(tempData.system.level).toBe(1);
-    });
-  });
-
-  describe("applyAetherModifiersToSpell", () => {
-    test("applies attack bonus from rarefied aether", () => {
-      const spellData = {
-        name: "Magic Missile",
-        system: {
-          attackBonus: 0,
-          damage: { parts: [] },
-        },
-      };
-
-      const modifiers = {
-        attack: 1,
-        damage: 1,
-        spellAttack: 1,
-        spellDamage: 1,
-      };
-
-      const modified = applyAetherModifiersToSpell(spellData, modifiers);
-
-      expect(modified.system.attackBonus).toBe(1);
-    });
-
-    test("applies damage bonus from prometheum aether", () => {
-      const spellData = {
-        name: "Burning Hands",
-        system: {
-          attackBonus: 0,
-          damage: { parts: [["3d6", "fire"]] },
-        },
-      };
-
-      const modifiers = {
-        attack: 5,
-        damage: 5,
-        spellAttack: 5,
-        spellDamage: 5,
-      };
-
-      const modified = applyAetherModifiersToSpell(spellData, modifiers);
-
-      // Should add a damage part
-      expect(modified.system.damage.parts.length).toBeGreaterThan(1);
-      const bonusPart =
-        modified.system.damage.parts[modified.system.damage.parts.length - 1];
-      expect(bonusPart[0]).toBe("5");
-      expect(bonusPart[1]).toBe("force");
-    });
-
-    test("handles zero modifiers (basic-refined aether)", () => {
-      const spellData = {
-        name: "Shield",
-        system: {
-          attackBonus: 3,
-          damage: { parts: [] },
-        },
-      };
-
-      const modifiers = {
-        attack: 0,
-        damage: 0,
-        spellAttack: 0,
-        spellDamage: 0,
-      };
-
-      const modified = applyAetherModifiersToSpell(spellData, modifiers);
-
-      expect(modified.system.attackBonus).toBe(3); // Unchanged
-    });
-
-    test("handles spells without damage parts", () => {
-      const spellData = {
-        name: "Shield",
-        system: {
-          attackBonus: 0,
-          // No damage property
-        },
-      };
-
-      const modifiers = {
-        attack: 1,
-        damage: 1,
-        spellAttack: 1,
-        spellDamage: 1,
-      };
-
-      const modified = applyAetherModifiersToSpell(spellData, modifiers);
-
-      expect(modified.system.attackBonus).toBe(1);
-      expect(modified.system.damage).toBeTruthy();
-      expect(modified.system.damage.parts).toBeTruthy();
-    });
-  });
-
   describe("castSpellFromFinger", () => {
-    test("creates temporary spell item on actor", async () => {
+    test("gets spell from actor spellbook and calls use()", async () => {
       const storedSpell = mockAethersGrasp.flags.elysium.storedSpells[0];
-      const modifiers = {
-        attack: 0,
-        damage: 0,
-        spellAttack: 0,
-        spellDamage: 0,
-      };
+      const modifiers = {};
 
       await castSpellFromFinger(mockActor, storedSpell, modifiers);
 
-      expect(mockActor.createEmbeddedDocuments).toHaveBeenCalledWith(
-        "Item",
-        expect.arrayContaining([
-          expect.objectContaining({
-            name: "Magic Missile",
-            type: "spell",
-          }),
-        ]),
-      );
-    });
-
-    test("casts the spell without consuming spell slots", async () => {
-      const storedSpell = mockAethersGrasp.flags.elysium.storedSpells[0];
-      const modifiers = {
-        attack: 1,
-        damage: 1,
-        spellAttack: 1,
-        spellDamage: 1,
-      };
-
-      const result = await castSpellFromFinger(
-        mockActor,
-        storedSpell,
-        modifiers,
-      );
-
-      expect(result.tempSpell.use).toHaveBeenCalledWith({
+      expect(mockActor.items.get).toHaveBeenCalledWith("spellbook-spell-1");
+      expect(mockSpellbookSpell.use).toHaveBeenCalledWith({
         consumeSpellSlot: false,
         consumeUsage: false,
       });
     });
 
-    test("applies aether modifiers before casting", async () => {
+    test("returns castResult from spell.use()", async () => {
       const storedSpell = mockAethersGrasp.flags.elysium.storedSpells[0];
-      const modifiers = {
-        attack: 5,
-        damage: 5,
-        spellAttack: 5,
-        spellDamage: 5,
+      const modifiers = {};
+
+      const result = await castSpellFromFinger(mockActor, storedSpell, modifiers);
+
+      expect(result.castResult).toEqual({ success: true });
+    });
+
+    test("throws error if spellbookItemId is missing", async () => {
+      const storedSpellNoId = {
+        id: "spell-bad",
+        fingerIndex: 0,
+        fingerName: "Thumb",
+        spellName: "Magic Missile",
+        // No spellbookItemId
       };
+      const modifiers = {};
+
+      await expect(
+        castSpellFromFinger(mockActor, storedSpellNoId, modifiers)
+      ).rejects.toThrow("No spellbookItemId");
+    });
+
+    test("throws error if spell not found in spellbook", async () => {
+      const storedSpellBadId = {
+        id: "spell-bad",
+        fingerIndex: 0,
+        fingerName: "Thumb",
+        spellName: "Magic Missile",
+        spellbookItemId: "nonexistent-spell",
+      };
+      const modifiers = {};
+
+      await expect(
+        castSpellFromFinger(mockActor, storedSpellBadId, modifiers)
+      ).rejects.toThrow("Spell not found in spellbook");
+    });
+
+    test("authorizes spell ID before casting and cleans up after", async () => {
+      const storedSpell = mockAethersGrasp.flags.elysium.storedSpells[0];
+      const modifiers = {};
+
+      // Verify authorization is added during cast
+      let wasAuthorized = false;
+      mockSpellbookSpell.use = jest.fn(async () => {
+        wasAuthorized = authorizedGraspCasts.has("spellbook-spell-1");
+        return { success: true };
+      });
 
       await castSpellFromFinger(mockActor, storedSpell, modifiers);
 
-      const createdData = mockActor.createEmbeddedDocuments.mock.calls[0][1][0];
-      expect(createdData.system.attackBonus).toBe(5);
+      expect(wasAuthorized).toBe(true);
+      // Should be cleaned up after
+      expect(authorizedGraspCasts.has("spellbook-spell-1")).toBe(false);
     });
 
-    test("returns the temporary spell for cleanup", async () => {
+    test("cleans up authorization even on error", async () => {
       const storedSpell = mockAethersGrasp.flags.elysium.storedSpells[0];
-      const modifiers = {
-        attack: 0,
-        damage: 0,
-        spellAttack: 0,
-        spellDamage: 0,
+      const modifiers = {};
+
+      mockSpellbookSpell.use = jest.fn(async () => {
+        throw new Error("Cast failed");
+      });
+
+      await expect(
+        castSpellFromFinger(mockActor, storedSpell, modifiers)
+      ).rejects.toThrow("Cast failed");
+
+      // Should still be cleaned up
+      expect(authorizedGraspCasts.has("spellbook-spell-1")).toBe(false);
+    });
+  });
+
+  describe("authorizedGraspCasts", () => {
+    beforeEach(() => {
+      authorizedGraspCasts.clear();
+    });
+
+    test("is a Set", () => {
+      expect(authorizedGraspCasts).toBeInstanceOf(Set);
+    });
+
+    test("can add and check spell IDs", () => {
+      authorizedGraspCasts.add("spell-123");
+      expect(authorizedGraspCasts.has("spell-123")).toBe(true);
+      expect(authorizedGraspCasts.has("spell-456")).toBe(false);
+    });
+
+    test("can remove spell IDs", () => {
+      authorizedGraspCasts.add("spell-123");
+      authorizedGraspCasts.delete("spell-123");
+      expect(authorizedGraspCasts.has("spell-123")).toBe(false);
+    });
+  });
+
+  describe("getSpellFromSpellbook", () => {
+    test("finds spell by spellbookItemId", () => {
+      const mockActorWithSpells = {
+        items: {
+          get: jest.fn().mockReturnValue({
+            id: "spell-in-spellbook",
+            name: "Magic Missile (Thumb)",
+          }),
+        },
       };
 
-      const result = await castSpellFromFinger(
-        mockActor,
-        storedSpell,
-        modifiers,
-      );
+      const result = getSpellFromSpellbook(mockActorWithSpells, "spell-in-spellbook");
 
-      expect(result.tempSpell).toBeTruthy();
-      expect(result.tempSpell.id).toBe("temp-spell-id");
+      expect(mockActorWithSpells.items.get).toHaveBeenCalledWith("spell-in-spellbook");
+      expect(result.id).toBe("spell-in-spellbook");
+    });
+
+    test("returns null if spell not found", () => {
+      const mockActorWithSpells = {
+        items: {
+          get: jest.fn().mockReturnValue(undefined),
+        },
+      };
+
+      const result = getSpellFromSpellbook(mockActorWithSpells, "nonexistent-id");
+
+      expect(result).toBeNull();
     });
   });
 });

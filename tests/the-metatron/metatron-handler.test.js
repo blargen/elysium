@@ -1,21 +1,21 @@
 /**
- * Tests for Aether's Grasp Handler
+ * Tests for The Metatron Handler
  * Tests validation and action selection workflow
  */
 
 import { describe, test, expect, beforeEach, jest } from "@jest/globals";
-import { handleAethersGraspUse } from "../../scripts/aethers-grasp/grasp-handler.js";
+import { handleMetatronUse } from "../../scripts/the-metatron/metatron-handler.js";
 
-describe("Aether's Grasp Handler", () => {
+describe("The Metatron Handler", () => {
   let mockActor;
   let mockItem;
 
   beforeEach(() => {
     // Mock actor
     mockActor = {
-      name: "Test Wizard",
+      name: "Test Cleric",
       classes: {
-        wizard: { system: { levels: 3 } },
+        cleric: { system: { levels: 3 } },
       },
       items: {
         filter: jest.fn(() => []),
@@ -26,15 +26,17 @@ describe("Aether's Grasp Handler", () => {
 
     // Mock item
     mockItem = {
-      name: "Aether's Grasp",
+      name: "The Metatron",
       getFlag: jest.fn((namespace, key) => {
         if (key === "requiredLevel") return 3;
-        if (key === "requiredClass") return "wizard";
+        if (key === "requiredClass") return "cleric";
+        if (key === "disabled") return false;
         return null;
       }),
       system: {
         attunement: "required",
         attuned: true,
+        equipped: true,
       },
     };
 
@@ -59,28 +61,28 @@ describe("Aether's Grasp Handler", () => {
   });
 
   describe("Validation checks", () => {
-    test("should reject non-wizard actor", async () => {
+    test("should reject non-cleric actor", async () => {
       mockActor.classes = { fighter: { system: { levels: 5 } } };
 
-      await handleAethersGraspUse(mockActor, mockItem);
+      await handleMetatronUse(mockActor, mockItem);
 
       expect(ui.notifications.error).toHaveBeenCalledWith(
-        "This modification requires the wizard class",
+        "This modification requires the cleric class",
       );
     });
 
-    test("should reject wizard below level 3", async () => {
-      mockActor.classes.wizard.system.levels = 2;
+    test("should reject cleric below level 3", async () => {
+      mockActor.classes.cleric.system.levels = 2;
 
-      await handleAethersGraspUse(mockActor, mockItem);
+      await handleMetatronUse(mockActor, mockItem);
 
       expect(ui.notifications.error).toHaveBeenCalledWith(
-        "This modification requires wizard level 3 or higher",
+        "This modification requires cleric level 3 or higher",
       );
     });
 
-    test("should accept wizard at level 3", async () => {
-      mockActor.classes.wizard.system.levels = 3;
+    test("should accept cleric at level 3", async () => {
+      mockActor.classes.cleric.system.levels = 3;
       mockItem.system.equipped = true;
 
       // Mock Dialog to immediately cancel (we just want to verify validation passed)
@@ -89,19 +91,18 @@ describe("Aether's Grasp Handler", () => {
           this.config = config;
         }
         render() {
-          // Immediately resolve as cancelled
           setTimeout(() => this.config.buttons.cancel.callback(), 0);
           return this;
         }
       };
 
-      await handleAethersGraspUse(mockActor, mockItem);
+      await handleMetatronUse(mockActor, mockItem);
 
       expect(ui.notifications.error).not.toHaveBeenCalled();
     });
 
-    test("should accept wizard above level 3", async () => {
-      mockActor.classes.wizard.system.levels = 5;
+    test("should accept cleric above level 3", async () => {
+      mockActor.classes.cleric.system.levels = 7;
       mockItem.system.equipped = true;
 
       // Mock Dialog to immediately cancel
@@ -115,7 +116,7 @@ describe("Aether's Grasp Handler", () => {
         }
       };
 
-      await handleAethersGraspUse(mockActor, mockItem);
+      await handleMetatronUse(mockActor, mockItem);
 
       expect(ui.notifications.error).not.toHaveBeenCalled();
     });
@@ -123,7 +124,7 @@ describe("Aether's Grasp Handler", () => {
     test("should reject if not equipped", async () => {
       mockItem.system.equipped = false;
 
-      await handleAethersGraspUse(mockActor, mockItem);
+      await handleMetatronUse(mockActor, mockItem);
 
       expect(ui.notifications.error).toHaveBeenCalledWith(
         "This modification must be equipped to use",
@@ -134,7 +135,7 @@ describe("Aether's Grasp Handler", () => {
       mockItem.system.equipped = true;
       mockItem.system.attuned = false;
 
-      await handleAethersGraspUse(mockActor, mockItem);
+      await handleMetatronUse(mockActor, mockItem);
 
       expect(ui.notifications.error).toHaveBeenCalledWith(
         "This modification requires attunement",
@@ -157,14 +158,48 @@ describe("Aether's Grasp Handler", () => {
         }
       };
 
-      await handleAethersGraspUse(mockActor, mockItem);
+      await handleMetatronUse(mockActor, mockItem);
 
       expect(ui.notifications.error).not.toHaveBeenCalled();
     });
+
+    test("should reject if The Metatron is disabled (Healer's Gambit failed)", async () => {
+      mockItem.getFlag = jest.fn((namespace, key) => {
+        if (key === "requiredLevel") return 3;
+        if (key === "requiredClass") return "cleric";
+        if (key === "disabled") return true;
+        return null;
+      });
+
+      await handleMetatronUse(mockActor, mockItem);
+
+      expect(ui.notifications.error).toHaveBeenCalledWith(
+        "The Metatron is dormant and cannot be used until you complete a long rest",
+      );
+    });
   });
 
-  // Note: Action selection dialog interactions (imprint/cast/forget/cancel)
-  // are tested via integration in Foundry. The individual action handlers
-  // (handleImprintFromScroll, handleCastFromFinger, handleForgetFromFinger)
-  // are tested in their respective test files: imprint.test.js, cast.test.js, forget.test.js
+  describe("Action selection dialog", () => {
+    test("should show all four action options", async () => {
+      let dialogContent = "";
+      global.Dialog = class {
+        constructor(config) {
+          this.config = config;
+          dialogContent = config.content;
+        }
+        render() {
+          setTimeout(() => this.config.buttons.cancel.callback(), 0);
+          return this;
+        }
+      };
+
+      await handleMetatronUse(mockActor, mockItem);
+
+      // Verify all four action options are present
+      expect(dialogContent).toContain("Prayer of Creation");
+      expect(dialogContent).toContain("Psalm of Casting");
+      expect(dialogContent).toContain("Meditation of Forgetfulness");
+      expect(dialogContent).toContain("Healer's Gambit");
+    });
+  });
 });

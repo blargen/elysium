@@ -102,3 +102,28 @@ export function getStoredSpells(item) {
 export async function setStoredSpells(item, spells) {
   return await item.setFlag("elysium", "storedSpells", spells);
 }
+
+// ============================================================================
+// SPELL DATA UTILITIES
+// ============================================================================
+
+/**
+ * Extract a clean spell name from spell/scroll data
+ * Handles DDB importer format and standard scroll naming conventions
+ * @param {Object} spellData - Spell or scroll item data (or object with flags/name)
+ * @returns {string} Clean spell name
+ */
+export function extractSpellName(spellData) {
+  if (!spellData) return "Unknown Spell";
+
+  // Try DDB importer original name first
+  const ddbName = spellData.flags?.ddbimporter?.originalName;
+  if (ddbName) return ddbName;
+
+  // Fall back to extracting from item name
+  const name = spellData.name || "";
+  return name
+    .replace(/^Spell Scroll:\s*/i, "")
+    .replace(/^Scroll of\s*/i, "")
+    .trim() || "Unknown Spell";
+}

@@ -8,6 +8,7 @@ import {
   hasFightingStyle,
   getAvailableFightingStyles,
   grantTemporaryFightingStyle,
+  removeTemporaryFightingStyles,
 } from "../../scripts/utils/fighting-styles.js";
 
 describe("Fighting Style Utilities", () => {
@@ -148,80 +149,66 @@ describe("Fighting Style Utilities", () => {
   });
 
   describe("grantTemporaryFightingStyle", () => {
-    test("creates active effect for Archery", async () => {
-      const effect = await grantTemporaryFightingStyle(mockActor, "Archery");
+    test("creates feat item for Archery", async () => {
+      const feat = await grantTemporaryFightingStyle(mockActor, "Archery");
 
       expect(mockActor.createEmbeddedDocuments).toHaveBeenCalledWith(
-        "ActiveEffect",
+        "Item",
         expect.arrayContaining([
           expect.objectContaining({
-            name: "Temporary: Archery",
-            changes: expect.arrayContaining([
-              expect.objectContaining({
-                key: "system.bonuses.rwak.attack",
-                value: "2",
-              }),
-            ]),
+            name: "Archery",
+            type: "feat",
             flags: expect.objectContaining({
               elysium: expect.objectContaining({
-                isTemporaryGrant: true,
-                isAetherEffect: true,
+                isTemporaryFightingStyle: true,
+                grantedBy: "aethers-edge",
               }),
             }),
           }),
         ]),
       );
 
-      expect(effect.name).toBe("Temporary: Archery");
+      expect(feat.name).toBe("Archery");
     });
 
-    test("creates active effect for Defense", async () => {
-      const effect = await grantTemporaryFightingStyle(mockActor, "Defense");
+    test("creates feat item for Defense", async () => {
+      const feat = await grantTemporaryFightingStyle(mockActor, "Defense");
 
       expect(mockActor.createEmbeddedDocuments).toHaveBeenCalledWith(
-        "ActiveEffect",
+        "Item",
         expect.arrayContaining([
           expect.objectContaining({
-            name: "Temporary: Defense",
-            changes: expect.arrayContaining([
-              expect.objectContaining({
-                key: "system.attributes.ac.bonus",
-                value: "1",
-              }),
-            ]),
+            name: "Defense",
+            type: "feat",
           }),
         ]),
       );
+
+      expect(feat.name).toBe("Defense");
     });
 
-    test("creates active effect for Great Weapon Fighting", async () => {
-      const effect = await grantTemporaryFightingStyle(
+    test("creates feat item for Great Weapon Fighting", async () => {
+      const feat = await grantTemporaryFightingStyle(
         mockActor,
         "Great Weapon Fighting",
       );
 
-      expect(effect.name).toBe("Temporary: Great Weapon Fighting");
-      // Great Weapon Fighting uses flags since it's a reroll mechanic
-      expect(effect.flags.elysium.isGreatWeaponFighting).toBe(true);
+      expect(feat.name).toBe("Great Weapon Fighting");
+      expect(feat.flags.elysium.isTemporaryFightingStyle).toBe(true);
     });
 
-    test("creates active effect for Two-Weapon Fighting", async () => {
-      const effect = await grantTemporaryFightingStyle(
+    test("creates feat item for Two-Weapon Fighting", async () => {
+      const feat = await grantTemporaryFightingStyle(
         mockActor,
         "Two-Weapon Fighting",
       );
 
       expect(mockActor.createEmbeddedDocuments).toHaveBeenCalledWith(
-        "ActiveEffect",
+        "Item",
         expect.arrayContaining([
           expect.objectContaining({
-            name: "Temporary: Two-Weapon Fighting",
-            changes: expect.arrayContaining([
-              expect.objectContaining({
-                key: "system.bonuses.mwak.damage",
-                value: "@mod",
-              }),
-            ]),
+            name: "Two-Weapon Fighting",
+            type: "feat",
           }),
         ]),
       );
@@ -233,12 +220,12 @@ describe("Fighting Style Utilities", () => {
         .spyOn(console, "error")
         .mockImplementation(() => {});
 
-      const effect = await grantTemporaryFightingStyle(
+      const feat = await grantTemporaryFightingStyle(
         mockActor,
         "Unknown Style",
       );
 
-      expect(effect).toBeNull();
+      expect(feat).toBeNull();
       expect(consoleError).toHaveBeenCalled();
 
       consoleError.mockRestore();
@@ -260,12 +247,59 @@ describe("Fighting Style Utilities", () => {
         },
       };
 
-      const effect = await grantTemporaryFightingStyle(mockActor, "Archery");
+      const feat = await grantTemporaryFightingStyle(mockActor, "Archery");
 
-      expect(effect).toBeNull();
+      expect(feat).toBeNull();
       expect(global.ui.notifications.warn).toHaveBeenCalledWith(
         expect.stringContaining("already has Archery"),
       );
+    });
+  });
+
+  describe("removeTemporaryFightingStyles", () => {
+    test("removes temporary fighting styles", async () => {
+      mockActor.items._items = [
+        {
+          id: "temp-archery",
+          type: "feat",
+          name: "Archery",
+          getFlag: (scope, key) =>
+            scope === "elysium" && key === "isTemporaryFightingStyle"
+              ? true
+              : undefined,
+        },
+        {
+          id: "perm-defense",
+          type: "feat",
+          name: "Defense",
+          getFlag: () => undefined, // Not temporary
+        },
+      ];
+      mockActor.deleteEmbeddedDocuments = jest.fn(async () => {});
+
+      const removed = await removeTemporaryFightingStyles(mockActor);
+
+      expect(removed).toBe(1);
+      expect(mockActor.deleteEmbeddedDocuments).toHaveBeenCalledWith("Item", [
+        "temp-archery",
+      ]);
+    });
+
+    test("returns 0 when no temporary styles exist", async () => {
+      mockActor.items._items = [
+        {
+          id: "perm-defense",
+          type: "feat",
+          name: "Defense",
+          getFlag: () => undefined,
+        },
+      ];
+      mockActor.deleteEmbeddedDocuments = jest.fn(async () => {});
+
+      const removed = await removeTemporaryFightingStyles(mockActor);
+
+      expect(removed).toBe(0);
+      expect(mockActor.deleteEmbeddedDocuments).not.toHaveBeenCalled();
     });
   });
 });

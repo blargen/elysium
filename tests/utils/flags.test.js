@@ -18,6 +18,8 @@ import {
   getStoredSpells,
   setStoredSpells,
   getModType,
+  // Spell utilities
+  extractSpellName,
 } from "../../scripts/utils/flags.js";
 
 describe("Flag Management - Actor Toxicity", () => {
@@ -158,6 +160,67 @@ describe("Flag Management - Item Aether", () => {
       const spells = [{ id: "1", spellData: { name: "Fireball" } }];
       await setStoredSpells(mockItem, spells);
       expect(mockItem.getFlag("elysium", "storedSpells")).toEqual(spells);
+    });
+  });
+});
+
+describe("Spell Data Utilities", () => {
+  describe("extractSpellName", () => {
+    test("extracts name from DDB importer originalName flag", () => {
+      const spellData = {
+        name: "Spell Scroll: Magic Missile",
+        flags: { ddbimporter: { originalName: "Magic Missile" } },
+      };
+      expect(extractSpellName(spellData)).toBe("Magic Missile");
+    });
+
+    test("extracts name by removing 'Spell Scroll:' prefix", () => {
+      const spellData = { name: "Spell Scroll: Shield" };
+      expect(extractSpellName(spellData)).toBe("Shield");
+    });
+
+    test("extracts name by removing 'Scroll of' prefix", () => {
+      const spellData = { name: "Scroll of Fireball" };
+      expect(extractSpellName(spellData)).toBe("Fireball");
+    });
+
+    test("handles case-insensitive prefix removal", () => {
+      const spellData = { name: "SPELL SCROLL: Detect Magic" };
+      expect(extractSpellName(spellData)).toBe("Detect Magic");
+    });
+
+    test("returns plain name when no prefix present", () => {
+      const spellData = { name: "Magic Missile" };
+      expect(extractSpellName(spellData)).toBe("Magic Missile");
+    });
+
+    test("returns 'Unknown Spell' for null input", () => {
+      expect(extractSpellName(null)).toBe("Unknown Spell");
+    });
+
+    test("returns 'Unknown Spell' for undefined input", () => {
+      expect(extractSpellName(undefined)).toBe("Unknown Spell");
+    });
+
+    test("returns 'Unknown Spell' for empty object", () => {
+      expect(extractSpellName({})).toBe("Unknown Spell");
+    });
+
+    test("returns 'Unknown Spell' for object with empty name", () => {
+      expect(extractSpellName({ name: "" })).toBe("Unknown Spell");
+    });
+
+    test("prioritizes DDB importer name over scroll name extraction", () => {
+      const spellData = {
+        name: "Spell Scroll: Wrong Name",
+        flags: { ddbimporter: { originalName: "Correct Name" } },
+      };
+      expect(extractSpellName(spellData)).toBe("Correct Name");
+    });
+
+    test("trims whitespace from extracted name", () => {
+      const spellData = { name: "Spell Scroll:   Mage Armor  " };
+      expect(extractSpellName(spellData)).toBe("Mage Armor");
     });
   });
 });

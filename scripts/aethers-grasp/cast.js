@@ -1,11 +1,29 @@
 /**
  * Aether's Grasp - Cast From Finger
  *
- * Logic for casting stored spells using aether fuel
+ * Logic for casting stored spells using aether fuel.
+ * Spells are stored in the character's spellbook and can only be cast
+ * through Aether's Grasp (direct casting is blocked by hooks).
  */
 
 import { getStoredSpells } from "../utils/flags.js";
 import { handleAetherFuelUse } from "../aether-fuel/consumption.js";
+
+/**
+ * Set of spell IDs currently authorized for casting through Aether's Grasp.
+ * Used to allow our programmatic casts while blocking direct spellbook casts.
+ */
+export const authorizedGraspCasts = new Set();
+
+/**
+ * Get a spell from the actor's spellbook by ID
+ * @param {Actor} actor - The actor
+ * @param {string} spellbookItemId - The ID of the spell in the spellbook
+ * @returns {Item|null} The spell item or null if not found
+ */
+export function getSpellFromSpellbook(actor, spellbookItemId) {
+  return actor.items.get(spellbookItemId) || null;
+}
 
 /**
  * Get the spell stored on a specific finger
@@ -19,79 +37,13 @@ export function getStoredSpellByFinger(aethersGraspItem, fingerIndex) {
 }
 
 /**
- * Create a temporary spell item data object for casting
- * @param {Object} spellData - Original spell data
- * @returns {Object} Modified spell data for temporary casting
- */
-export function createTemporarySpellItem(spellData) {
-  // Deep copy the spell data
-  const tempData =
-    foundry?.utils?.duplicate?.(spellData) ||
-    JSON.parse(JSON.stringify(spellData));
-
-  // Modify for casting without spell slots
-  if (tempData.system.preparation) {
-    tempData.system.preparation.mode = "atwill";
-  }
-
-  // Mark as temporary
-  if (!tempData.flags) tempData.flags = {};
-  tempData.flags.aethersGrasp = {
-    temporary: true,
-    castTime: Date.now(),
-  };
-
-  return tempData;
-}
-
-/**
- * Apply aether modifiers to a spell
- * @param {Object} spellData - Spell data to modify
- * @param {Object} modifiers - { attack, damage, spellAttack, spellDamage }
- * @returns {Object} Modified spell data
- */
-export function applyAetherModifiersToSpell(spellData, modifiers) {
-  // Deep copy
-  const modified =
-    foundry?.utils?.duplicate?.(spellData) ||
-    JSON.parse(JSON.stringify(spellData));
-
-  // Apply attack bonus
-  if (modifiers.attack !== 0 || modifiers.spellAttack !== 0) {
-    const attackBonus = modifiers.spellAttack || modifiers.attack;
-    modified.system.attackBonus =
-      (modified.system.attackBonus || 0) + attackBonus;
-  }
-
-  // Apply damage bonus
-  if (modifiers.damage !== 0 || modifiers.spellDamage !== 0) {
-    const damageBonus = modifiers.spellDamage || modifiers.damage;
-
-    // Ensure damage structure exists
-    if (!modified.system.damage) {
-      modified.system.damage = { parts: [] };
-    }
-    if (!modified.system.damage.parts) {
-      modified.system.damage.parts = [];
-    }
-
-    // Add damage bonus as a new damage part
-    if (damageBonus > 0) {
-      modified.system.damage.parts.push([String(damageBonus), "force"]);
-    }
-  }
-
-  return modified;
-}
-
-/**
  * Cast a spell from a finger using aether fuel
+ * Casts the spell directly from the actor's spellbook.
  * @param {Actor} actor
- * @param {Object} storedSpell - The stored spell object
- * @param {Object} modifiers - Aether modifiers to apply + enhanced flag
- * @param {boolean} modifiers.enhanced - Whether to upcast using spell slot
+ * @param {Object} storedSpell - The stored spell reference
+ * @param {Object} modifiers - Reserved for future aether modifier system
  * @param {Item} aetherFuel - The aether fuel item to consume AFTER cast
- * @returns {Promise<Object>} { tempSpell, castResult }
+ * @returns {Promise<Object>} { castResult }
  */
 export async function castSpellFromFinger(
   actor,
@@ -99,92 +51,38 @@ export async function castSpellFromFinger(
   modifiers,
   aetherFuel,
 ) {
-  // Create temporary spell data
-  let tempData = createTemporarySpellItem(storedSpell.spellData);
+  const spellbookItemId = storedSpell.spellbookItemId;
 
-  // Get spell name (remove "Spell Scroll:" prefix)
-  const spellName =
-    storedSpell.spellData.flags?.ddbimporter?.originalName ||
-    storedSpell.spellData.name.replace(/^Spell Scroll:\s*/i, "").trim();
-
-  let castLevel = tempData.system.level || 1;
-  let isUpcast = false;
-
-  // Check if upcasting is requested and validate spell slots BEFORE casting
-  if (modifiers.enhanced) {
-    const spellSlots = actor.system?.spells?.spell1;
-
-    if (!spellSlots || spellSlots.value <= 0) {
-      throw new Error(
-        `No 1st level spell slots available for upcasting ${spellName}!`,
-      );
-    }
-
-    // Upcast to 2nd level (but don't consume slot yet - wait for confirmation)
-    castLevel = 2;
-    isUpcast = true;
-    tempData.system.level = 2;
-    tempData.name = `${spellName} (2nd Level)`;
-  } else {
-    // Normal cast at 1st level
-    tempData.name = spellName;
+  if (!spellbookItemId) {
+    throw new Error("No spellbookItemId - spell must be in actor's spellbook");
   }
 
-  // Apply aether modifiers
-  tempData = applyAetherModifiersToSpell(tempData, modifiers);
+  // Authorize this cast (for blocking hook to allow it through)
+  authorizedGraspCasts.add(spellbookItemId);
 
-  // Create temporary spell item on actor
-  const createdItems = await actor.createEmbeddedDocuments("Item", [tempData]);
-  const tempSpell = createdItems[0];
+  try {
+    // Get the spell from the spellbook
+    const spell = getSpellFromSpellbook(actor, spellbookItemId);
+    if (!spell) {
+      throw new Error(`Spell not found in spellbook (id: ${spellbookItemId})`);
+    }
 
-  // Cast the spell without consuming spell slots
-  // User will see casting dialog and can confirm or cancel
-  const castResult = await tempSpell.use({
-    consumeSpellSlot: false,
-    consumeUsage: false,
-  });
+    console.log(`Elysium | Casting from spellbook: ${spell.name}`);
 
-  // AFTER user confirms cast, THEN consume resources
-  if (castResult) {
-    // Consume aether fuel and trigger toxicity workflow if unrefined
-    if (aetherFuel) {
+    // Cast the spell directly from the spellbook
+    const castResult = await spell.use({
+      consumeSpellSlot: false,
+      consumeUsage: false,
+    });
+
+    // Consume aether fuel only if cast was confirmed
+    if (castResult && aetherFuel) {
       await handleAetherFuelUse(actor, aetherFuel);
     }
 
-    // Consume spell slot if upcasting
-    if (isUpcast) {
-      const spellSlots = actor.system.spells.spell1;
-      await actor.update({
-        "system.spells.spell1.value": spellSlots.value - 1,
-      });
-    }
-
-    // Create chat message showing cast was successful
-    const modeText = isUpcast
-      ? "2nd level (Upcast with Spell Slot)"
-      : "1st level";
-    const quality =
-      aetherFuel?.getFlag("elysium", "aetherQuality") || "unknown";
-
-    ChatMessage.create({
-      speaker: ChatMessage.getSpeaker({ actor }),
-      content: `
-        <div class="elysium-message">
-          <h3>⚡ AETHER'S GRASP ⚡</h3>
-          <p><strong>${actor.name}</strong> casts <strong>${spellName}</strong> from ${storedSpell.fingerName}!</p>
-          <p style="color: var(--aether-text-blue); margin-top: 8px;">
-            <strong>Cast Level:</strong> ${modeText}
-          </p>
-          <p style="font-size: 0.8em; color: #9bb8d3; margin-top: 8px;">
-            Powered by <em>${quality}</em> aether
-          </p>
-        </div>
-      `,
-    });
+    return { castResult };
+  } finally {
+    // Always clean up authorization, even on error
+    authorizedGraspCasts.delete(spellbookItemId);
   }
-
-  return {
-    tempSpell,
-    castResult,
-  };
 }

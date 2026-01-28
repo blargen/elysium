@@ -5,7 +5,10 @@
  */
 
 import { describe, test, expect, beforeEach, jest } from "@jest/globals";
-import { clearSpellFromFinger } from "../../scripts/aethers-grasp/forget.js";
+import {
+  clearSpellFromFinger,
+  removeSpellFromSpellbook,
+} from "../../scripts/aethers-grasp/forget.js";
 
 describe("Forget From Finger", () => {
   let mockAethersGrasp;
@@ -175,6 +178,72 @@ describe("Forget From Finger", () => {
 
       expect(removed).toBeNull();
       expect(mockAethersGrasp.setFlag).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("removeSpellFromSpellbook", () => {
+    let mockActor;
+
+    beforeEach(() => {
+      mockActor = {
+        name: "Test Wizard",
+        items: {
+          get: jest.fn(),
+        },
+        deleteEmbeddedDocuments: jest.fn().mockResolvedValue([]),
+      };
+    });
+
+    test("removes spell from actor's spellbook by ID", async () => {
+      const mockSpell = {
+        id: "spellbook-spell-123",
+        name: "Magic Missile (Thumb)",
+        delete: jest.fn().mockResolvedValue(true),
+      };
+      mockActor.items.get.mockReturnValue(mockSpell);
+
+      await removeSpellFromSpellbook(mockActor, "spellbook-spell-123");
+
+      expect(mockActor.items.get).toHaveBeenCalledWith("spellbook-spell-123");
+      expect(mockSpell.delete).toHaveBeenCalled();
+    });
+
+    test("does nothing if spell not found in spellbook", async () => {
+      mockActor.items.get.mockReturnValue(undefined);
+
+      // Should not throw
+      await removeSpellFromSpellbook(mockActor, "nonexistent-id");
+
+      expect(mockActor.items.get).toHaveBeenCalledWith("nonexistent-id");
+    });
+
+    test("does nothing if spellbookItemId is null", async () => {
+      await removeSpellFromSpellbook(mockActor, null);
+
+      expect(mockActor.items.get).not.toHaveBeenCalled();
+    });
+
+    test("does nothing if spellbookItemId is undefined", async () => {
+      await removeSpellFromSpellbook(mockActor, undefined);
+
+      expect(mockActor.items.get).not.toHaveBeenCalled();
+    });
+
+    test("logs when spell is removed", async () => {
+      const consoleSpy = jest.spyOn(console, "log").mockImplementation();
+      const mockSpell = {
+        id: "spell-123",
+        name: "Shield (Index)",
+        delete: jest.fn().mockResolvedValue(true),
+      };
+      mockActor.items.get.mockReturnValue(mockSpell);
+
+      await removeSpellFromSpellbook(mockActor, "spell-123");
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining("Shield (Index)"),
+      );
+      consoleSpy.mockRestore();
     });
   });
 });

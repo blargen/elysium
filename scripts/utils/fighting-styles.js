@@ -67,14 +67,14 @@ export function getAvailableFightingStyles(actor) {
 }
 
 /**
- * Grant a temporary fighting style to the actor via Active Effect
- * The effect will be removed on the next long rest
+ * Grant a temporary fighting style to the actor as an actual feat item
+ * The feat will be removed on the next long rest
  * @param {Actor} actor - The actor to grant the style to
  * @param {string} styleName - The fighting style name
- * @returns {Promise<ActiveEffect|null>} The created effect or null if failed
+ * @returns {Promise<Item|null>} The created feat item or null if failed
  */
 export async function grantTemporaryFightingStyle(actor, styleName) {
-  // Don't grant if they already have it
+  // Don't grant if they already have it (permanent or temporary)
   if (hasFightingStyle(actor, styleName)) {
     if (typeof ui !== "undefined" && ui.notifications) {
       ui.notifications.warn(`${actor.name} already has ${styleName}!`);
@@ -82,46 +82,28 @@ export async function grantTemporaryFightingStyle(actor, styleName) {
     return null;
   }
 
-  // Define fighting style configurations
+  // Define fighting style feat data
   const fightingStyles = {
     Archery: {
-      icon: "icons/skills/ranged/arrow-flying-broadhead-metal.webp",
-      changes: [
-        {
-          key: "system.bonuses.rwak.attack",
-          mode: 2, // CONST.ACTIVE_EFFECT_MODES.ADD
-          value: "2",
-        },
-      ],
-    },
-    Defense: {
-      icon: "icons/equipment/shield/heater-steel-boss-red.webp",
-      changes: [
-        {
-          key: "system.attributes.ac.bonus",
-          mode: 2, // CONST.ACTIVE_EFFECT_MODES.ADD
-          value: "1",
-        },
-      ],
-    },
-    "Great Weapon Fighting": {
-      icon: "icons/weapons/swords/greatsword-crossguard-steel.webp",
-      changes: [],
-      // Great Weapon Fighting uses a flag since it's a reroll mechanic, not a static bonus
-      // The actual reroll logic would need to be implemented elsewhere via a hook
-      flags: {
-        isGreatWeaponFighting: true,
+      description: "<p>You gain a +2 bonus to attack rolls you make with ranged weapons.</p>",
+      // Uses system.bonuses for the +2 ranged attack bonus
+      bonuses: {
+        rwak: { attack: "2" },
       },
     },
+    Defense: {
+      description: "<p>While you are wearing armor, you gain a +1 bonus to AC.</p>",
+      bonuses: {
+        ac: { bonus: "1" },
+      },
+    },
+    "Great Weapon Fighting": {
+      description: "<p>When you roll a 1 or 2 on a damage die for an attack you make with a melee weapon that you are wielding with two hands, you can reroll the die and must use the new roll, even if the new roll is a 1 or a 2. The weapon must have the two-handed or versatile property for you to gain this benefit.</p>",
+      bonuses: {},
+    },
     "Two-Weapon Fighting": {
-      icon: "icons/weapons/daggers/dagger-双-black.webp",
-      changes: [
-        {
-          key: "system.bonuses.mwak.damage",
-          mode: 2, // CONST.ACTIVE_EFFECT_MODES.ADD
-          value: "@mod", // Add ability modifier to off-hand attack
-        },
-      ],
+      description: "<p>When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack.</p>",
+      bonuses: {},
     },
   };
 
@@ -131,26 +113,54 @@ export async function grantTemporaryFightingStyle(actor, styleName) {
     return null;
   }
 
-  // Create the active effect
-  const effectData = {
-    name: `Temporary: ${styleName}`,
-    icon: styleConfig.icon,
-    origin: actor.uuid,
-    changes: styleConfig.changes,
+  // Create the feat item
+  const featData = {
+    name: styleName,
+    type: "feat",
+    img: "icons/svg/sword.svg", // Generic icon - Foundry will use system default
+    system: {
+      description: { value: styleConfig.description },
+      type: {
+        value: "class",
+        subtype: "fightingStyle",
+      },
+      requirements: "Granted by Aether's Edge",
+      ...styleConfig.bonuses,
+    },
     flags: {
       elysium: {
-        isTemporaryGrant: true,
-        isAetherEffect: true, // Will be auto-cleaned on long rest
-        ...(styleConfig.flags || {}),
+        isTemporaryFightingStyle: true,
+        grantedBy: "aethers-edge",
       },
     },
   };
 
-  const createdEffects = await actor.createEmbeddedDocuments("ActiveEffect", [
-    effectData,
-  ]);
+  const createdItems = await actor.createEmbeddedDocuments("Item", [featData]);
 
   console.log(`Elysium | Granted temporary ${styleName} to ${actor.name}`);
 
-  return createdEffects[0];
+  return createdItems[0];
+}
+
+/**
+ * Remove any temporary fighting styles from the actor
+ * Called before showing the fighting style selection on long rest
+ * @param {Actor} actor - The actor to clean up
+ * @returns {Promise<number>} Number of items removed
+ */
+export async function removeTemporaryFightingStyles(actor) {
+  const temporaryStyles = actor.items.filter(
+    (item) => item.getFlag("elysium", "isTemporaryFightingStyle") === true
+  );
+
+  if (temporaryStyles.length === 0) return 0;
+
+  const itemIds = temporaryStyles.map((item) => item.id);
+  await actor.deleteEmbeddedDocuments("Item", itemIds);
+
+  console.log(
+    `Elysium | Removed ${temporaryStyles.length} temporary fighting style(s) from ${actor.name}`
+  );
+
+  return temporaryStyles.length;
 }
