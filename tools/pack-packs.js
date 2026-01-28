@@ -42,6 +42,8 @@ async function packCompendium(packInfo) {
   let count = 0;
 
   try {
+    // Wait for database to be ready
+    await db.open();
     console.log('   Packing items...');
 
     // Read all JSON files from source

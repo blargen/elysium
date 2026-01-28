@@ -28,8 +28,3 @@ npm-debug.log*
 
 # Foundry data (if testing locally)
 Data/
-
-# Foundry pack database files (LevelDB - built from src/packs/)
-# Ignore ALL files in pack directories since they're generated
-packs/*/
-!packs/*/.gitkeep
