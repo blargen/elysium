@@ -163,30 +163,8 @@ describe("Aether's Grasp Handler", () => {
     });
   });
 
-  describe("Action selection dialog", () => {
-    test("should show imprint, cast, and forget options", () => {
-      // Verify all three action options are available
-      expect(true).toBe(true); // Placeholder
-    });
-
-    test("should handle imprint action selection", () => {
-      // Mock imprint selection
-      expect(true).toBe(true); // Placeholder
-    });
-
-    test("should handle cast action selection", () => {
-      // Mock cast selection
-      expect(true).toBe(true); // Placeholder
-    });
-
-    test("should handle forget action selection", () => {
-      // Mock forget selection
-      expect(true).toBe(true); // Placeholder
-    });
-
-    test("should handle cancel", () => {
-      // Mock cancel button
-      expect(true).toBe(true); // Placeholder
-    });
-  });
+  // Note: Action selection dialog interactions (imprint/cast/forget/cancel)
+  // are tested via integration in Foundry. The individual action handlers
+  // (handleImprintFromScroll, handleCastFromFinger, handleForgetFromFinger)
+  // are tested in their respective test files: imprint.test.js, cast.test.js, forget.test.js
 });

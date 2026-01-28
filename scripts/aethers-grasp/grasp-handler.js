@@ -7,8 +7,12 @@ import {
   findFirstLevelScrolls,
   getAvailableFingerSlots,
   consumeScroll,
+  prepareImprintsFromSelections,
+  createStoredSpellObject,
+  addSpellToSpellbook,
 } from "./imprint.js";
 import { getStoredSpellByFinger, castSpellFromFinger } from "./cast.js";
+import { removeSpellFromSpellbook } from "./forget.js";
 import { getStoredSpells, setStoredSpells } from "../utils/flags.js";
 import { getQualityModifiers } from "../aether-fuel/fuel-selection.js";
 import { handleAetherFuelUse as consumeAether } from "../aether-fuel/consumption.js";
@@ -134,7 +138,7 @@ async function handleImprintFromScroll(actor, aethersGrasp) {
   slots.forEach((slot) => {
     const statusText = slot.occupied ? "Occupied" : "Empty";
     const spellCell = slot.occupied
-      ? `<td>${slot.spell.spellData.name}</td>`
+      ? `<td>${slot.spell.spellName}</td>`
       : `<td>
           <select name="finger-${slot.index}" class="elysium-select" style="width: 100%;">
             <option value="">-- Select Spell --</option>
@@ -218,35 +222,7 @@ async function handleImprintFromScroll(actor, aethersGrasp) {
   }
 
   // Step 1: Collect all spell data and validate scrolls BEFORE consuming anything
-  const imprintsToMake = [];
-  for (const [fingerIndex, scrollId] of Object.entries(selections)) {
-    const scroll = actor.items.get(scrollId);
-    if (!scroll) {
-      console.warn(`Elysium | Scroll ${scrollId} not found, skipping`);
-      continue;
-    }
-
-    // In D&D 5e v5.x, spell scrolls have all spell data embedded directly
-    // Use the scroll item data as the spell data
-    const spellData = scroll.toObject();
-
-    // Get spell name (try DDB importer flag first, then extract from scroll name)
-    const spellName =
-      scroll.flags?.ddbimporter?.originalName ||
-      scroll.name.replace(/^Spell Scroll:\s*/i, "").trim();
-
-    const fingerIdx = parseInt(fingerIndex);
-    const fingerName = slots[fingerIdx].name;
-
-    imprintsToMake.push({
-      fingerIdx,
-      fingerName,
-      spellData,
-      spellName,
-      scroll,
-      scrollName: scroll.name,
-    });
-  }
+  const imprintsToMake = prepareImprintsFromSelections(actor, selections, slots);
 
   if (imprintsToMake.length === 0) {
     ui.notifications.warn("No valid scrolls found to imprint.");
@@ -256,22 +232,19 @@ async function handleImprintFromScroll(actor, aethersGrasp) {
   // Step 2: Track stored spells locally to avoid flag caching issues
   let currentStoredSpells = getStoredSpells(aethersGrasp);
 
-  // Step 3: Imprint all spells
+  // Step 3: Imprint all spells - add to spellbook AND store on Grasp
   for (const imprint of imprintsToMake) {
-    // Create stored spell object (same logic as imprintSpellOnFinger)
-    const storedSpell = {
-      id:
-        foundry?.utils?.randomID?.() || `spell-${Date.now()}-${Math.random()}`,
-      fingerIndex: imprint.fingerIdx,
-      fingerName: imprint.fingerName,
-      spellData:
-        foundry?.utils?.duplicate?.(imprint.spellData) ||
-        JSON.parse(JSON.stringify(imprint.spellData)),
-      imprintedAt: Date.now(),
-      originalScrollName: imprint.scrollName,
-    };
+    // Add spell to actor's spellbook (marked with fromAethersGrasp flag)
+    const spellbookItem = await addSpellToSpellbook(
+      actor,
+      imprint.spellData,
+      imprint.fingerIdx,
+      aethersGrasp.id,
+      imprint.fingerName,
+    );
 
-    // Add to local tracking array
+    // Create stored spell reference with link to spellbook item
+    const storedSpell = createStoredSpellObject(imprint, spellbookItem.id);
     currentStoredSpells.push(storedSpell);
   }
 
@@ -307,8 +280,7 @@ async function handleCastFromFinger(actor, aethersGrasp) {
   let tableRows = "";
   slots.forEach((slot) => {
     const spellName = slot.occupied
-      ? slot.spell.spellData.flags?.ddbimporter?.originalName ||
-        slot.spell.spellData.name.replace(/^Spell Scroll:\s*/i, "").trim()
+      ? slot.spell.spellName
       : "(Empty)";
 
     const castCell = slot.occupied
@@ -395,44 +367,18 @@ async function handleCastFromFinger(actor, aethersGrasp) {
     return;
   }
 
-  // Get quality modifiers (don't consume yet!)
+  // Get quality modifiers (reserved for future shared modifier system)
   const quality = fuelSelection.aetherFuel.getFlag("elysium", "aetherQuality");
   const modifiers = getQualityModifiers(quality);
   modifiers.enhanced = fuelSelection.enhanced;
 
-  // Cast the spell! (This will consume aether + spell slot AFTER user confirms)
-  const { tempSpell } = await castSpellFromFinger(
+  // Cast the spell directly from the spellbook
+  await castSpellFromFinger(
     actor,
     storedSpell,
     modifiers,
     fuelSelection.aetherFuel,
   );
-
-  // Check if spell has duration - if so, don't delete it immediately
-  const duration = tempSpell.system.duration;
-  const isInstant =
-    !duration ||
-    duration.units === "inst" ||
-    duration.units === "instantaneous" ||
-    duration.value === 0;
-
-  if (isInstant) {
-    // Instant spells can be cleaned up quickly
-    setTimeout(async () => {
-      try {
-        await tempSpell.delete();
-        console.log("Elysium | Cleaned up instant spell");
-      } catch (e) {
-        // Already cleaned up
-      }
-    }, 2000);
-  } else {
-    // Duration spells - let them persist for their duration
-    console.log(`Elysium | Spell ${tempSpell.name} has duration, will persist`);
-    ui.notifications.info(
-      `${storedSpell.spellData.name} will remain active for its duration`,
-    );
-  }
 }
 
 /**
@@ -451,8 +397,7 @@ async function handleForgetFromFinger(actor, aethersGrasp) {
   let tableRows = "";
   slots.forEach((slot) => {
     const spellName = slot.occupied
-      ? slot.spell.spellData.flags?.ddbimporter?.originalName ||
-        slot.spell.spellData.name.replace(/^Spell Scroll:\s*/i, "").trim()
+      ? slot.spell.spellName
       : "(Empty)";
 
     const forgetCell = slot.occupied
@@ -550,13 +495,17 @@ async function handleForgetFromFinger(actor, aethersGrasp) {
   // Step 4: Save updated list once
   await setStoredSpells(aethersGrasp, updatedSpells);
 
-  // Step 5: Show notifications
+  // Step 5: Remove spells from actor's spellbook
   for (const removedSpell of removedSpells) {
-    const spellName =
-      removedSpell.spellData.flags?.ddbimporter?.originalName ||
-      removedSpell.spellData.name.replace(/^Spell Scroll:\s*/i, "").trim();
+    if (removedSpell.spellbookItemId) {
+      await removeSpellFromSpellbook(actor, removedSpell.spellbookItemId);
+    }
+  }
+
+  // Step 6: Show notifications
+  for (const removedSpell of removedSpells) {
     ui.notifications.info(
-      `Forgot ${spellName} from ${removedSpell.fingerName}!`,
+      `Forgot ${removedSpell.spellName} from ${removedSpell.fingerName}!`,
     );
   }
 
