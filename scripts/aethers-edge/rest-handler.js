@@ -6,7 +6,7 @@
 import { showStanceSelectionDialog } from "./stance-selection-dialog.js";
 import { showFightingStyleDialog } from "./fighting-style-dialog.js";
 import { applyStanceEffect, removeOldStance } from "./stance-handler.js";
-import { grantTemporaryFightingStyle } from "../utils/fighting-styles.js";
+import { grantTemporaryFightingStyle, removeTemporaryFightingStyles } from "../utils/fighting-styles.js";
 
 /**
  * Update the Aether's Edge item to show only the activity for the current stance
@@ -58,10 +58,21 @@ async function updateItemActivities(item, stance) {
     return;
   }
 
-  // Generate a proper 16-character ID
+  // First, delete all existing activities
+  const existingActivities = item.system?.activities || {};
+  const deleteUpdates = {};
+  for (const activityId of Object.keys(existingActivities)) {
+    deleteUpdates[`system.activities.-=${activityId}`] = null;
+  }
+
+  if (Object.keys(deleteUpdates).length > 0) {
+    await item.update(deleteUpdates);
+  }
+
+  // Generate a proper 16-character ID for the new activity
   const activityId = foundry.utils.randomID();
 
-  // Clear all activities and add only the one for this stance
+  // Add only the activity for this stance
   const updates = {
     "system.activities": {
       [activityId]: activityData,
@@ -135,6 +146,9 @@ export async function handleAethersEdgeLongRest(actor, result) {
       `${actor.name} enters ${stances[selectedStance].name}!`,
     );
   }
+
+  // Remove any temporary fighting styles from previous rest
+  await removeTemporaryFightingStyles(actor);
 
   // Show fighting style selection dialog
   const selectedStyle = await showFightingStyleDialog(actor);
