@@ -1,0 +1,181 @@
+{
+  "name": "The Metatron",
+  "type": "equipment",
+  "img": "modules/elysium/assets/icons/TheMetatron.png",
+  "system": {
+    "type": {
+      "value": "trinket",
+      "baseItem": ""
+    },
+    "equipped": false,
+    "attunement": "required",
+    "rarity": "veryRare",
+    "description": {
+      "value": "<p>A sacred amulet that channels divine energy through aether, allowing clerics to store and cast spells through the power of prayer.</p>\n<h3>Sacred Slots</h3>\n<p>The Metatron holds five prayer slots, each a different form of sacred invocation:</p>\n<ul>\n<li><strong>Supplication</strong> - A humble prayer of need</li>\n<li><strong>Invocation</strong> - A call upon divine power</li>\n<li><strong>Litany</strong> - A repeated prayer of devotion</li>\n<li><strong>Benediction</strong> - A blessing bestowed</li>\n<li><strong>Consecration</strong> - A prayer of sanctification</li>\n</ul>\n<h3>Abilities</h3>\n<p><img src=\"modules/elysium/assets/icons/MetatronImprint.png\" width=\"32\" height=\"32\" style=\"vertical-align: middle; margin-right: 8px;\"><strong>Prayer of Creation:</strong> Imprint any 1st level Cleric spell from the divine spell list into an empty slot. No aether cost.</p>\n<p><img src=\"modules/elysium/assets/icons/TheMetatron.png\" width=\"32\" height=\"32\" style=\"vertical-align: middle; margin-right: 8px;\"><strong>Psalm of Casting:</strong> Cast a stored spell using aether fuel. Spend a spell slot to enhance: non-healing spells upcast to 2nd level; healing spells choose extended range (40ft), upcast, or maximum healing.</p>\n<p><img src=\"modules/elysium/assets/icons/MetatronForgetSpell.png\" width=\"32\" height=\"32\" style=\"vertical-align: middle; margin-right: 8px;\"><strong>Meditation of Forgetfulness:</strong> Remove stored spells from slots.</p>\n<p><img src=\"modules/elysium/assets/icons/TheMetatron.png\" width=\"32\" height=\"32\" style=\"vertical-align: middle; margin-right: 8px;\"><strong>Healer's Gambit:</strong> Cast Mass Healing Word (3rd level) using a 2nd level spell slot and aether. <em>Warning:</em> Gain 1 Aether Toxicity Level. Roll d20 - on failure (1 to 2+ATL*2), The Metatron goes dormant until long rest.</p>\n<p class=\"elysium-info-box\"><strong>Note:</strong> This modification requires attunement and a minimum cleric level of 3. Healer's Gambit becomes increasingly dangerous as Aether Toxicity accumulates.</p>",
+      "chat": ""
+    },
+    "activities": {
+      "use": {
+        "type": "utility",
+        "name": "Use The Metatron",
+        "activation": {
+          "type": "action",
+          "value": 1,
+          "override": false
+        },
+        "_id": "metatronActivity01",
+        "sort": 0,
+        "consumption": {
+          "scaling": {
+            "allowed": false
+          },
+          "spellSlot": true,
+          "targets": []
+        },
+        "description": {},
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": false
+        },
+        "effects": [],
+        "range": {
+          "units": "self",
+          "override": false
+        },
+        "target": {
+          "template": {
+            "contiguous": false,
+            "units": "ft"
+          },
+          "affects": {
+            "choice": false
+          },
+          "override": false,
+          "prompt": true
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": []
+        },
+        "roll": {
+          "prompt": false,
+          "visible": false
+        },
+        "useConditionText": "",
+        "useConditionReason": "",
+        "effectConditionText": "",
+        "macroData": {
+          "name": "",
+          "command": ""
+        },
+        "ignoreTraits": {
+          "idi": false,
+          "idr": false,
+          "idv": false,
+          "ida": false,
+          "idm": false
+        },
+        "midiProperties": {
+          "ignoreTraits": [],
+          "triggeredActivityId": "none",
+          "triggeredActivityConditionText": "",
+          "triggeredActivityTargets": "targets",
+          "triggeredActivityRollAs": "self",
+          "autoConsume": false,
+          "forceConsumeDialog": "default",
+          "forceRollDialog": "default",
+          "forceDamageDialog": "default",
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "automationOnly": false,
+          "otherActivityCompatible": true,
+          "otherActivityAsParentType": true,
+          "identifier": "",
+          "displayActivityName": false,
+          "rollMode": "default",
+          "chooseEffects": false,
+          "toggleEffect": false,
+          "ignoreFullCover": false,
+          "removeChatButtons": "default",
+          "magicEffect": false,
+          "magicDamage": false,
+          "noConcentrationCheck": false,
+          "autoCEEffects": "default"
+        },
+        "isOverTimeFlag": false,
+        "overTimeProperties": {
+          "saveRemoves": true,
+          "preRemoveConditionText": "",
+          "postRemoveConditionText": ""
+        },
+        "otherActivityId": "none",
+        "otherActivityAsParentType": true
+      }
+    },
+    "uses": {
+      "spent": 0,
+      "recovery": []
+    },
+    "identifier": "the-metatron",
+    "source": {
+      "revision": 1,
+      "rules": "2024"
+    },
+    "identified": true,
+    "unidentified": {
+      "description": ""
+    },
+    "container": null,
+    "quantity": 1,
+    "weight": {
+      "value": 0.5,
+      "units": "lb"
+    },
+    "price": {
+      "value": 0,
+      "denomination": "gp"
+    },
+    "attuned": false,
+    "crewed": false,
+    "armor": {
+      "value": null,
+      "dex": null
+    },
+    "proficient": null,
+    "properties": [],
+    "strength": null
+  },
+  "flags": {
+    "elysium": {
+      "requiresAether": true,
+      "isTheMetatron": true,
+      "modType": "spell-storage",
+      "requiredClass": "cleric",
+      "requiredLevel": 3,
+      "maxStoredSpells": 5,
+      "allowedSpellLevel": 1,
+      "storedSpells": [],
+      "disabled": false
+    }
+  },
+  "_id": "theMetatron00001",
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "13.350",
+    "systemId": "dnd5e",
+    "systemVersion": "5.1.10",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  }
+}
