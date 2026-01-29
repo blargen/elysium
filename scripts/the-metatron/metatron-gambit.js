@@ -40,42 +40,18 @@ const MASS_HEALING_WORD = {
   },
 };
 
-/**
- * Calculate the failure threshold based on ATL
- * Formula: 2 + (ATL * 2), capped at 20
- * @param {number} atl - Current Aether Toxicity Level
- * @returns {number} The failure threshold (roll <= this = failure)
- */
-export function calculateFailureThreshold(atl) {
-  const threshold = 2 + atl * 2;
-  return Math.min(threshold, 20); // Cap at 20
-}
+import {
+  calculateOverloadThreshold,
+  isOverloadFailure,
+  disableItem,
+  enableItem,
+} from "../utils/overload.js";
 
-/**
- * Check if a roll is a gambit failure
- * @param {number} roll - The d20 roll result
- * @param {number} threshold - The failure threshold
- * @returns {boolean} True if the roll fails
- */
-export function isGambitFailure(roll, threshold) {
-  return roll <= threshold;
-}
-
-/**
- * Disable The Metatron (failed gambit)
- * @param {Item} metatron - The Metatron item
- */
-export async function disableMetatron(metatron) {
-  await metatron.setFlag("elysium", "disabled", true);
-}
-
-/**
- * Enable The Metatron (after long rest)
- * @param {Item} metatron - The Metatron item
- */
-export async function enableMetatron(metatron) {
-  await metatron.setFlag("elysium", "disabled", false);
-}
+// Re-export with original names for backwards compatibility
+export const calculateFailureThreshold = calculateOverloadThreshold;
+export const isGambitFailure = isOverloadFailure;
+export const disableMetatron = disableItem;
+export const enableMetatron = enableItem;
 
 /**
  * Execute Healer's Gambit

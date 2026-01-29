@@ -21,8 +21,9 @@ export function registerAethersGraspHooks() {
   );
 
   // Hook 2: Block direct casting of spells stored in Aether's Grasp
+  // Authorization check is in canHandle so the registry can let authorized casts through synchronously
   registerPreUseActivityHandler(
-    isGraspSpell,
+    (item) => isGraspSpell(item) && !authorizedGraspCasts.has(item.id),
     blockDirectGraspSpellCast
   );
 
@@ -39,25 +40,17 @@ function isGraspSpell(item) {
 }
 
 /**
- * Block direct casting of Grasp spells unless authorized
+ * Block direct casting of Grasp spells (unauthorized casts only - authorized
+ * casts are filtered out in canHandle so the registry lets them through)
  * @param {Actor} actor - The actor casting
  * @param {Item} item - The spell being cast
- * @returns {boolean} False to block, undefined to allow
  */
 async function blockDirectGraspSpellCast(actor, item) {
-  // Check if this cast is authorized (through Aether's Grasp workflow)
-  if (authorizedGraspCasts.has(item.id)) {
-    console.log(`Elysium | Authorized Grasp cast: ${item.name}`);
-    return; // Allow the cast to proceed
-  }
-
-  // Block the direct cast
   const fingerName = item.getFlag("elysium", "fingerName") || "a finger";
   ui.notifications.warn(
     `${item.name} must be cast through Aether's Grasp, not directly from your spellbook!`
   );
   console.log(`Elysium | Blocked direct cast of ${item.name} (stored on ${fingerName})`);
-  return false; // Cancel the activity
 }
 
 /**
@@ -66,5 +59,4 @@ async function blockDirectGraspSpellCast(actor, item) {
 async function handleGraspUse(actor, item) {
   console.log(`Elysium | ${actor.name} is using Aether's Grasp`);
   await handleAethersGraspUse(actor, item);
-  return false; // Prevent default item use
 }

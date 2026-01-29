@@ -12,8 +12,8 @@ const restCompletedHandlers = [];
 
 /**
  * Register a handler for preUseActivity hook
- * @param {Function} canHandle - (item) => boolean - returns true if this handler owns the item
- * @param {Function} handle - (actor, item, activity, config) => Promise<boolean|void> - return false to cancel
+ * @param {Function} canHandle - (item, activity) => boolean - returns true if this handler should intercept
+ * @param {Function} handle - (actor, item, activity, config) => Promise<void> - async handler, activity is already cancelled
  */
 export function registerPreUseActivityHandler(canHandle, handle) {
   preUseActivityHandlers.push({ canHandle, handle });
@@ -43,18 +43,27 @@ export function registerRestCompletedHandler(canHandle, handle) {
  */
 export function initializeHooks() {
   // Pre-use activity - intercepts item use
-  Hooks.on("dnd5e.preUseActivity", async (activity, usageConfig, dialogConfig, messageConfig) => {
+  //
+  // IMPORTANT: This callback is NOT async. Foundry does not await async hook
+  // callbacks, so an async function returning false would return a Promise
+  // (which is truthy), and the activity would proceed immediately.
+  //
+  // Instead, we check canHandle synchronously, return false to cancel the
+  // activity, and kick off the async handler work separately. The handler
+  // is responsible for re-triggering activity.use() if the attack should
+  // still proceed after async work (fuel selection, etc.) completes.
+  Hooks.on("dnd5e.preUseActivity", (activity, usageConfig, dialogConfig, messageConfig) => {
     const item = activity.item;
     const actor = item?.actor;
 
     if (!actor) return;
 
     for (const handler of preUseActivityHandlers) {
-      if (handler.canHandle(item)) {
-        const result = await handler.handle(actor, item, activity, { usageConfig, dialogConfig, messageConfig });
-        if (result === false) {
-          return false; // Cancel the activity
-        }
+      if (handler.canHandle(item, activity)) {
+        // Fire the async handler but do NOT await it.
+        // The handler is responsible for re-triggering activity.use() if needed.
+        handler.handle(actor, item, activity, { usageConfig, dialogConfig, messageConfig });
+        return false; // Synchronously cancel the activity
       }
     }
   });

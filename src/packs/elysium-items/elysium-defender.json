@@ -1,0 +1,366 @@
+{
+  "name": "The Elysium Defender",
+  "type": "weapon",
+  "img": "modules/elysium/assets/icons/ElysiumDefender.png",
+  "system": {
+    "type": {
+      "value": "simpleR",
+      "baseItem": ""
+    },
+    "equipped": false,
+    "attunement": "",
+    "rarity": "rare",
+    "description": {
+      "value": "<p>This large revolver has some heft to it, making you realize that what you see outside of the gun is only a small percentage of the technology packed into this firearm. The long barrel feels perfectly balanced once the user has it in a firing position, granting the user unparalleled comfort while firing. The handle of the gun is made up of a material that carefully forms around the hands of the user.</p>\n<h3>Properties</h3>\n<ul>\n<li><strong>Attack:</strong> +1 to hit (DEX-based ranged weapon)</li>\n<li><strong>Damage:</strong> 2d6 + DEX modifier force damage</li>\n<li><strong>Ergonomic Grip:</strong> Disarming attacks are made with disadvantage against the wielder of this weapon</li>\n</ul>\n<h3>Overload</h3>\n<p><img src=\"modules/elysium/assets/icons/ElysiumDefenderOverload.png\" width=\"32\" height=\"32\" style=\"vertical-align: middle; margin-right: 8px;\"><strong>Overload:</strong> As an action, you can push the weapon beyond its limits, channeling raw aether through its core. The damage doubles to <strong>4d6 + DEX modifier</strong> force damage for that attack.</p>\n<p><strong>Cost:</strong> Consumes 1 aether fuel charge. You gain 1 daily dose and 1 Aether Toxicity Level.</p>\n<p><strong>Risk:</strong> After the overloaded shot, roll a d20. If the result is equal to or less than <strong>2 + (ATL &times; 2)</strong>, the weapon's internal mechanisms seize up and it becomes inert until you complete a long rest.</p>\n<p class=\"elysium-info-box\"><strong>Warning:</strong> Overloading becomes increasingly dangerous as Aether Toxicity accumulates. At ATL 0 you fail on a 1-2, at ATL 1 on a 1-4, at ATL 2 on a 1-6, and so on.</p>",
+      "chat": ""
+    },
+    "activities": {
+      "attack": {
+        "type": "attack",
+        "name": "Fire",
+        "activation": {
+          "type": "action",
+          "value": 1,
+          "override": false
+        },
+        "_id": "elysDefAttack001",
+        "sort": 0,
+        "attack": {
+          "ability": "dex",
+          "bonus": "1",
+          "critical": {
+            "threshold": null
+          },
+          "flat": false,
+          "type": {
+            "value": "ranged",
+            "classification": "weapon"
+          }
+        },
+        "consumption": {
+          "scaling": {
+            "allowed": false
+          },
+          "spellSlot": false,
+          "targets": []
+        },
+        "damage": {
+          "critical": {
+            "bonus": ""
+          },
+          "includeBase": true,
+          "parts": []
+        },
+        "description": {},
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": false
+        },
+        "effects": [],
+        "range": {
+          "value": "60",
+          "long": "180",
+          "units": "ft",
+          "override": false
+        },
+        "target": {
+          "template": {
+            "contiguous": false,
+            "units": "ft"
+          },
+          "affects": {
+            "count": "1",
+            "type": "creature",
+            "choice": false
+          },
+          "override": false,
+          "prompt": true
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": []
+        },
+        "roll": {
+          "prompt": false,
+          "visible": false
+        },
+        "useConditionText": "",
+        "useConditionReason": "",
+        "effectConditionText": "",
+        "macroData": {
+          "name": "",
+          "command": ""
+        },
+        "ignoreTraits": {
+          "idi": false,
+          "idr": false,
+          "idv": false,
+          "ida": false,
+          "idm": false
+        },
+        "midiProperties": {
+          "ignoreTraits": [],
+          "triggeredActivityId": "none",
+          "triggeredActivityConditionText": "",
+          "triggeredActivityTargets": "targets",
+          "triggeredActivityRollAs": "self",
+          "autoConsume": false,
+          "forceConsumeDialog": "default",
+          "forceRollDialog": "default",
+          "forceDamageDialog": "default",
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "automationOnly": false,
+          "otherActivityCompatible": true,
+          "otherActivityAsParentType": true,
+          "identifier": "",
+          "displayActivityName": false,
+          "rollMode": "default",
+          "chooseEffects": false,
+          "toggleEffect": false,
+          "ignoreFullCover": false,
+          "removeChatButtons": "default",
+          "magicEffect": false,
+          "magicDamage": true,
+          "noConcentrationCheck": false,
+          "autoCEEffects": "default"
+        },
+        "isOverTimeFlag": false,
+        "overTimeProperties": {
+          "saveRemoves": true,
+          "preRemoveConditionText": "",
+          "postRemoveConditionText": ""
+        },
+        "otherActivityId": "none",
+        "otherActivityAsParentType": true
+      },
+      "overload": {
+        "type": "attack",
+        "name": "Overload",
+        "activation": {
+          "type": "action",
+          "value": 1,
+          "override": false
+        },
+        "_id": "elysDefOverld001",
+        "sort": 1,
+        "attack": {
+          "ability": "dex",
+          "bonus": "1",
+          "critical": {
+            "threshold": null
+          },
+          "flat": false,
+          "type": {
+            "value": "ranged",
+            "classification": "weapon"
+          }
+        },
+        "consumption": {
+          "scaling": {
+            "allowed": false
+          },
+          "spellSlot": false,
+          "targets": []
+        },
+        "damage": {
+          "critical": {
+            "bonus": ""
+          },
+          "includeBase": false,
+          "parts": [
+            {
+              "number": 4,
+              "denomination": 6,
+              "bonus": "@mod",
+              "types": ["force"],
+              "custom": {
+                "enabled": false,
+                "formula": ""
+              },
+              "scaling": {
+                "mode": "",
+                "number": null,
+                "formula": ""
+              }
+            }
+          ]
+        },
+        "description": {
+          "value": "<p>Channel raw aether through the weapon's core to double its damage output. Deals 4d6 + DEX force damage but gains 1 daily dose and 1 ATL. Risk of weapon going dormant.</p>"
+        },
+        "duration": {
+          "units": "inst",
+          "concentration": false,
+          "override": false
+        },
+        "effects": [],
+        "range": {
+          "value": "60",
+          "long": "180",
+          "units": "ft",
+          "override": false
+        },
+        "target": {
+          "template": {
+            "contiguous": false,
+            "units": "ft"
+          },
+          "affects": {
+            "count": "1",
+            "type": "creature",
+            "choice": false
+          },
+          "override": false,
+          "prompt": true
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": []
+        },
+        "roll": {
+          "prompt": false,
+          "visible": false
+        },
+        "useConditionText": "",
+        "useConditionReason": "",
+        "effectConditionText": "",
+        "macroData": {
+          "name": "",
+          "command": ""
+        },
+        "ignoreTraits": {
+          "idi": false,
+          "idr": false,
+          "idv": false,
+          "ida": false,
+          "idm": false
+        },
+        "midiProperties": {
+          "ignoreTraits": [],
+          "triggeredActivityId": "none",
+          "triggeredActivityConditionText": "",
+          "triggeredActivityTargets": "targets",
+          "triggeredActivityRollAs": "self",
+          "autoConsume": false,
+          "forceConsumeDialog": "default",
+          "forceRollDialog": "default",
+          "forceDamageDialog": "default",
+          "confirmTargets": "default",
+          "autoTargetType": "any",
+          "autoTargetAction": "default",
+          "automationOnly": false,
+          "otherActivityCompatible": true,
+          "otherActivityAsParentType": true,
+          "identifier": "",
+          "displayActivityName": false,
+          "rollMode": "default",
+          "chooseEffects": false,
+          "toggleEffect": false,
+          "ignoreFullCover": false,
+          "removeChatButtons": "default",
+          "magicEffect": false,
+          "magicDamage": true,
+          "noConcentrationCheck": false,
+          "autoCEEffects": "default"
+        },
+        "isOverTimeFlag": false,
+        "overTimeProperties": {
+          "saveRemoves": true,
+          "preRemoveConditionText": "",
+          "postRemoveConditionText": ""
+        },
+        "otherActivityId": "none",
+        "otherActivityAsParentType": true
+      }
+    },
+    "uses": {
+      "spent": 0,
+      "recovery": []
+    },
+    "identifier": "elysium-defender",
+    "source": {
+      "revision": 1,
+      "rules": "2024"
+    },
+    "identified": true,
+    "unidentified": {
+      "description": ""
+    },
+    "container": null,
+    "quantity": 1,
+    "weight": {
+      "value": 3,
+      "units": "lb"
+    },
+    "price": {
+      "value": 0,
+      "denomination": "gp"
+    },
+    "attuned": false,
+    "magicalBonus": 1,
+    "properties": [
+      "mgc"
+    ],
+    "proficient": null,
+    "range": {
+      "value": 60,
+      "long": 180,
+      "units": "ft"
+    },
+    "damage": {
+      "base": {
+        "number": 2,
+        "denomination": 6,
+        "bonus": "",
+        "types": ["force"],
+        "custom": {
+          "enabled": false,
+          "formula": ""
+        },
+        "scaling": {
+          "mode": "",
+          "number": null,
+          "formula": ""
+        }
+      }
+    }
+  },
+  "flags": {
+    "elysium": {
+      "isElysiumDefender": true,
+      "requiresAether": true,
+      "modType": "weapon",
+      "disabled": false,
+      "disarmDisadvantage": true,
+      "overload": {
+        "damageDice": "4d6",
+        "damageType": "force",
+        "failThreshold": "2 + ATL * 2",
+        "disabledUntil": "longRest",
+        "costATL": 1,
+        "costDailyDose": 1
+      }
+    }
+  },
+  "_id": "elysiumDefend001",
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "13.350",
+    "systemId": "dnd5e",
+    "systemVersion": "5.2.5",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  }
+}

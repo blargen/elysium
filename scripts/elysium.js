@@ -17,6 +17,7 @@ import { registerAethersLeapHooks } from "./aethers-leap/leap-hooks.js";
 import { registerAethersDetectionHooks } from "./aethers-detection/detection-hooks.js";
 import { registerGiftHooks } from "./gift-of-thousand-strikes/gift-hooks.js";
 import { registerAethersEdgeRestHandler } from "./aethers-edge/rest-handler.js";
+import { registerDefenderHooks } from "./elysium-defender/defender-hooks.js";
 
 // UI hooks
 import { injectToxicityDisplay } from "./ui/character-sheet.js";
@@ -47,6 +48,8 @@ Hooks.once("ready", function () {
   registerAethersLeapHooks();
   registerAethersDetectionHooks();
   registerGiftHooks();
+
+  registerDefenderHooks();
 
   // Register rest handlers
   registerAethersEdgeRestHandler();

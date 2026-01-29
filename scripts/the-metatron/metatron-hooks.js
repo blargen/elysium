@@ -47,7 +47,6 @@ function hasDisabledMetatron(actor) {
 async function handleMetatronPreUse(actor, item) {
   console.log(`Elysium | ${actor.name} is using The Metatron`);
   await handleMetatronUse(actor, item);
-  return false; // Prevent default item use
 }
 
 /**

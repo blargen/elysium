@@ -27,5 +27,4 @@ export function registerGiftHooks() {
 async function handleGiftUse(actor, item) {
   console.log(`Elysium | ${actor.name} is using Gift of a Thousand Strikes`);
   await handleGiftOfThousandStrikes(actor, item);
-  return false; // Prevent default item use
 }
