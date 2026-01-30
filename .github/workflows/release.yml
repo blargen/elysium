@@ -35,6 +35,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
+      - name: Setup Node.js
+        if: steps.check_release.outputs.exists == 'false'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies and build compendiums
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          npm install
+          npm run pack
+
       - name: Create release package
         if: steps.check_release.outputs.exists == 'false'
         run: |
@@ -47,11 +59,17 @@ jobs:
                     --exclude='.claude' \
                     --exclude='node_modules' \
                     --exclude='tests' \
+                    --exclude='tools' \
+                    --exclude='src' \
                     --exclude='jest.config.js' \
                     --exclude='package.json' \
                     --exclude='package-lock.json' \
                     --exclude='TESTING.md' \
+                    --exclude='CLAUDE.md' \
                     --exclude='.gitignore' \
+                    --exclude='.gitattributes' \
+                    --exclude='.eslintrc*' \
+                    --exclude='.prettierrc*' \
                     --exclude='*.test.js' \
                     . elysium/
 
@@ -61,8 +79,12 @@ jobs:
       - name: Create GitHub Release
         if: steps.check_release.outputs.exists == 'false'
         run: |
+          # Rename to stable filename for the download URL
+          cp elysium-v${{ steps.get_version.outputs.version }}.zip elysium-latest.zip
+
           gh release create "v${{ steps.get_version.outputs.version }}" \
             elysium-v${{ steps.get_version.outputs.version }}.zip \
+            elysium-latest.zip \
             --title "Elysium v${{ steps.get_version.outputs.version }}" \
             --generate-notes
         env:
