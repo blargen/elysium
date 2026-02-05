@@ -18,6 +18,8 @@ import { registerAethersDetectionHooks } from "./aethers-detection/detection-hoo
 import { registerGiftHooks } from "./gift-of-thousand-strikes/gift-hooks.js";
 import { registerAethersEdgeRestHandler } from "./aethers-edge/rest-handler.js";
 import { registerDefenderHooks } from "./elysium-defender/defender-hooks.js";
+import { registerWeaponUsageHook } from "./aether-weapons/weapon-hook-registration.js";
+import { registerDamageModificationHook } from "./aether-weapons/damage-hook-registration.js";
 
 // UI hooks
 import { injectToxicityDisplay } from "./ui/character-sheet.js";
@@ -50,6 +52,10 @@ Hooks.once("ready", function () {
   registerGiftHooks();
 
   registerDefenderHooks();
+
+  // Register aether weapon usage hook (overpower/overclock system)
+  registerWeaponUsageHook();
+  registerDamageModificationHook();
 
   // Register rest handlers
   registerAethersEdgeRestHandler();
