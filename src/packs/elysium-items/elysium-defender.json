@@ -330,7 +330,10 @@
   },
   "flags": {
     "elysium": {
-      "isElysiumDefender": true,
+      "isAetherWeapon": true,
+      "normalDamage": "2d6",
+      "overpowerDamage": "4d6",
+      "weaponType": "revolver",
       "requiresAether": true,
       "modType": "weapon",
       "disabled": false,

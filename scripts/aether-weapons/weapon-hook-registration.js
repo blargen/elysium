@@ -2,41 +2,57 @@
  * Weapon Hook Registration
  *
  * Registers the hook that intercepts aether weapon usage in Foundry.
+ * Uses the activity system hook pattern for D&D 5e v4+.
  */
 
+import { registerPreUseActivityHandler } from "../hooks/hook-registry.js";
 import { handleAetherWeaponUsage } from "./weapon-usage-hook.js";
 
 /**
- * Register the weapon usage hook with Foundry (using midi-qol)
+ * Set of activity IDs authorized to bypass our handler on re-trigger.
+ */
+const authorizedWeaponUses = new Set();
+
+/**
+ * Register the weapon usage hook (using activity system)
  */
 export function registerWeaponUsageHook() {
-  console.log("Elysium | Registering weapon usage hook (midi-qol.preItemRoll)");
+  console.log("Elysium | Registering weapon usage hook (dnd5e.preUseActivity)");
 
-  Hooks.on("midi-qol.preItemRoll", async (workflow) => {
-    const item = workflow.item;
-    const actor = workflow.actor;
+  registerPreUseActivityHandler(
+    // canHandle - check if this is an aether weapon
+    (item, activity) => {
+      const isAetherWeapon = item.getFlag("elysium", "isAetherWeapon");
+      const isAuthorized = authorizedWeaponUses.has(activity?._id);
 
-    console.log("Elysium | midi-qol.preItemRoll fired for:", item?.name);
+      // Only intercept if it's an aether weapon AND not already authorized
+      return isAetherWeapon && !isAuthorized;
+    },
 
-    // Only process if item has an actor
-    if (!item || !actor) return true;
+    // handle - async handler that shows dialogs and re-triggers
+    async (actor, item, activity) => {
+      console.log("Elysium | Aether weapon activity intercepted:", item.name);
 
-    // Let our handler process it
-    const result = await handleAetherWeaponUsage(item, actor);
+      // Run our handler
+      const result = await handleAetherWeaponUsage(item, actor);
 
-    console.log("Elysium | Handler result:", result);
+      console.log("Elysium | Handler result:", result);
 
-    // If not intercepted, let it continue normally
-    if (!result.intercepted && result.intercepted !== undefined) {
-      return true;
+      // If cancelled, don't re-trigger
+      if (result.cancelled) {
+        return;
+      }
+
+      // Authorize the re-trigger so canHandle returns false next time
+      authorizedWeaponUses.add(activity._id);
+
+      try {
+        // Re-trigger the activity - this time it will proceed normally
+        await activity.use({});
+      } finally {
+        // Clean up authorization
+        authorizedWeaponUses.delete(activity._id);
+      }
     }
-
-    // If cancelled, prevent the item use
-    if (result.cancelled) {
-      return false;
-    }
-
-    // Otherwise continue (normal fire or overpower completed)
-    return true;
-  });
+  );
 }
