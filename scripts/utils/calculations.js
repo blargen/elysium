@@ -7,13 +7,13 @@
 
 /**
  * Calculate the toxicity save DC based on daily doses
- * Formula: DC = 8 + (2 * (dailyDoses + 1))
+ * Formula: DC = 10 + (2 * (dailyDoses + 1))
  *
  * @param {number} dailyDoses - Current number of doses taken today (before this one)
  * @returns {number} The Constitution save DC
  */
 export function calculateToxicityDC(dailyDoses) {
-  return 8 + 2 * (dailyDoses + 1);
+  return 10 + 2 * (dailyDoses + 1);
 }
 
 /**

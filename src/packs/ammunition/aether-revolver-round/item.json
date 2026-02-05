@@ -1,0 +1,44 @@
+{
+  "name": "Aether Revolver Round",
+  "type": "consumable",
+  "img": "modules/elysium/src/packs/ammunition/aether-revolver-round/assets/icon.png",
+  "system": {
+    "description": {
+      "value": "<p><strong>Aether Type:</strong> Basic Refined</p><p><strong>Ammunition Type:</strong> Revolver round</p><p><strong>Damage Type:</strong> Force</p><hr/><p>Aether revolver rounds use refined Aether housed within the casing to generate the propulsive force that fires the projectile. The casing of the round is made from an alloy mixed from steel and depleted Aether, and it houses a rune-protected vial. The stored energy of the Aether is released when the hammer with an opposing rune strikes the round's rune, destroying the vial.</p><p><em>These rounds are standard issue for enlisted officers of the Elysium military.</em></p>",
+      "chat": ""
+    },
+    "type": {
+      "value": "ammo",
+      "subtype": ""
+    },
+    "quantity": 20,
+    "weight": {
+      "value": 0.1,
+      "units": "lb"
+    },
+    "price": {
+      "value": 5,
+      "denomination": "gp"
+    },
+    "rarity": "common",
+    "identified": true,
+    "uses": {
+      "max": "20",
+      "recovery": [],
+      "autoDestroy": true
+    }
+  },
+  "flags": {
+    "elysium": {
+      "isAetherAmmo": true,
+      "damageType": "force"
+    }
+  },
+  "_id": "AetherRound00001",
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  }
+}

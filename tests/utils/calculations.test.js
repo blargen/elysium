@@ -13,19 +13,19 @@ import {
 describe("Toxicity Calculations", () => {
   describe("calculateToxicityDC", () => {
     test("calculates DC correctly for first dose", () => {
-      expect(calculateToxicityDC(0)).toBe(10); // 8 + 2*1
+      expect(calculateToxicityDC(0)).toBe(12); // 10 + 2*1
     });
 
     test("calculates DC correctly for second dose", () => {
-      expect(calculateToxicityDC(1)).toBe(12); // 8 + 2*2
+      expect(calculateToxicityDC(1)).toBe(14); // 10 + 2*2
     });
 
     test("calculates DC correctly for fifth dose", () => {
-      expect(calculateToxicityDC(4)).toBe(18); // 8 + 2*5
+      expect(calculateToxicityDC(4)).toBe(20); // 10 + 2*5
     });
 
     test("calculates DC correctly for tenth dose", () => {
-      expect(calculateToxicityDC(9)).toBe(28); // 8 + 2*10
+      expect(calculateToxicityDC(9)).toBe(30); // 10 + 2*10
     });
   });
 

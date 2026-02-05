@@ -85,7 +85,7 @@ describe("Toxicity Application System", () => {
 
     test("increments ATL on failed save", async () => {
       mockActor.flags.elysium = { dailyDoses: 0, atl: 0 };
-      const mockRoll = { total: 5 }; // Low roll = fail (DC is 10)
+      const mockRoll = { total: 5 }; // Low roll = fail (DC is 12)
 
       await applyUnrefinedAetherUse(mockActor, mockRoll);
 
@@ -93,24 +93,24 @@ describe("Toxicity Application System", () => {
     });
 
     test("DC increases with each daily dose", async () => {
-      // First dose: DC 10 (8 + 2*1)
+      // First dose: DC 12 (10 + 2*1)
       mockActor.flags.elysium = { dailyDoses: 0, atl: 0 };
-      let mockRoll = { total: 11 };
+      let mockRoll = { total: 13 };
       await applyUnrefinedAetherUse(mockActor, mockRoll);
       expect(getDailyDoses(mockActor)).toBe(1);
 
-      // Second dose: DC 12 (8 + 2*2)
-      mockRoll = { total: 13 };
+      // Second dose: DC 14 (10 + 2*2)
+      mockRoll = { total: 15 };
       await applyUnrefinedAetherUse(mockActor, mockRoll);
       expect(getDailyDoses(mockActor)).toBe(2);
 
-      // Third dose: DC 14 (8 + 2*3)
-      mockRoll = { total: 15 };
+      // Third dose: DC 16 (10 + 2*3)
+      mockRoll = { total: 17 };
       await applyUnrefinedAetherUse(mockActor, mockRoll);
       expect(getDailyDoses(mockActor)).toBe(3);
 
-      // Fourth dose: DC 16 (8 + 2*4)
-      mockRoll = { total: 17 };
+      // Fourth dose: DC 18 (10 + 2*4)
+      mockRoll = { total: 19 };
       await applyUnrefinedAetherUse(mockActor, mockRoll);
       expect(getDailyDoses(mockActor)).toBe(4);
     });
@@ -140,7 +140,7 @@ describe("Toxicity Application System", () => {
 
       expect(data.dailyDoses).toBe(0);
       expect(data.atl).toBe(0);
-      expect(data.nextDC).toBe(10); // 8 + 2*1
+      expect(data.nextDC).toBe(12); // 10 + 2*1
     });
 
     test("calculates correct next DC for fourth dose", () => {
@@ -150,7 +150,7 @@ describe("Toxicity Application System", () => {
 
       expect(data.dailyDoses).toBe(3);
       expect(data.atl).toBe(2);
-      expect(data.nextDC).toBe(16); // 8 + 2*4
+      expect(data.nextDC).toBe(18); // 10 + 2*4
     });
   });
 
