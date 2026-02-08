@@ -1,0 +1,26 @@
+{
+  "name": "The Elysium Defender",
+  "type": "weapon",
+  "_id": "elysiumDefend001",
+  "img": "modules/elysium/assets/icons/elysium-defender.png",
+  "flags": {
+    "elysium": {
+      "isAetherWeapon": true,
+      "normalDamage": "2d6",
+      "overpowerDamage": "4d6",
+      "weaponType": "revolver"
+    }
+  },
+  "system": {
+    "damage": {
+      "parts": []
+    },
+    "actionType": "rwak",
+    "properties": {
+      "amm": true
+    },
+    "consume": {
+      "type": "ammo"
+    }
+  }
+}

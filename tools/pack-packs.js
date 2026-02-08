@@ -13,7 +13,8 @@ const rootDir = path.join(__dirname, '..');
 
 const packs = [
   { name: 'aether-fuel', src: path.join(rootDir, 'src/packs/aether-fuel'), dest: path.join(rootDir, 'packs/aether-fuel') },
-  { name: 'elysium-items', src: path.join(rootDir, 'src/packs/elysium-items'), dest: path.join(rootDir, 'packs/elysium-items') }
+  { name: 'elysium-items', src: path.join(rootDir, 'src/packs/elysium-items'), dest: path.join(rootDir, 'packs/elysium-items') },
+  { name: 'ammunition', src: path.join(rootDir, 'src/packs/ammunition'), dest: path.join(rootDir, 'packs/ammunition') }
 ];
 
 async function packCompendium(packInfo) {
@@ -46,15 +47,30 @@ async function packCompendium(packInfo) {
     await db.open();
     console.log('   Packing items...');
 
-    // Read all JSON files from source
-    const files = fs.readdirSync(packInfo.src)
-      .filter(f => f.endsWith('.json'));
+    // Read all JSON files from source (handles both flat and nested structure)
+    const entries = fs.readdirSync(packInfo.src);
+    const items = [];
 
-    console.log(`   Found ${files.length} JSON files`);
+    for (const entry of entries) {
+      const entryPath = path.join(packInfo.src, entry);
+      const stat = fs.statSync(entryPath);
 
-    for (const file of files) {
-      const filepath = path.join(packInfo.src, file);
-      const content = fs.readFileSync(filepath, 'utf-8');
+      if (stat.isDirectory()) {
+        // New nested structure: look for item.json inside directory
+        const itemJsonPath = path.join(entryPath, 'item.json');
+        if (fs.existsSync(itemJsonPath)) {
+          items.push({ file: entry, path: itemJsonPath });
+        }
+      } else if (entry.endsWith('.json')) {
+        // Old flat structure: JSON file directly in source
+        items.push({ file: entry, path: entryPath });
+      }
+    }
+
+    console.log(`   Found ${items.length} items`);
+
+    for (const item of items) {
+      const content = fs.readFileSync(item.path, 'utf-8');
       const data = JSON.parse(content);
 
       // Use the document's _id as the key
@@ -62,7 +78,7 @@ async function packCompendium(packInfo) {
 
       await db.put(key, data);
 
-      console.log(`  ✅ ${data.name} ← ${file}`);
+      console.log(`  ✅ ${data.name} ← ${item.file}`);
       count++;
     }
 

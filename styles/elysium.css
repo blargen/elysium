@@ -331,6 +331,25 @@ body,
    (Custom UI components)
    =============================== */
 
+/* Elysium Dialog Window Styling */
+.elysium-dialog .window-content {
+  background: linear-gradient(135deg, var(--aether-bg-dark), var(--aether-bg-panel)) !important;
+  border: 2px solid var(--aether-blue);
+  box-shadow: inset 0 0 20px rgba(17, 117, 208, 0.2);
+  padding: 16px;
+}
+
+.elysium-dialog .window-header {
+  background: linear-gradient(135deg, rgba(17, 117, 208, 0.2), rgba(0, 0, 0, 0.8));
+  border-bottom: 2px solid var(--aether-blue);
+  box-shadow: 0 0 12px rgba(17, 117, 208, 0.4);
+}
+
+.elysium-dialog .window-title {
+  color: var(--aether-blue);
+  text-shadow: 0 0 8px rgba(17, 117, 208, 0.8);
+}
+
 /* Dialog Content Containers */
 .elysium-dialog-content {
   color: var(--aether-text-main);
@@ -617,6 +636,46 @@ body,
   color: var(--aether-text-muted);
   font-size: 0.8rem;
   line-height: 1.3;
+}
+
+/* Overpower Toggle Section */
+.elysium-overpower-section {
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(17, 117, 208, 0.1);
+  border: 1px solid var(--aether-blue);
+  border-radius: 4px;
+}
+
+.elysium-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--aether-text-main);
+}
+
+.elysium-checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.elysium-overpower-warning {
+  margin-top: 8px;
+  padding: 8px;
+  background: rgba(208, 108, 17, 0.2);
+  border-left: 3px solid var(--aether-orange);
+  font-size: 12px;
+  color: var(--aether-text-muted);
+}
+
+/* Divider */
+.elysium-divider {
+  margin: 16px 0;
+  border: none;
+  border-top: 1px solid rgba(17, 117, 208, 0.3);
 }
 
 /* ===============================
