@@ -5,7 +5,7 @@
  * Building incrementally with TDD!
  */
 
-import { showOverpowerDialog } from "./overpower-prompt.js";
+import { showFireModeDialog } from "./fire-mode-dialog.js";
 import {
   checkAetherFuelAvailable,
   executeOverclock,
@@ -107,35 +107,41 @@ export async function handleAetherWeaponUsage(weapon, actor) {
     };
   }
 
-  // Show the overpower prompt dialog
-  const choice = await showOverpowerPrompt(weapon, actor);
+  // Step 1: Show fire mode selection dialog
+  const fireMode = await showFireModeDialog(weapon, actor);
 
-  console.log("Elysium | weapon-usage-hook - choice received:", choice, "type:", typeof choice);
+  console.log("Elysium | weapon-usage-hook - fire mode selected:", fireMode);
 
   // If cancelled, abort
-  if (!choice) {
-    console.log("Elysium | weapon-usage-hook - choice is falsy, cancelling");
+  if (!fireMode) {
+    console.log("Elysium | weapon-usage-hook - fire mode selection cancelled");
     return {
       continue: false,
       cancelled: true,
     };
   }
 
-  // Show ammo selection dialog
-  const selectedAmmo = await showAmmoSelectionDialog(actor, weapon);
-  if (!selectedAmmo) {
+  // Step 2: Show ammo selection dialog (no overclock toggle)
+  const selection = await showAmmoSelectionDialog(actor, weapon, { showOverclock: false });
+
+  console.log("Elysium | weapon-usage-hook - ammo selection received:", selection);
+
+  // If cancelled, abort
+  if (!selection) {
+    console.log("Elysium | weapon-usage-hook - ammo selection cancelled");
     return {
       continue: false,
       cancelled: true,
-      reason: "ammo-selection-cancelled",
     };
   }
+
+  const { ammo: selectedAmmo } = selection;
 
   // Consume the selected ammunition
   await consumeAmmo(selectedAmmo);
 
   // Handle normal fire
-  if (choice === "normal") {
+  if (fireMode === "normal") {
     return await handleNormalFire(weapon, actor);
   }
 
@@ -177,12 +183,12 @@ export async function handleAetherWeaponUsage(weapon, actor) {
     saveRoll
   );
 
-  // Get activity ID for overpower mode
-  const activityId = getActivityIdForFireMode("overpower");
+  // Get activity ID for overclock mode
+  const activityId = getActivityIdForFireMode("overclock");
 
   return {
     continue: true,
-    mode: "overpower",
+    mode: "overclock",
     activityId,
     overclockResult,
   };

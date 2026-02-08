@@ -31,11 +31,21 @@ export function getDamageForMode(item) {
   if (!fireMode) return null;
 
   if (fireMode === "normal") {
-    return item.getFlag?.("elysium", "normalDamage") || null;
+    const damage = item.getFlag?.("elysium", "normalDamage");
+    if (!damage) {
+      console.error(`Elysium | ${item.name} missing normalDamage flag!`);
+      return null;
+    }
+    return damage;
   }
 
-  if (fireMode === "overpower") {
-    return item.getFlag?.("elysium", "overpowerDamage") || null;
+  if (fireMode === "overclock") {
+    const damage = item.getFlag?.("elysium", "overclockDamage");
+    if (!damage) {
+      console.error(`Elysium | ${item.name} missing overclockDamage flag!`);
+      return null;
+    }
+    return damage;
   }
 
   return null;

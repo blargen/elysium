@@ -1,7 +1,7 @@
 {
   "name": "The Elysium Defender",
   "type": "weapon",
-  "img": "modules/elysium/assets/icons/ElysiumDefender.png",
+  "img": "modules/elysium/assets/icons/ElysiumDefenderFinal.png",
   "system": {
     "type": {
       "value": "simpleR",
@@ -52,143 +52,6 @@
           "parts": [
             {
               "number": 2,
-              "denomination": 6,
-              "bonus": "@mod",
-              "types": ["force"],
-              "custom": {
-                "enabled": false,
-                "formula": ""
-              },
-              "scaling": {
-                "mode": "",
-                "number": null,
-                "formula": ""
-              }
-            }
-          ]
-        },
-        "description": {},
-        "duration": {
-          "units": "inst",
-          "concentration": false,
-          "override": false
-        },
-        "effects": [],
-        "range": {
-          "value": "60",
-          "long": "180",
-          "units": "ft",
-          "override": false
-        },
-        "target": {
-          "template": {
-            "contiguous": false,
-            "units": "ft"
-          },
-          "affects": {
-            "count": "1",
-            "type": "creature",
-            "choice": false
-          },
-          "override": false,
-          "prompt": true
-        },
-        "uses": {
-          "spent": 0,
-          "recovery": []
-        },
-        "roll": {
-          "prompt": false,
-          "visible": false
-        },
-        "useConditionText": "",
-        "useConditionReason": "",
-        "effectConditionText": "",
-        "macroData": {
-          "name": "",
-          "command": ""
-        },
-        "ignoreTraits": {
-          "idi": false,
-          "idr": false,
-          "idv": false,
-          "ida": false,
-          "idm": false
-        },
-        "midiProperties": {
-          "ignoreTraits": [],
-          "triggeredActivityId": "none",
-          "triggeredActivityConditionText": "",
-          "triggeredActivityTargets": "targets",
-          "triggeredActivityRollAs": "self",
-          "autoConsume": false,
-          "forceConsumeDialog": "default",
-          "forceRollDialog": "default",
-          "forceDamageDialog": "default",
-          "confirmTargets": "default",
-          "autoTargetType": "any",
-          "autoTargetAction": "default",
-          "automationOnly": false,
-          "otherActivityCompatible": true,
-          "otherActivityAsParentType": true,
-          "identifier": "",
-          "displayActivityName": false,
-          "rollMode": "default",
-          "chooseEffects": false,
-          "toggleEffect": false,
-          "ignoreFullCover": false,
-          "removeChatButtons": "default",
-          "magicEffect": false,
-          "magicDamage": true,
-          "noConcentrationCheck": false,
-          "autoCEEffects": "default"
-        },
-        "isOverTimeFlag": false,
-        "overTimeProperties": {
-          "saveRemoves": true,
-          "preRemoveConditionText": "",
-          "postRemoveConditionText": ""
-        },
-        "otherActivityId": "none",
-        "otherActivityAsParentType": true
-      },
-      "overload": {
-        "type": "attack",
-        "name": "Overload",
-        "activation": {
-          "type": "action",
-          "value": 1,
-          "override": false
-        },
-        "_id": "elysDefOverload001",
-        "sort": 1,
-        "attack": {
-          "ability": "dex",
-          "bonus": "1",
-          "critical": {
-            "threshold": null
-          },
-          "flat": false,
-          "type": {
-            "value": "ranged",
-            "classification": "weapon"
-          }
-        },
-        "consumption": {
-          "scaling": {
-            "allowed": false
-          },
-          "spellSlot": false,
-          "targets": []
-        },
-        "damage": {
-          "critical": {
-            "bonus": ""
-          },
-          "includeBase": false,
-          "parts": [
-            {
-              "number": 4,
               "denomination": 6,
               "bonus": "@mod",
               "types": ["force"],
@@ -347,7 +210,7 @@
       "isAetherWeapon": true,
       "ammoType": "revolver",
       "normalDamage": "2d6",
-      "overpowerDamage": "4d6",
+      "overclockDamage": "4d6",
       "weaponType": "revolver",
       "requiresAether": true,
       "modType": "weapon",

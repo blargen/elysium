@@ -18,7 +18,7 @@ import { registerAethersDetectionHooks } from "./aethers-detection/detection-hoo
 import { registerGiftHooks } from "./gift-of-thousand-strikes/gift-hooks.js";
 import { registerAethersEdgeRestHandler } from "./aethers-edge/rest-handler.js";
 // import { registerDefenderHooks } from "./elysium-defender/defender-hooks.js"; // DISABLED: Using new aether-weapons system
-import { registerWeaponUsageHook } from "./aether-weapons/weapon-hook-registration.js";
+import { registerWeaponUsageHook, registerWeaponRestHook } from "./aether-weapons/weapon-hook-registration.js";
 import { registerDamageModificationHook } from "./aether-weapons/damage-hook-registration.js";
 
 // UI hooks
@@ -58,6 +58,7 @@ Hooks.once("ready", function () {
   registerDamageModificationHook();
 
   // Register rest handlers
+  registerWeaponRestHook();
   registerAethersEdgeRestHandler();
 
   console.log("Elysium | All systems online.");

@@ -17,20 +17,25 @@ export function registerDamageModificationHook() {
     const item = workflow.item;
     if (!item) return true;
 
-    const result = modifyWeaponDamage(item);
+    // Check if this is an overclock shot
+    const fireMode = item.getFlag("elysium", "currentFireMode");
+    if (!fireMode || fireMode !== "overclock") return true;
 
-    if (result.modified) {
-      // Modify the damage formula
-      // workflow.damageFormula contains the formula before it's rolled
-      workflow.damageFormula = result.newFormula + " + @mod";
-
-      console.log(
-        `Elysium | Modified damage formula: ${result.originalFormula} → ${workflow.damageFormula}`
-      );
-
-      // Clear the fire mode flag after using it
-      await item.unsetFlag("elysium", "currentFireMode");
+    // Get the activity from the workflow
+    const activity = workflow.activity;
+    if (!activity?.damage?.parts?.[0]) {
+      console.error(`Elysium | ${item.name} activity has no damage parts!`);
+      return true;
     }
+
+    // Modify the activity's damage parts directly (4d6 instead of 2d6)
+    const originalNumber = activity.damage.parts[0].number;
+    activity.damage.parts[0].number = 4;
+
+    console.log(`Elysium | Modified damage: ${originalNumber}d6 → 4d6`);
+
+    // Clear the fire mode flag after using it
+    await item.unsetFlag("elysium", "currentFireMode");
 
     return true;
   });

@@ -5,7 +5,7 @@
  * Uses the activity system hook pattern for D&D 5e v4+.
  */
 
-import { registerPreUseActivityHandler } from "../hooks/hook-registry.js";
+import { registerPreUseActivityHandler, registerRestCompletedHandler } from "../hooks/hook-registry.js";
 import { handleAetherWeaponUsage } from "./weapon-usage-hook.js";
 
 /**
@@ -60,6 +60,12 @@ export function registerWeaponUsageHook() {
         return;
       }
 
+      // Set fire mode flag for damage modification
+      if (result.mode) {
+        await item.setFlag("elysium", "currentFireMode", result.mode);
+        console.log(`Elysium | Set fire mode: ${result.mode}`);
+      }
+
       // Authorize the re-trigger so canHandle returns false next time
       authorizedWeaponUses.add(targetActivity._id);
 
@@ -97,6 +103,51 @@ export function registerWeaponUsageHook() {
       } finally {
         // Clean up authorization
         authorizedWeaponUses.delete(targetActivity._id);
+      }
+    }
+  );
+}
+
+/**
+ * Register the rest completed hook to unlock aether weapons
+ */
+export function registerWeaponRestHook() {
+  console.log("Elysium | Registering weapon rest hook (dnd5e.restCompleted)");
+
+  registerRestCompletedHandler(
+    // canHandle - check if actor has any locked aether weapons
+    (actor) => {
+      return actor.items.some(
+        (item) =>
+          item.getFlag("elysium", "isAetherWeapon") &&
+          item.getFlag("elysium", "isLocked")
+      );
+    },
+
+    // handle - unlock all locked aether weapons
+    async (actor, restData) => {
+      // Only unlock on long rest
+      if (!restData.longRest) {
+        return;
+      }
+
+      console.log("Elysium | Unlocking aether weapons after long rest");
+
+      const lockedWeapons = actor.items.filter(
+        (item) =>
+          item.getFlag("elysium", "isAetherWeapon") &&
+          item.getFlag("elysium", "isLocked")
+      );
+
+      for (const weapon of lockedWeapons) {
+        await weapon.unsetFlag("elysium", "isLocked");
+        console.log(`Elysium | Unlocked ${weapon.name}`);
+      }
+
+      if (lockedWeapons.length > 0) {
+        ui.notifications.info(
+          `${lockedWeapons.length} aether weapon(s) unlocked after long rest.`
+        );
       }
     }
   );

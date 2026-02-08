@@ -6,6 +6,43 @@
  */
 
 /**
+ * Build HTML for overclock card section
+ * @param {Object} config - Overclock configuration
+ * @param {boolean} config.enabled - Whether to show overclock card
+ * @param {string} config.name - Overclock name (e.g., "Overclock", "Overcharge")
+ * @param {string} config.image - Image/icon path
+ * @param {string} config.description - What overclocking does
+ * @param {string} config.warning - Warning text (optional)
+ * @param {boolean} config.defaultChecked - Initial checked state
+ * @returns {string} HTML string (empty if not enabled)
+ */
+export function buildOverclockSectionHtml(config) {
+  if (!config || !config.enabled) return "";
+
+  const checked = config.defaultChecked ? "checked" : "";
+  const name = config.name || "Overclock";
+  const image = config.image || "icons/svg/hazard.svg";
+  const description = config.description || "";
+  const warning = config.warning || "";
+
+  return `
+    <hr class="elysium-divider">
+    <div class="elysium-overclock-card">
+      <img src="${image}" class="elysium-overclock-icon" alt="${name}">
+      <div class="elysium-overclock-info">
+        <div class="elysium-overclock-name">⚡ ${name.toUpperCase()}</div>
+        <div class="elysium-overclock-desc">${description}</div>
+        ${warning ? `<div class="elysium-overclock-warning">⚠️ ${warning}</div>` : ""}
+      </div>
+      <label class="elysium-toggle-switch">
+        <input type="checkbox" id="overclock-toggle" ${checked}>
+        <span class="elysium-toggle-slider"></span>
+      </label>
+    </div>
+  `;
+}
+
+/**
  * Create a card selection dialog with clickable cards
  *
  * @param {Object} config - Dialog configuration
@@ -16,7 +53,12 @@
  * @param {Function} config.getTitle - Function to get title from item
  * @param {Function} config.getSubtitle - Function to get subtitle from item
  * @param {Function} config.getMetadata - Optional function to get metadata text
- * @returns {Promise<Object|null>} Selected item or null if cancelled
+ * @param {Object} config.overclock - Optional overclock configuration:
+ *   @param {boolean} config.overclock.enabled - Show overclock toggle
+ *   @param {string} config.overclock.label - Toggle label
+ *   @param {string} config.overclock.description - Warning text
+ *   @param {boolean} config.overclock.defaultChecked - Initial state
+ * @returns {Promise<Object|null>} { item: Object, isOverclock: boolean } or null if cancelled
  */
 export async function showCardSelectionDialog(config) {
   const {
@@ -27,6 +69,7 @@ export async function showCardSelectionDialog(config) {
     getTitle,
     getSubtitle,
     getMetadata,
+    overclock,
   } = config;
 
   // No items available
@@ -35,7 +78,7 @@ export async function showCardSelectionDialog(config) {
     return null;
   }
 
-  // Build cards HTML
+  // Build cards HTML using CSS classes (NO inline styles!)
   let cardsHtml = "";
 
   items.forEach((item, index) => {
@@ -45,78 +88,39 @@ export async function showCardSelectionDialog(config) {
     const metadata = getMetadata ? getMetadata(item) : "";
 
     cardsHtml += `
-      <div class="elysium-selection-card" data-item-index="${index}" style="
-        margin-bottom: 12px;
-        padding: 12px;
-        background: linear-gradient(135deg, rgba(17, 117, 208, 0.1), rgba(0, 0, 0, 0.8));
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        border: 2px solid var(--aether-blue);
-        box-shadow: 0 0 8px rgba(17, 117, 208, 0.3);
-      ">
-        <img src="${img}" style="
-          width: 48px;
-          height: 48px;
-          border-radius: 4px;
-          border: 1px solid var(--aether-blue);
-          box-shadow: 0 0 4px rgba(17, 117, 208, 0.5);
-        " alt="${itemTitle}">
-        <div style="flex: 1;">
-          <div style="
-            color: var(--aether-text-main);
-            font-weight: 600;
-            margin-bottom: 4px;
-          ">${itemTitle}</div>
-          <div style="
-            color: var(--aether-text-muted);
-            font-size: 0.85rem;
-          ">${subtitle}</div>
-          ${metadata ? `<div style="color: var(--aether-blue); font-size: 0.85rem; text-shadow: 0 0 4px rgba(17, 117, 208, 0.6);">${metadata}</div>` : ""}
+      <div class="elysium-action-option" data-item-index="${index}">
+        <img src="${img}" class="elysium-action-icon" alt="${itemTitle}">
+        <div class="elysium-action-info">
+          <div class="elysium-action-name">${itemTitle}</div>
+          <div class="elysium-action-desc">${subtitle}</div>
+          ${metadata ? `<div class="elysium-action-metadata">${metadata}</div>` : ""}
         </div>
       </div>
     `;
   });
 
+  // Build overclock section HTML
+  const overclockHtml = buildOverclockSectionHtml(overclock);
+
   const content = `
     <div class="elysium-dialog-content">
       <h2 class="elysium-header">${title}</h2>
-      ${description ? `<p style="text-align: center; margin-bottom: 16px; color: var(--aether-text-muted, #999);">${description}</p>` : ""}
+      ${description ? `<p class="elysium-dialog-text">${description}</p>` : ""}
       <div id="elysium-card-container">
         ${cardsHtml}
       </div>
-      <style>
-        .elysium-selection-card:hover {
-          background: linear-gradient(135deg, rgba(17, 117, 208, 0.2), rgba(0, 0, 0, 0.9)) !important;
-          box-shadow: 0 0 16px rgba(17, 117, 208, 0.6) !important;
-          transform: translateX(4px);
-        }
-        .elysium-selection-card:active {
-          background: linear-gradient(135deg, rgba(17, 117, 208, 0.25), rgba(0, 0, 0, 0.95)) !important;
-          box-shadow: 0 0 20px rgba(17, 117, 208, 0.8) !important;
-        }
-      </style>
+      ${overclockHtml}
     </div>
   `;
 
-  // Create dialog with only Cancel button
+  // Create dialog with no buttons (use X to close)
   // Cards will handle selection via click events
   return new Promise((resolve) => {
     const dialog = new Dialog(
       {
         title: title,
         content: content,
-        buttons: {
-          cancel: {
-            icon: '<i class="fas fa-times"></i>',
-            label: "Cancel",
-            callback: () => resolve(null),
-          },
-        },
-        default: "cancel",
+        buttons: {},
         close: () => resolve(null),
         render: (html) => {
           console.log("Elysium | Card dialog render callback fired");
@@ -126,8 +130,8 @@ export async function showCardSelectionDialog(config) {
           let container = html[0] || html;
           console.log("Elysium | container:", container);
 
-          // Add click handlers to cards
-          const cards = container.querySelectorAll(".elysium-selection-card");
+          // Add click handlers to cards (using action-option class)
+          const cards = container.querySelectorAll(".elysium-action-option:not(.elysium-overclock-card)");
           console.log("Elysium | Found cards:", cards.length);
 
           cards.forEach((card, idx) => {
@@ -136,10 +140,18 @@ export async function showCardSelectionDialog(config) {
               const itemIndex = parseInt(card.getAttribute("data-item-index"));
               const selectedItem = items[itemIndex];
               console.log("Elysium | Card clicked! Index:", itemIndex, "Item:", selectedItem);
-              resolve(selectedItem); // Resolve FIRST
-              dialog.close(); // Then close
+
+              // Get overclock state (false if toggle doesn't exist)
+              const overclockToggle = container.querySelector("#overclock-toggle");
+              const isOverclock = overclockToggle ? overclockToggle.checked : false;
+
+              // Return both item and overclock state
+              resolve({ item: selectedItem, isOverclock });
+              dialog.close();
             });
           });
+
+          // Overclock toggle - no change handler needed (warning always visible)
         },
       },
       {

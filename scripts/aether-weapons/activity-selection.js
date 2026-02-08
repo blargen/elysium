@@ -7,16 +7,14 @@
 
 /**
  * Get the activity name for the given fire mode choice
- * @param {string} choice - The fire mode choice ("normal" or "overpower")
- * @returns {string|null} The activity name ("Fire" or "Overload") or null if invalid
+ * @param {string} choice - The fire mode choice ("normal" or "overclock")
+ * @returns {string|null} The activity name (always "Fire") or null if invalid
  */
 export function getActivityIdForFireMode(choice) {
-  if (choice === "normal") {
+  // Both normal and overclock use the "Fire" activity
+  // Damage modification is handled by the damage-modification.js hook based on currentFireMode flag
+  if (choice === "normal" || choice === "overclock") {
     return "Fire";
-  }
-
-  if (choice === "overpower") {
-    return "Overload";
   }
 
   return null;
