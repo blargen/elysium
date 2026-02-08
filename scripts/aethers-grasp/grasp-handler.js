@@ -19,6 +19,7 @@ import { handleAetherFuelUse as consumeAether } from "../aether-fuel/consumption
 import { selectAetherFuel } from "../utils/fuel-selection-dialog.js";
 import { showFuelEnhancementDialog } from "../ui/fuel-enhancement-dialog.js";
 import { getClassResourceForItem } from "../utils/class-resources.js";
+import { showActionSelectionDialog } from "../ui/action-selection-dialog.js";
 
 /**
  * Handle Aether's Grasp usage - show action selection dialog
@@ -55,61 +56,42 @@ export async function handleAethersGraspUse(actor, aethersGrasp) {
     return;
   }
 
-  // Step 2: Build action option cards
-  const content = `
-    <div class="elysium-dialog-content">
-      <p class="elysium-dialog-text">What would you like to do with <strong>Aether's Grasp</strong>?</p>
-
-      <div class="elysium-action-option" data-action="imprint">
-        <img src="modules/elysium/assets/ImprintFromScroll.png" class="elysium-action-icon" alt="Imprint">
-        <div class="elysium-action-info">
-          <div class="elysium-action-name">Imprint From Scroll</div>
-          <div class="elysium-action-desc">Store a spell from a scroll onto a finger</div>
-        </div>
-      </div>
-
-      <div class="elysium-action-option" data-action="cast">
-        <img src="modules/elysium/assets/CastFromFinger.png" class="elysium-action-icon" alt="Cast">
-        <div class="elysium-action-info">
-          <div class="elysium-action-name">Cast From Finger</div>
-          <div class="elysium-action-desc">Cast a stored spell using aether fuel</div>
-        </div>
-      </div>
-
-      <div class="elysium-action-option" data-action="forget">
-        <img src="modules/elysium/assets/ForgetFromFinger.png" class="elysium-action-icon" alt="Forget">
-        <div class="elysium-action-info">
-          <div class="elysium-action-name">Forget From Finger</div>
-          <div class="elysium-action-desc">Remove a stored spell from a finger</div>
-        </div>
-      </div>
-    </div>
-  `;
-
-  // Show action selection dialog
-  const action = await new Promise((resolve) => {
-    new Dialog({
-      title: "Aether's Grasp",
-      content: content,
-      buttons: {
-        cancel: {
-          icon: '<i class="fas fa-times"></i>',
-          label: "Cancel",
-          callback: () => resolve(null),
-        },
+  // Step 2: Show action selection dialog
+  const selection = await showActionSelectionDialog({
+    title: "Aether's Grasp",
+    description: "What would you like to do with <strong>Aether's Grasp</strong>?",
+    actions: [
+      {
+        id: "imprint",
+        name: "Imprint From Scroll",
+        img: "modules/elysium/assets/ImprintFromScroll.png",
+        description: "Store a spell from a scroll onto a finger"
       },
-      render: (html) => {
-        html.find(".elysium-action-option").click((event) => {
-          const actionType = event.currentTarget.dataset.action;
-          resolve(actionType);
-          html.closest(".dialog").find(".dialog-button.cancel").click();
-        });
+      {
+        id: "cast",
+        name: "Cast From Finger",
+        img: "modules/elysium/assets/CastFromFinger.png",
+        description: "Cast a stored spell using aether fuel"
       },
-      default: "cancel",
-    }).render(true);
+      {
+        id: "forget",
+        name: "Forget From Finger",
+        img: "modules/elysium/assets/ForgetFromFinger.png",
+        description: "Remove a stored spell from a finger"
+      }
+    ],
+    overpower: {
+      enabled: false  // No overpower for Aether's Grasp
+    }
   });
 
+  // Handle cancellation
+  if (!selection) {
+    return;
+  }
+
   // Step 3: Execute selected action
+  const action = selection.actionId;
   if (action === "imprint") {
     await handleImprintFromScroll(actor, aethersGrasp);
   } else if (action === "cast") {
