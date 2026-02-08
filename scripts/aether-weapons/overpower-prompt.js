@@ -7,6 +7,7 @@
  */
 
 import { calculateToxicityDC } from "../utils/calculations.js";
+import { showCardSelectionDialog } from "../ui/card-selection-dialog.js";
 
 /**
  * Check if weapon should show overpower prompt
@@ -19,15 +20,15 @@ export function shouldShowOverpowerPrompt(weapon) {
 }
 
 /**
- * Create the overpower dialog configuration
+ * Show the overpower/fire mode selection dialog
  * @param {Object} weapon - The weapon item
  * @param {Object} actor - The actor using the weapon
- * @returns {Object} Dialog configuration object
+ * @returns {Promise<string|null>} Selected mode ("normal" or "overpower") or null if cancelled
  */
-export function createOverpowerDialog(weapon, actor) {
+export async function showOverpowerDialog(weapon, actor) {
   // Get weapon damage formulas
-  const normalDamage = weapon.getFlag("elysium", "normalDamage") || "0";
-  const overpowerDamage = weapon.getFlag("elysium", "overpowerDamage") || "0";
+  const normalDamage = weapon.getFlag("elysium", "normalDamage") || "2d6";
+  const overpowerDamage = weapon.getFlag("elysium", "overpowerDamage") || "4d6";
 
   // Get current toxicity status
   const dailyDoses = actor.getFlag("elysium", "dailyDoses") || 0;
@@ -36,52 +37,54 @@ export function createOverpowerDialog(weapon, actor) {
   // Calculate what the DC will be if they use overpower
   const nextDC = calculateToxicityDC(dailyDoses);
 
-  // Build dialog content with Elysium styling
-  const content = `
-    <div class="elysium-dialog-content">
-      <h2 class="elysium-header">Select Fire Mode</h2>
+  // Get weapon image
+  const weaponImg = weapon.img || "icons/svg/sword.svg";
 
-      <div style="margin-bottom: 16px; padding: 8px; background: rgba(17, 117, 208, 0.1); border-radius: 4px;">
-        <h3 style="color: var(--aether-blue); margin: 0 0 8px 0;">Current Status</h3>
-        <p style="margin: 4px 0;"><strong>Daily Doses:</strong> ${dailyDoses}</p>
-        <p style="margin: 4px 0;"><strong>Aether Toxicity Level (ATL):</strong> ${currentATL}</p>
-      </div>
+  // Create choice objects
+  const choices = [
+    {
+      id: "normal",
+      name: "🎯 Normal Fire",
+      img: weaponImg,
+      damage: normalDamage,
+      subtitle: `${normalDamage} + DEX damage`,
+      metadata: "Standard attack, no risk",
+    },
+    {
+      id: "overpower",
+      name: "⚡ Overpower",
+      img: weaponImg,
+      damage: overpowerDamage,
+      subtitle: `${overpowerDamage} + DEX damage`,
+      metadata: `⚠️ +1 ATL, DC ${nextDC} CON save or weapon locks`,
+    },
+  ];
 
-      <div style="margin-bottom: 12px; padding: 8px; background: rgba(255, 255, 255, 0.05); border-radius: 4px;">
-        <h4 style="color: var(--aether-text-main); margin: 0 0 6px 0;">🎯 Normal Fire</h4>
-        <p style="margin: 4px 0;"><strong>Damage:</strong> ${normalDamage}</p>
-        <p style="margin: 4px 0; color: var(--aether-text-muted);">Standard attack, no aether required, no risk.</p>
-      </div>
-
-      <div style="margin-bottom: 12px; padding: 8px; background: rgba(208, 108, 17, 0.15); border: 1px solid rgba(208, 108, 17, 0.4); border-radius: 4px;">
-        <h4 style="color: var(--aether-orange); margin: 0 0 6px 0;">⚡ Overpower</h4>
-        <p style="margin: 4px 0;"><strong>Damage:</strong> ${overpowerDamage}</p>
-        <p style="margin: 4px 0; color: var(--aether-warning);"><strong>Requires:</strong> Aether fuel</p>
-        <hr style="border: none; border-top: 1px solid rgba(255, 255, 255, 0.1); margin: 8px 0;" />
-        <h5 class="elysium-header-toxicity" style="font-size: 0.9rem; margin: 8px 0 4px 0;">⚠️ Risk</h5>
-        <p style="margin: 4px 0;"><strong>Guaranteed:</strong> +1 ATL (will be ${currentATL + 1})</p>
-        <p style="margin: 4px 0;"><strong>CON Save:</strong> DC ${nextDC}</p>
-        <p style="margin: 4px 0; color: var(--aether-orange);"><strong>If failed:</strong> weapon lock until long rest</p>
-      </div>
+  // Add toxicity info to description
+  const description = `
+    <div style="margin-bottom: 12px; padding: 8px; background: rgba(17, 117, 208, 0.1); border-radius: 4px; text-align: left;">
+      <strong style="color: var(--aether-blue);">Current Status:</strong>
+      Daily Doses: ${dailyDoses} | ATL: ${currentATL}
     </div>
   `;
 
-  return {
-    title: "Fire Mode Selection",
-    content: content,
-    buttons: {
-      normal: {
-        label: "Normal Fire",
-        callback: () => "normal",
-      },
-      overpower: {
-        label: "Overpower",
-        callback: () => "overpower",
-      },
-    },
-    default: "normal",
-    close: () => null,
-  };
+  // Show card selection
+  const selectedChoice = await showCardSelectionDialog({
+    title: "Select Fire Mode",
+    description: description,
+    items: choices,
+    getImage: (choice) => choice.img,
+    getTitle: (choice) => choice.name,
+    getSubtitle: (choice) => choice.subtitle,
+    getMetadata: (choice) => choice.metadata,
+  });
+
+  console.log("Elysium | showOverpowerDialog - selectedChoice:", selectedChoice);
+
+  // Return the mode ID or null
+  const result = selectedChoice ? selectedChoice.id : null;
+  console.log("Elysium | showOverpowerDialog - returning:", result);
+  return result;
 }
 
 /**

@@ -5,13 +5,19 @@
  * Building incrementally with TDD!
  */
 
-import { createOverpowerDialog } from "./overpower-prompt.js";
+import { showOverpowerDialog } from "./overpower-prompt.js";
 import {
   checkAetherFuelAvailable,
   executeOverclock,
 } from "./overclock-execution.js";
 import { showFuelSelectionPrompt } from "./fuel-selection-prompt.js";
 import { getAvailableAetherFuel } from "../aether-fuel/fuel-selection.js";
+import { showAmmoSelectionDialog } from "../ammo-selection/ammo-dialog.js";
+import { consumeAmmo } from "../ammo-selection/ammo-utils.js";
+import { rollConstitutionSave } from "../aether-fuel/consumption.js";
+import { calculateToxicityDC } from "../utils/calculations.js";
+import { getDailyDoses } from "../utils/flags.js";
+import { getActivityIdForFireMode } from "./activity-selection.js";
 
 /**
  * Check if we should intercept this weapon's usage
@@ -39,24 +45,22 @@ export function shouldInterceptWeapon(weapon) {
  * @returns {Promise<string|null>} User's choice ("normal", "overpower", or null if cancelled)
  */
 export async function showOverpowerPrompt(weapon, actor) {
-  const dialogConfig = createOverpowerDialog(weapon, actor);
-  const choice = await Dialog.wait(dialogConfig);
-  return choice;
+  return await showOverpowerDialog(weapon, actor);
 }
 
 /**
- * Handle normal fire choice - no overclock, just store the mode
+ * Handle normal fire choice - no overclock, just return activity ID
  * @param {Object} weapon - The weapon item
  * @param {Object} actor - The actor using the weapon
- * @returns {Promise<Object>} Result with continue:true
+ * @returns {Promise<Object>} Result with continue:true and activityId
  */
 export async function handleNormalFire(weapon, actor) {
-  // Store the fire mode on the weapon for damage calculation
-  await weapon.setFlag("elysium", "currentFireMode", "normal");
+  const activityId = getActivityIdForFireMode("normal");
 
   return {
     continue: true,
     mode: "normal",
+    activityId,
   };
 }
 
@@ -106,13 +110,29 @@ export async function handleAetherWeaponUsage(weapon, actor) {
   // Show the overpower prompt dialog
   const choice = await showOverpowerPrompt(weapon, actor);
 
+  console.log("Elysium | weapon-usage-hook - choice received:", choice, "type:", typeof choice);
+
   // If cancelled, abort
   if (!choice) {
+    console.log("Elysium | weapon-usage-hook - choice is falsy, cancelling");
     return {
       continue: false,
       cancelled: true,
     };
   }
+
+  // Show ammo selection dialog
+  const selectedAmmo = await showAmmoSelectionDialog(actor, weapon);
+  if (!selectedAmmo) {
+    return {
+      continue: false,
+      cancelled: true,
+      reason: "ammo-selection-cancelled",
+    };
+  }
+
+  // Consume the selected ammunition
+  await consumeAmmo(selectedAmmo);
 
   // Handle normal fire
   if (choice === "normal") {
@@ -139,8 +159,15 @@ export async function handleAetherWeaponUsage(weapon, actor) {
     };
   }
 
-  // Prompt for CON save roll
-  const saveRoll = await actor.rollSavingThrow("con");
+  // Calculate DC and roll CON save (using existing toxicity system)
+  const currentDoses = getDailyDoses(actor);
+  const dc = calculateToxicityDC(currentDoses);
+  const saveRollArray = await rollConstitutionSave(actor, dc);
+
+  // Extract roll from array (v4.1+ returns array)
+  const saveRoll = Array.isArray(saveRollArray)
+    ? saveRollArray[0]
+    : saveRollArray;
 
   // Execute the overclock!
   const overclockResult = await executeOverclock(
@@ -150,12 +177,13 @@ export async function handleAetherWeaponUsage(weapon, actor) {
     saveRoll
   );
 
-  // Store overpower mode on weapon
-  await weapon.setFlag("elysium", "currentFireMode", "overpower");
+  // Get activity ID for overpower mode
+  const activityId = getActivityIdForFireMode("overpower");
 
   return {
     continue: true,
     mode: "overpower",
+    activityId,
     overclockResult,
   };
 }

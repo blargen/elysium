@@ -20,13 +20,12 @@ export function registerDamageModificationHook() {
     const result = modifyWeaponDamage(item);
 
     if (result.modified) {
-      // Modify the damage formula in the workflow
-      if (workflow.damageRoll) {
-        workflow.damageRoll = await new Roll(result.newFormula).evaluate();
-      }
+      // Modify the damage formula
+      // workflow.damageFormula contains the formula before it's rolled
+      workflow.damageFormula = result.newFormula + " + @mod";
 
       console.log(
-        `Elysium | Modified damage: ${result.originalFormula} → ${result.newFormula} (${result.damageType})`
+        `Elysium | Modified damage formula: ${result.originalFormula} → ${workflow.damageFormula}`
       );
 
       // Clear the fire mode flag after using it

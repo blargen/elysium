@@ -48,8 +48,24 @@
           "critical": {
             "bonus": ""
           },
-          "includeBase": true,
-          "parts": []
+          "includeBase": false,
+          "parts": [
+            {
+              "number": 2,
+              "denomination": 6,
+              "bonus": "@mod",
+              "types": ["force"],
+              "custom": {
+                "enabled": false,
+                "formula": ""
+              },
+              "scaling": {
+                "mode": "",
+                "number": null,
+                "formula": ""
+              }
+            }
+          ]
         },
         "description": {},
         "duration": {
@@ -144,7 +160,7 @@
           "value": 1,
           "override": false
         },
-        "_id": "elysDefOverld001",
+        "_id": "elysDefOverload001",
         "sort": 1,
         "attack": {
           "ability": "dex",
@@ -188,9 +204,7 @@
             }
           ]
         },
-        "description": {
-          "value": "<p>Channel raw aether through the weapon's core to double its damage output. Deals 4d6 + DEX force damage but gains 1 daily dose and 1 ATL. Risk of weapon going dormant.</p>"
-        },
+        "description": {},
         "duration": {
           "units": "inst",
           "concentration": false,
@@ -331,6 +345,7 @@
   "flags": {
     "elysium": {
       "isAetherWeapon": true,
+      "ammoType": "revolver",
       "normalDamage": "2d6",
       "overpowerDamage": "4d6",
       "weaponType": "revolver",

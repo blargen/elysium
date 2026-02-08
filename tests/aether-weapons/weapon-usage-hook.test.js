@@ -16,10 +16,56 @@ import {
   handleAetherWeaponUsage,
 } from "../../scripts/aether-weapons/weapon-usage-hook.js";
 
-// Mock Dialog
+// Mock Dialog that simulates card-selection behavior
+// Set mockDialogSequence to an array of return values for sequential dialogs
+let mockDialogSequence = [];
+let mockDialogCallIndex = 0;
+
 global.Dialog = class MockDialog {
-  static async wait(config) {
-    return "normal"; // Default choice
+  constructor(config, options) {
+    this.config = config;
+    this.options = options;
+
+    // Auto-resolve the dialog asynchronously to simulate user interaction
+    setTimeout(() => {
+      const result = mockDialogSequence[mockDialogCallIndex] || null;
+      mockDialogCallIndex++;
+
+      // Simulate card click or cancel
+      if (result !== null && result !== undefined) {
+        // Find the card click handler in the render callback and simulate it
+        const mockCards = [];
+        const mockHtml = [{
+          querySelectorAll: () => mockCards
+        }];
+
+        if (this.config.render) {
+          // Create a mock card element
+          const mockCard = {
+            getAttribute: (attr) => "0", // First card
+            addEventListener: (event, handler) => {
+              // Immediately trigger the click handler with our result
+              setTimeout(() => handler(), 0);
+            }
+          };
+          mockCards.push(mockCard);
+          this.config.render(mockHtml);
+        }
+      } else {
+        // User cancelled
+        if (this.config.close) {
+          this.config.close();
+        }
+      }
+    }, 0);
+  }
+
+  render(force) {
+    // Render is called by card-selection-dialog, but we handle it in constructor
+  }
+
+  close() {
+    // Close might be called, just no-op
   }
 };
 
@@ -272,16 +318,36 @@ describe("Weapon Usage Hook - Main Orchestrator", () => {
         if (scope === "elysium" && key === "isAetherWeapon") return true;
         if (scope === "elysium" && key === "normalDamage") return "2d6";
         if (scope === "elysium" && key === "overpowerDamage") return "4d6";
+        if (scope === "elysium" && key === "ammoType") return "revolver";
         return undefined;
       },
       setFlag: jest.fn(),
     };
 
-    const actor = {
-      getFlag: () => 0,
+    const mockAmmo = {
+      name: "Mock Ammo",
+      type: "consumable",
+      system: { type: { value: "ammo" }, quantity: 10 },
+      getFlag: (scope, key) => {
+        if (scope === "elysium" && key === "roundType") return "revolver";
+        return null;
+      },
+      update: jest.fn().mockResolvedValue(true),
     };
 
-    global.Dialog.wait = jest.fn(async () => "normal");
+    const actor = {
+      getFlag: () => 0,
+      items: [mockAmmo], // actor.items should be an array
+    };
+
+    // Dialog sequence: overpower choice, then ammo selection
+    let dialogCallCount = 0;
+    global.Dialog.wait = jest.fn(async () => {
+      dialogCallCount++;
+      if (dialogCallCount === 1) return "normal"; // Overpower choice
+      if (dialogCallCount === 2) return mockAmmo; // Ammo selection
+      return null;
+    });
 
     const result = await handleAetherWeaponUsage(weapon, actor);
 
@@ -307,6 +373,9 @@ describe("Weapon Usage Hook - Main Orchestrator", () => {
 
     const actor = {
       getFlag: () => 0,
+      items: {
+        filter: jest.fn(() => [{ name: "Mock Ammo", system: { quantity: 10 } }]),
+      },
     };
 
     global.Dialog.wait = jest.fn(async () => null);
@@ -324,16 +393,35 @@ describe("Weapon Usage Hook - Main Orchestrator", () => {
         if (scope === "elysium" && key === "isAetherWeapon") return true;
         if (scope === "elysium" && key === "normalDamage") return "2d6";
         if (scope === "elysium" && key === "overpowerDamage") return "4d6";
+        if (scope === "elysium" && key === "ammoType") return "revolver";
         return undefined;
       },
     };
 
-    const actor = {
-      getFlag: () => 0,
-      items: [], // No fuel
+    const mockAmmo = {
+      name: "Mock Ammo",
+      type: "consumable",
+      system: { type: { value: "ammo" }, quantity: 10 },
+      getFlag: (scope, key) => {
+        if (scope === "elysium" && key === "roundType") return "revolver";
+        return null;
+      },
+      update: jest.fn().mockResolvedValue(true),
     };
 
-    global.Dialog.wait = jest.fn(async () => "overpower");
+    const actor = {
+      getFlag: () => 0,
+      items: [mockAmmo], // Only ammo, no fuel
+    };
+
+    // Dialog sequence: overpower choice, ammo selection, then fuel check fails
+    let dialogCallCount = 0;
+    global.Dialog.wait = jest.fn(async () => {
+      dialogCallCount++;
+      if (dialogCallCount === 1) return "overpower"; // Overpower choice
+      if (dialogCallCount === 2) return mockAmmo; // Ammo selection
+      return null;
+    });
 
     const result = await handleAetherWeaponUsage(weapon, actor);
 
@@ -349,9 +437,21 @@ describe("Weapon Usage Hook - Main Orchestrator", () => {
         if (scope === "elysium" && key === "isAetherWeapon") return true;
         if (scope === "elysium" && key === "normalDamage") return "2d6";
         if (scope === "elysium" && key === "overpowerDamage") return "4d6";
+        if (scope === "elysium" && key === "ammoType") return "revolver";
         return undefined;
       },
       setFlag: jest.fn(),
+    };
+
+    const mockAmmo = {
+      name: "Mock Ammo",
+      type: "consumable",
+      system: { type: { value: "ammo" }, quantity: 10 },
+      getFlag: (scope, key) => {
+        if (scope === "elysium" && key === "roundType") return "revolver";
+        return null;
+      },
+      update: jest.fn().mockResolvedValue(true),
     };
 
     const aetherFuel = {
@@ -379,15 +479,16 @@ describe("Weapon Usage Hook - Main Orchestrator", () => {
       system: {
         attributes: { exhaustion: 0 },
       },
-      items: [aetherFuel],
+      items: [mockAmmo, aetherFuel], // Both ammo and fuel available
     };
 
-    // Mock dialog sequence: overpower, then select fuel
+    // Mock dialog sequence: overpower, ammo selection, then fuel selection
     let callCount = 0;
     global.Dialog.wait = jest.fn(async () => {
       callCount++;
-      if (callCount === 1) return "overpower";
-      if (callCount === 2) return aetherFuel;
+      if (callCount === 1) return "overpower"; // Overpower choice
+      if (callCount === 2) return mockAmmo; // Ammo selection
+      if (callCount === 3) return aetherFuel; // Fuel selection
       return null;
     });
 
@@ -418,5 +519,141 @@ describe("Weapon Usage Hook - Main Orchestrator", () => {
     expect(result.cancelled).toBe(true);
     expect(result.reason).toBe("weapon-locked");
     expect(ui.notifications.warn).toHaveBeenCalled();
+  });
+
+  describe("Activity Selection", () => {
+    test("should set activity to 'attack' when normal fire is selected", async () => {
+      // Arrange
+      const mockAmmo = {
+        id: "ammo1",
+        name: "Standard Round",
+        img: "icons/ammo.png",
+        system: { quantity: 10 },
+        getFlag: (scope, key) => {
+          if (scope === "elysium" && key === "ammoType") return "standard";
+          return undefined;
+        },
+        update: jest.fn(),
+      };
+
+      const weapon = {
+        name: "The Elysium Defender",
+        getFlag: jest.fn((scope, key) => {
+          if (scope === "elysium" && key === "isAetherWeapon") return true;
+          if (scope === "elysium" && key === "isLocked") return false;
+          if (scope === "elysium" && key === "normalDamage") return "2d6";
+          if (scope === "elysium" && key === "overpowerDamage") return "4d6";
+          return undefined;
+        }),
+        setFlag: jest.fn(),
+        img: "icons/weapon.png",
+      };
+
+      const actor = {
+        getFlag: () => 0,
+        items: [mockAmmo],
+      };
+
+      // Mock dialogs - user selects "normal" fire
+      global.Dialog.wait = jest
+        .fn()
+        .mockResolvedValueOnce({ id: "normal" }) // Fire mode selection
+        .mockResolvedValueOnce(mockAmmo); // Ammo selection
+
+      // Act
+      const result = await handleAetherWeaponUsage(weapon, actor);
+
+      // Assert
+      expect(result.continue).toBe(true);
+      expect(result.mode).toBe("normal");
+      expect(result.selectedActivity).toBe("attack");
+      expect(weapon.setFlag).toHaveBeenCalledWith(
+        "elysium",
+        "currentFireMode",
+        "normal"
+      );
+      expect(weapon.setFlag).toHaveBeenCalledWith(
+        "elysium",
+        "selectedActivity",
+        "attack"
+      );
+    });
+
+    test("should set activity to 'overload' when overpower is selected", async () => {
+      // Arrange
+      const mockAmmo = {
+        id: "ammo1",
+        name: "Standard Round",
+        img: "icons/ammo.png",
+        system: { quantity: 10 },
+        getFlag: (scope, key) => {
+          if (scope === "elysium" && key === "ammoType") return "standard";
+          return undefined;
+        },
+        update: jest.fn(),
+      };
+
+      const mockFuel = {
+        id: "fuel1",
+        name: "Unrefined Aether",
+        system: { uses: { value: 5 } },
+        update: jest.fn(),
+        getFlag: () => "unrefined",
+      };
+
+      const weapon = {
+        name: "The Elysium Defender",
+        getFlag: jest.fn((scope, key) => {
+          if (scope === "elysium" && key === "isAetherWeapon") return true;
+          if (scope === "elysium" && key === "isLocked") return false;
+          if (scope === "elysium" && key === "normalDamage") return "2d6";
+          if (scope === "elysium" && key === "overpowerDamage") return "4d6";
+          return undefined;
+        }),
+        setFlag: jest.fn(),
+        img: "icons/weapon.png",
+      };
+
+      const actor = {
+        getFlag: () => 0,
+        setFlag: jest.fn(),
+        items: [mockAmmo, mockFuel],
+      };
+
+      // Mock dialogs - user selects "overpower"
+      global.Dialog.wait = jest
+        .fn()
+        .mockResolvedValueOnce({ id: "overpower" }) // Fire mode selection
+        .mockResolvedValueOnce(mockAmmo) // Ammo selection
+        .mockResolvedValueOnce(mockFuel); // Fuel selection
+
+      // Mock CON save roll
+      global.actor = {
+        rollSavingThrow: jest.fn().mockResolvedValue([
+          {
+            total: 15,
+            options: { targetValue: 12 },
+          },
+        ]),
+      };
+
+      // Act
+      const result = await handleAetherWeaponUsage(weapon, actor);
+
+      // Assert
+      expect(result.continue).toBe(true);
+      expect(result.mode).toBe("overpower");
+      expect(result.selectedActivity).toBe("overload");
+      expect(weapon.setFlag).toHaveBeenCalledWith(
+        "elysium",
+        "currentFireMode",
+        "overpower"
+      );
+      expect(weapon.setFlag).toHaveBeenCalledWith(
+        "elysium",
+        "selectedActivity",
+        "overload"
+      );
+    });
   });
 });

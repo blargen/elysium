@@ -30,7 +30,7 @@ export function registerWeaponUsageHook() {
     },
 
     // handle - async handler that shows dialogs and re-triggers
-    async (actor, item, activity) => {
+    async (actor, item, activity, { usageConfig, dialogConfig, messageConfig }) => {
       console.log("Elysium | Aether weapon activity intercepted:", item.name);
 
       // Run our handler
@@ -43,15 +43,60 @@ export function registerWeaponUsageHook() {
         return;
       }
 
+      // Get the correct activity to trigger based on fire mode
+      const activityName = result.activityId;
+
+      // Find activity by name (activities Map uses _id as key, so we need to search)
+      let targetActivity = null;
+      for (const activity of item.system.activities.values()) {
+        if (activity.name === activityName) {
+          targetActivity = activity;
+          break;
+        }
+      }
+
+      if (!targetActivity) {
+        console.error(`Elysium | Activity "${activityName}" not found on weapon ${item.name}`);
+        return;
+      }
+
       // Authorize the re-trigger so canHandle returns false next time
-      authorizedWeaponUses.add(activity._id);
+      authorizedWeaponUses.add(targetActivity._id);
 
       try {
-        // Re-trigger the activity - this time it will proceed normally
-        await activity.use({});
+        // Trigger the correct activity - skip ALL dialogs
+        console.log(`Elysium | Triggering activity: ${activityName} (${targetActivity.name})`);
+
+        // Build config to skip both dnd5e and midi-qol dialogs
+        const finalUsageConfig = {
+          ...usageConfig,
+          // Try midi-qol options at usage level
+          skipRollDialog: true,
+          forceRollDialog: false
+        };
+
+        const finalDialogConfig = {
+          ...dialogConfig,
+          skipDialog: true // Skip dnd5e dialog
+        };
+
+        const finalMessageConfig = {
+          ...messageConfig,
+          // Also try in flags
+          flags: {
+            ...messageConfig?.flags,
+            "midi-qol": {
+              ...messageConfig?.flags?.["midi-qol"],
+              skipRollDialog: true,
+              forceRollDialog: false
+            }
+          }
+        };
+
+        await targetActivity.use(finalUsageConfig, finalDialogConfig, finalMessageConfig);
       } finally {
         // Clean up authorization
-        authorizedWeaponUses.delete(activity._id);
+        authorizedWeaponUses.delete(targetActivity._id);
       }
     }
   );
