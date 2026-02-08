@@ -16,6 +16,7 @@ import {
   setATL,
 } from "../utils/flags.js";
 import { applyToxicityEffects } from "../aether-fuel/toxicity.js";
+import { consumeAetherFuelItem } from "../aether-fuel/consumption.js";
 
 /**
  * Check if actor has any aether fuel available
@@ -65,8 +66,8 @@ export async function executeOverclock(actor, weapon, aetherFuel, saveRoll) {
   // Apply toxicity conditions based on new ATL
   await applyToxicityEffects(actor, newATL);
 
-  // Consume aether fuel
-  await consumeAetherFuel(aetherFuel);
+  // Consume aether fuel (use the shared consumption function)
+  await consumeAetherFuelItem(aetherFuel);
 
   // Check CON save for weapon lock (not ATL - that's guaranteed)
   const saveTotal = saveRoll.total || 0;
@@ -90,24 +91,6 @@ export async function executeOverclock(actor, weapon, aetherFuel, saveRoll) {
   };
 }
 
-/**
- * Consume one use of aether fuel, delete if last use
- * @param {Object} aetherFuel - The aether fuel item
- * @returns {Promise<void>}
- */
-async function consumeAetherFuel(aetherFuel) {
-  const currentUses = aetherFuel.system?.uses?.value || 0;
-
-  if (currentUses <= 1) {
-    // Last use - delete the item
-    await aetherFuel.delete();
-  } else {
-    // Decrement uses
-    await aetherFuel.update({
-      "system.uses.value": currentUses - 1,
-    });
-  }
-}
 
 /**
  * Validate an overclock result object
